@@ -27,7 +27,8 @@
       "Bash(Select-Object Name)",
       "Bash(tree:*)",
       "Bash(dotnet new:*)",
-      "Bash(dotnet sln:*)"
+      "Bash(dotnet sln:*)",
+      "Bash(Get-ChildItem src -Directory)"
     ],
     "deny": [],
     "ask": []
