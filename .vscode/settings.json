@@ -14,7 +14,6 @@
   },
   "omnisharp.enableRoslynAnalyzers": true,
   "omnisharp.enableEditorConfigSupport": true,
-  "omnisharp.enableImportCompletion": true,
   "csharp.semanticHighlighting.enabled": true,
   "editor.formatOnSave": true,
   "[csharp]": {
@@ -27,5 +26,6 @@
   "files.watcherExclude": {
     "**/bin/**": true,
     "**/obj/**": true
-  }
+  },
+  "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true
 }
