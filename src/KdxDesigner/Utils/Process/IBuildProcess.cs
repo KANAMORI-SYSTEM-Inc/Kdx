@@ -87,7 +87,10 @@ namespace KdxDesigner.Utils.Process
                 foreach (var detailId in startCondition)
                 {
                     var target = _details.FirstOrDefault(d => d.Detail.Id == detailId);
-                    if (target == null) continue;
+                    if (target == null)
+                    {
+                        continue;
+                    }
 
                     var mnemonic = target.Mnemonic;
                     var label = mnemonic.DeviceLabel ?? string.Empty;

@@ -128,7 +128,10 @@ namespace KdxDesigner.ViewModels
         {
             try
             {
-                if (_supabaseHelper == null) return;
+                if (_supabaseHelper == null)
+                {
+                    return;
+                }
 
                 Debug.WriteLine("Starting Supabase initialization from MainViewModel...");
                 var success = await _supabaseHelper.InitializeAsync();

@@ -51,7 +51,9 @@ namespace KdxDesigner.ViewModels.Settings
             PlcProfiles = new ObservableCollection<PlcMemoryProfile>(profiles);
 
             if (SelectedPlc != null)
+            {
                 PlcProfiles = ToObservableCollection(PlcProfiles.Where(p => p.PlcId == SelectedPlc.Id));
+            }
 
             // プロファイルが存在する場合のみデフォルトを選択
             if (PlcProfiles.Any())
@@ -74,7 +76,9 @@ namespace KdxDesigner.ViewModels.Settings
             CycleProfiles = new ObservableCollection<CycleMemoryProfile>(profiles);
 
             if (SelectedPlc != null)
+            {
                 CycleProfiles = ToObservableCollection(CycleProfiles.Where(p => p.PlcId == SelectedPlc.Id));
+            }
 
             // 既存の選択をクリア
             SelectedCycleProfiles.Clear();
@@ -469,17 +473,36 @@ namespace KdxDesigner.ViewModels.Settings
                         var operationCount = devices.Count(d => d.MnemonicId == (int)MnemonicType.Operation);
                         var cylinderCount = devices.Count(d => d.MnemonicId == (int)MnemonicType.CY);
 
-                        if (processCount > 0) statusBuilder.AppendLine($"  工程: {processCount}");
-                        if (detailCount > 0) statusBuilder.AppendLine($"  工程詳細: {detailCount}");
-                        if (operationCount > 0) statusBuilder.AppendLine($"  操作: {operationCount}");
-                        if (cylinderCount > 0) statusBuilder.AppendLine($"  シリンダ: {cylinderCount}");
+                        if (processCount > 0)
+                        {
+                            statusBuilder.AppendLine($"  工程: {processCount}");
+                        }
+
+                        if (detailCount > 0)
+                        {
+                            statusBuilder.AppendLine($"  工程詳細: {detailCount}");
+                        }
+
+                        if (operationCount > 0)
+                        {
+                            statusBuilder.AppendLine($"  操作: {operationCount}");
+                        }
+
+                        if (cylinderCount > 0)
+                        {
+                            statusBuilder.AppendLine($"  シリンダ: {cylinderCount}");
+                        }
                     }
 
                     if (timerDevices.Count > 0)
+                    {
                         statusBuilder.AppendLine($"  タイマー: {timerDevices.Count}");
+                    }
 
                     if (speedDevices.Count > 0)
+                    {
                         statusBuilder.AppendLine($"  速度: {speedDevices.Count}");
+                    }
 
                     _memoryConfig.MemoryConfigurationStatus = statusBuilder.ToString().TrimEnd();
                 }

@@ -301,7 +301,10 @@ namespace KdxDesigner.Controls
 
         private async void DeleteProcess_Click(object sender, RoutedEventArgs e)
         {
-            if (SelectedProcess == null || Repository == null) return;
+            if (SelectedProcess == null || Repository == null)
+            {
+                return;
+            }
 
             var result = MessageBox.Show(
                 $"工程 '{SelectedProcess.ProcessName}' を削除しますか？\n関連する工程詳細も削除されます。",

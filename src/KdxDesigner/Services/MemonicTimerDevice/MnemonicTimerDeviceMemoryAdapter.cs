@@ -75,7 +75,7 @@ namespace KdxDesigner.Services.MemonicTimerDevice
         /// </summary>
         public async Task<int> SaveWithDetail(List<Timer> timers, List<ProcessDetail> details, int startNum, int plcId, int count)
         {
-            if(_mainViewModel == null)
+            if (_mainViewModel == null)
             {
                 Debug.WriteLine($"[MemoryAdapter.SaveWithDetail] WARNING: MainViewModel is null");
                 return count;
@@ -88,7 +88,7 @@ namespace KdxDesigner.Services.MemonicTimerDevice
             // 2. タイマーをRecordIdごとに整理した辞書を作成
             var timersByRecordId = new Dictionary<int, List<Timer>>();
             var detailTimersSource = timers.Where(t => t.MnemonicId == (int)MnemonicType.ProcessDetail);
-            
+
             var allMemoriesToSave = new List<Kdx.Contracts.DTOs.Memory>();
 
 
@@ -108,11 +108,14 @@ namespace KdxDesigner.Services.MemonicTimerDevice
                     timersByRecordId[recordId].Add(timer);
                 }
             }
-            
+
 
             foreach (var detail in details)
             {
-                if (detail == null) continue;
+                if (detail == null)
+                {
+                    continue;
+                }
 
                 // デバッグ: 最初の数件のdetail.Idを出力
                 if (devices.Count < 5)
@@ -122,7 +125,7 @@ namespace KdxDesigner.Services.MemonicTimerDevice
 
                 if (timersByRecordId.TryGetValue(detail.Id, out var detailTimers))
                 {
-                    
+
                     foreach (Timer timer in detailTimers)
                     {
                         var timerStartWith = "";
@@ -270,7 +273,10 @@ namespace KdxDesigner.Services.MemonicTimerDevice
 
             foreach (Operation operation in operations)
             {
-                if (operation == null) continue;
+                if (operation == null)
+                {
+                    continue;
+                }
 
                 if (timersByRecordId.TryGetValue(operation.Id, out var operationTimers))
                 {
@@ -442,7 +448,10 @@ namespace KdxDesigner.Services.MemonicTimerDevice
                     foreach (Timer timer in cylinderTimers)
                     {
 
-                        if (timer == null) continue;
+                        if (timer == null)
+                        {
+                            continue;
+                        }
 
                         // デバイス番号の計算
                         var timerStartWith = "";
@@ -534,7 +543,7 @@ namespace KdxDesigner.Services.MemonicTimerDevice
                             OutcoilNumber = 0
                         };
                         allMemoriesToSave.Add(memoryZR);
-                        
+
                     }
                 }
             }

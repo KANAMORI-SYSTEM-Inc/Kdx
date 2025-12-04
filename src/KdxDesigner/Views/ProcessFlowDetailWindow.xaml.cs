@@ -47,7 +47,7 @@ namespace KdxDesigner.Views
             // Loadedイベントでコントロールを取得
             Loaded += OnLoaded;
         }
-        
+
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             // ScrollViewerを取得
@@ -72,7 +72,7 @@ namespace KdxDesigner.Views
             // プロパティウィンドウ表示要求イベントを監視（ダブルクリック時）
             _viewModel.RequestShowPropertiesWindow += OnRequestShowPropertiesWindow;
         }
-        
+
         private void OnScrollViewerMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.MiddleButton == MouseButtonState.Pressed && _scrollViewer != null)
@@ -85,7 +85,7 @@ namespace KdxDesigner.Views
                 e.Handled = true;
             }
         }
-        
+
         private void OnScrollViewerMouseMove(object sender, MouseEventArgs e)
         {
             if (_isPanning && e.MiddleButton == MouseButtonState.Pressed && _scrollViewer != null)
@@ -93,14 +93,14 @@ namespace KdxDesigner.Views
                 var currentPoint = e.GetPosition(_scrollViewer);
                 var deltaX = currentPoint.X - _lastPanPoint.X;
                 var deltaY = currentPoint.Y - _lastPanPoint.Y;
-                
+
                 _scrollViewer.ScrollToHorizontalOffset(_panStartScrollOffset.X - deltaX);
                 _scrollViewer.ScrollToVerticalOffset(_panStartScrollOffset.Y - deltaY);
-                
+
                 e.Handled = true;
             }
         }
-        
+
         private void OnScrollViewerMouseUp(object sender, MouseButtonEventArgs e)
         {
             if (e.MiddleButton == MouseButtonState.Released && _isPanning && _scrollViewer != null)
@@ -111,7 +111,7 @@ namespace KdxDesigner.Views
                 e.Handled = true;
             }
         }
-        
+
         private void OnScrollViewerMouseWheel(object sender, MouseWheelEventArgs e)
         {
             // Ctrlキーが押されているかチェック
@@ -119,15 +119,15 @@ namespace KdxDesigner.Views
             {
                 // マウスの位置を取得（ズームの中心点として使用）
                 var mousePosition = e.GetPosition(_scrollViewer);
-                
+
                 // 現在のスクロール位置を記録
                 var scrollOffsetX = _scrollViewer.HorizontalOffset;
                 var scrollOffsetY = _scrollViewer.VerticalOffset;
-                
+
                 // ズーム前のマウス位置（コンテンツ座標系）
                 var contentX = scrollOffsetX + mousePosition.X;
                 var contentY = scrollOffsetY + mousePosition.Y;
-                
+
                 // ズーム処理（生成されたコマンドを使用）
                 if (e.Delta > 0)
                 {
@@ -137,7 +137,7 @@ namespace KdxDesigner.Views
                 {
                     _viewModel.ZoomOutCommand.Execute(null);
                 }
-                
+
                 // ズーム後、マウス位置を中心にスクロール位置を調整
                 // これは次のフレームで実行する必要がある（レイアウトが更新された後）
                 Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, new Action(() =>
@@ -147,17 +147,17 @@ namespace KdxDesigner.Views
                         // ズーム後のコンテンツ座標
                         var newContentX = contentX * _viewModel.ZoomScale;
                         var newContentY = contentY * _viewModel.ZoomScale;
-                        
+
                         // マウス位置を維持するようにスクロール位置を調整
                         _scrollViewer.ScrollToHorizontalOffset(newContentX - mousePosition.X);
                         _scrollViewer.ScrollToVerticalOffset(newContentY - mousePosition.Y);
                     }
                 }));
-                
+
                 e.Handled = true;
             }
         }
-        
+
         private void ShowPropertiesWindow()
         {
             // SelectedNodeが null または ProcessDetailノード以外の場合は何もしない
@@ -175,7 +175,10 @@ namespace KdxDesigner.Views
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
                     .GetValue(_viewModel) as ISupabaseRepository;
 
-                if (repository == null) return;
+                if (repository == null)
+                {
+                    return;
+                }
 
                 _propertiesViewModel = new ProcessDetailPropertiesViewModel(
                     repository,
@@ -227,7 +230,7 @@ namespace KdxDesigner.Views
                 _propertiesWindow.Activate();
             }
         }
-        
+
         private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             // ノードが選択されたときの処理
@@ -256,7 +259,7 @@ namespace KdxDesigner.Views
                 }
             }
         }
-        
+
         private void OnConnectionSelected(object? sender, EventArgs e)
         {
             if (_viewModel.SelectedConnection != null)
@@ -324,13 +327,13 @@ namespace KdxDesigner.Views
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
-            
+
             // プロパティウィンドウも閉じる
             _propertiesWindow?.Close();
-            
+
             // 接続情報ウィンドウも閉じる
             _connectionInfoWindow?.Close();
-            
+
             // イベントハンドラーの解除
             if (_viewModel != null)
             {
@@ -339,7 +342,7 @@ namespace KdxDesigner.Views
                 _viewModel.ConnectionDeleted -= OnConnectionDeleted;
                 _viewModel.RequestShowPropertiesWindow -= OnRequestShowPropertiesWindow;
             }
-            
+
             if (_scrollViewer != null)
             {
                 _scrollViewer.PreviewMouseDown -= OnScrollViewerMouseDown;

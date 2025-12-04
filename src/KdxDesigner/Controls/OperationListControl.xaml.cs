@@ -300,7 +300,10 @@ namespace KdxDesigner.Controls
 
         private async void DeleteOperation_Click(object sender, RoutedEventArgs e)
         {
-            if (SelectedOperation == null || Repository == null) return;
+            if (SelectedOperation == null || Repository == null)
+            {
+                return;
+            }
 
             var result = MessageBox.Show(
                 $"操作 '{SelectedOperation.OperationName}' を削除しますか？",

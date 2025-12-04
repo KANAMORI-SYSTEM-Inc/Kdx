@@ -38,22 +38,46 @@ namespace KdxDesigner.ViewModels.Settings
         public int TotalMemoryDeviceCount
         {
             get => _memoryConfig?.TotalMemoryDeviceCount ?? 0;
-            set { if (_memoryConfig != null) _memoryConfig.TotalMemoryDeviceCount = value; }
+            set
+            {
+                if (_memoryConfig != null)
+                {
+                    _memoryConfig.TotalMemoryDeviceCount = value;
+                }
+            }
         }
         public string MemoryConfigurationStatus
         {
             get => _memoryConfig?.MemoryConfigurationStatus ?? "未設定";
-            set { if (_memoryConfig != null) _memoryConfig.MemoryConfigurationStatus = value; }
+            set
+            {
+                if (_memoryConfig != null)
+                {
+                    _memoryConfig.MemoryConfigurationStatus = value;
+                }
+            }
         }
         public bool IsMemoryConfigured
         {
             get => _memoryConfig?.IsMemoryConfigured ?? false;
-            set { if (_memoryConfig != null) _memoryConfig.IsMemoryConfigured = value; }
+            set
+            {
+                if (_memoryConfig != null)
+                {
+                    _memoryConfig.IsMemoryConfigured = value;
+                }
+            }
         }
         public string LastMemoryConfigTime
         {
             get => _memoryConfig?.LastMemoryConfigTime ?? string.Empty;
-            set { if (_memoryConfig != null) _memoryConfig.LastMemoryConfigTime = value; }
+            set
+            {
+                if (_memoryConfig != null)
+                {
+                    _memoryConfig.LastMemoryConfigTime = value;
+                }
+            }
         }
 
         // PLC用プロファイル関連

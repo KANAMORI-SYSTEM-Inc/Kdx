@@ -48,13 +48,13 @@ namespace KdxDesigner.ViewModels
 
         [ObservableProperty]
         private bool _isLoading;
-        
+
         [ObservableProperty]
         private bool _showUnassignedOnly;
-        
+
         [ObservableProperty]
         private bool _hasChanges;
-        
+
         [ObservableProperty]
         private ObservableCollection<TimerCategory?> _timerCategoriesWithNull = new();
 
@@ -265,7 +265,7 @@ namespace KdxDesigner.ViewModels
                 UpdateCanSave();
             }
         }
-        
+
         private async void OnTimerMnemonicTypeChanged(object? sender, EventArgs e)
         {
             if (sender is TimerViewModel timer)
@@ -290,7 +290,7 @@ namespace KdxDesigner.ViewModels
             CanSaveSelectedTimer = SelectedTimer?.IsDirty ?? false;
             HasChanges = _allTimers.Any(t => t.IsDirty);
         }
-        
+
         private void UpdateTimerCategoriesWithNull()
         {
             TimerCategoriesWithNull.Clear();
@@ -412,7 +412,9 @@ namespace KdxDesigner.ViewModels
         private async Task DeleteTimer()
         {
             if (SelectedTimer == null)
+            {
                 return;
+            }
 
             var result = MessageBox.Show(
                 $"タイマーを削除しますか？\n\nタイマー名: {SelectedTimer.TimerName}",
@@ -436,7 +438,9 @@ namespace KdxDesigner.ViewModels
         private async Task SaveSelectedTimer()
         {
             if (SelectedTimer == null || !SelectedTimer.IsDirty)
+            {
                 return;
+            }
 
             try
             {
@@ -562,11 +566,13 @@ namespace KdxDesigner.ViewModels
                     MessageBoxImage.Warning);
 
                 if (result != MessageBoxResult.Yes)
+                {
                     return;
+                }
             }
             await LoadTimers();
         }
-        
+
         [RelayCommand]
         private async Task SaveAllTimers()
         {
@@ -632,12 +638,14 @@ namespace KdxDesigner.ViewModels
                 MessageBox.Show($"保存中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
+
         [RelayCommand]
         private void EditRecordIds()
         {
             if (SelectedTimer == null)
+            {
                 return;
+            }
 
             // 選択されているPLCのIDを取得
             var plcId = _mainViewModel.SelectedPlc?.Id ?? 0;
@@ -663,7 +671,7 @@ namespace KdxDesigner.ViewModels
                 UpdateCanSave();
             }
         }
-        
+
         partial void OnShowUnassignedOnlyChanged(bool value)
         {
             FilteredTimers.Refresh();

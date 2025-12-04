@@ -36,7 +36,10 @@ namespace KdxDesigner.Utils.Operation
 
             foreach (var pros in prosTimeList)
             {
-                if (string.IsNullOrEmpty(pros.CurrentDevice) || string.IsNullOrEmpty(pros.PreviousDevice)) continue;
+                if (string.IsNullOrEmpty(pros.CurrentDevice) || string.IsNullOrEmpty(pros.PreviousDevice))
+                {
+                    continue;
+                }
 
                 switch (pros.CategoryId)
                 {
@@ -57,7 +60,11 @@ namespace KdxDesigner.Utils.Operation
             var count = "K" + prosTimeList.Count.ToString();
 
             // リセット信号の追加
-            if (string.IsNullOrEmpty(current) || string.IsNullOrEmpty(previous)) return result;
+            if (string.IsNullOrEmpty(current) || string.IsNullOrEmpty(previous))
+            {
+                return result;
+            }
+
             result.Add(LadderRow.AddLDP(label + (outNum + 19).ToString()));
             result.AddRange(LadderRow.AddBMOVSet(current, previous, count));
             result.AddRange(LadderRow.AddFMOVSet("K0", current, count));
@@ -82,7 +89,11 @@ namespace KdxDesigner.Utils.Operation
 
             foreach (var pros in prosTimeList)
             {
-                if (pros.SortId == 0 || pros.SortId == 1) continue; // SortId 0は全体のCYタイムなのでスキップ
+                if (pros.SortId == 0 || pros.SortId == 1)
+                {
+                    continue; // SortId 0は全体のCYタイムなのでスキップ
+                }
+
                 var previousDevice1 = pros.PreviousDevice;
                 var previousDevice2 = prosTimeList.SingleOrDefault(p => p.SortId == pros.SortId - 1)?.PreviousDevice ?? "";
                 var cylinderDeviceSort = prosTimeList.SingleOrDefault(p => p.SortId == pros.SortId)?.CylinderDevice ?? "";

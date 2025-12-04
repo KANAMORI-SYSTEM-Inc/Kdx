@@ -333,7 +333,10 @@ namespace KdxDesigner.ViewModels
                     var properties = typeof(IO).GetProperties();
                     foreach (var prop in properties)
                     {
-                        if (prop.Name == "Id") continue;
+                        if (prop.Name == "Id")
+                        {
+                            continue;
+                        }
 
                         var oldValue = prop.GetValue(originalIo);
                         var newValue = prop.GetValue(updatedIo);
@@ -377,7 +380,10 @@ namespace KdxDesigner.ViewModels
         /// </summary>
         public void ExportLadderCsvFile(List<LadderCsvRow> rows, string fileName, string categoryName)
         {
-            if (!rows.Any()) return; // 出力する行がなければ何もしない
+            if (!rows.Any())
+            {
+                return; // 出力する行がなければ何もしない
+            }
 
             try
             {
@@ -396,7 +402,10 @@ namespace KdxDesigner.ViewModels
         /// </summary>
         private async void LoadCyList()
         {
-            if (_mainViewModel.SelectedPlc == null) return;
+            if (_mainViewModel.SelectedPlc == null)
+            {
+                return;
+            }
 
             var cylinders = await _repository.GetCyListAsync(_mainViewModel.SelectedPlc.Id);
             CyList.Clear();
@@ -413,7 +422,10 @@ namespace KdxDesigner.ViewModels
         {
             AssociatedIoList.Clear();
 
-            if (SelectedCylinder == null || _mainViewModel.SelectedPlc == null) return;
+            if (SelectedCylinder == null || _mainViewModel.SelectedPlc == null)
+            {
+                return;
+            }
 
             try
             {
@@ -576,7 +588,10 @@ namespace KdxDesigner.ViewModels
         /// </summary>
         private async void LoadOperationList()
         {
-            if (_mainViewModel.SelectedPlc == null) return;
+            if (_mainViewModel.SelectedPlc == null)
+            {
+                return;
+            }
 
             var operations = await _repository.GetOperationsAsync();
             OperationList.Clear();
@@ -593,7 +608,10 @@ namespace KdxDesigner.ViewModels
         {
             OperationAssociatedIoList.Clear();
 
-            if (SelectedOperation == null || _mainViewModel.SelectedPlc == null) return;
+            if (SelectedOperation == null || _mainViewModel.SelectedPlc == null)
+            {
+                return;
+            }
 
             try
             {

@@ -33,7 +33,7 @@ namespace KdxDesigner.ViewModels.Settings
             private int? _boxNumber;
             public int? BoxNumber        // ControlBox.BoxNumber を選択
             {
-                get => _boxNumber; set { if (Set(ref _boxNumber, value)) { if (value.HasValue) ManualNumber = value.Value; } }
+                get => _boxNumber; set { if (Set(ref _boxNumber, value)) { if (value.HasValue) { ManualNumber = value.Value; } } }
             }
 
             private int _manualNumber;
@@ -55,7 +55,11 @@ namespace KdxDesigner.ViewModels.Settings
             public event PropertyChangedEventHandler? PropertyChanged;
             protected bool Set<T>(ref T field, T value, [CallerMemberName] string? name = null)
             {
-                if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+                if (EqualityComparer<T>.Default.Equals(field, value))
+                {
+                    return false;
+                }
+
                 field = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
                 return true;
@@ -75,7 +79,13 @@ namespace KdxDesigner.ViewModels.Settings
         public CylinderViewModel? SelectedCylinder
         {
             get => _selectedCylinder;
-            set { if (Set(ref _selectedCylinder, value)) _ = LoadMappingsForSelection(); }
+            set
+            {
+                if (Set(ref _selectedCylinder, value))
+                {
+                    _ = LoadMappingsForSelection();
+                }
+            }
         }
 
         public ICommand AddMappingCommand { get; }
@@ -103,7 +113,10 @@ namespace KdxDesigner.ViewModels.Settings
             AddMappingCommand = new RelayCommand(_ => AddMapping(), _ => SelectedCylinder != null);
             RemoveMappingCommand = new RelayCommand(m =>
             {
-                if (m is MappingItem item) Mappings.Remove(item);
+                if (m is MappingItem item)
+                {
+                    Mappings.Remove(item);
+                }
             }, _ => SelectedCylinder != null);
 
             SaveAllMappingsCommand = new RelayCommand(_ => _ = SaveAllMappings(), _ => SelectedCylinder != null);
@@ -151,7 +164,9 @@ namespace KdxDesigner.ViewModels.Settings
             // 右ペイン：ControlBox のコンボ
             var controlBoxes = await repo.GetControlBoxesByPlcIdAsync(plcId);
             foreach (var cb in controlBoxes.OrderBy(x => x.BoxNumber))
+            {
                 vm.ControlBoxes.Add(cb);
+            }
 
             return vm;
         }
@@ -159,7 +174,10 @@ namespace KdxDesigner.ViewModels.Settings
         private async Task LoadMappingsForSelection()
         {
             Mappings.Clear();
-            if (SelectedCylinder == null) return;
+            if (SelectedCylinder == null)
+            {
+                return;
+            }
 
             // 既存を全件取得（複数行）
             var links = await _repo.GetCylinderControlBoxesAsync(_plcId, SelectedCylinder.Cylinder.Id); // ← List<CylinderControlBox>
@@ -178,7 +196,11 @@ namespace KdxDesigner.ViewModels.Settings
 
         private void AddMapping()
         {
-            if (SelectedCylinder == null) return;
+            if (SelectedCylinder == null)
+            {
+                return;
+            }
+
             Mappings.Add(new MappingItem
             {
                 PlcId = _plcId,
@@ -191,7 +213,10 @@ namespace KdxDesigner.ViewModels.Settings
 
         private async Task SaveAllMappings()
         {
-            if (SelectedCylinder == null) return;
+            if (SelectedCylinder == null)
+            {
+                return;
+            }
 
             // 簡易検証: BoxNumber 重複
             var dup = Mappings
@@ -236,7 +261,9 @@ namespace KdxDesigner.ViewModels.Settings
             {
                 var key = (row.PlcId, row.CylinderId, row.ManualNumber);
                 if (!toKeepKeys.Contains(key))
+                {
                     await _repo.DeleteCylinderControlBoxAsync(row.PlcId, row.CylinderId, row.ManualNumber);
+                }
             }
 
             // 再読込して同期
@@ -245,7 +272,10 @@ namespace KdxDesigner.ViewModels.Settings
 
         private async Task DeleteAllMappings()
         {
-            if (SelectedCylinder == null) return;
+            if (SelectedCylinder == null)
+            {
+                return;
+            }
 
             // 確認ダイアログ
             var result = MessageBox.Show(
@@ -254,7 +284,10 @@ namespace KdxDesigner.ViewModels.Settings
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
 
-            if (result != MessageBoxResult.Yes) return;
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
 
             var cylId = SelectedCylinder.Cylinder.Id;
 
@@ -272,7 +305,11 @@ namespace KdxDesigner.ViewModels.Settings
         public event PropertyChangedEventHandler? PropertyChanged;
         protected bool Set<T>(ref T field, T value, [CallerMemberName] string? name = null)
         {
-            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            if (EqualityComparer<T>.Default.Equals(field, value))
+            {
+                return false;
+            }
+
             field = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
             return true;

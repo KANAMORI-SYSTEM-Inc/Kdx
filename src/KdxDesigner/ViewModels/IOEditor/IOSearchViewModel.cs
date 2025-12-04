@@ -77,8 +77,15 @@ namespace KdxDesigner.ViewModels.IOEditor
 
         private bool FilterIO(object obj)
         {
-            if (obj is not IO io) return false;
-            if (string.IsNullOrWhiteSpace(SearchText)) return true;
+            if (obj is not IO io)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(SearchText))
+            {
+                return true;
+            }
 
             var searchLower = SearchText.ToLower();
             return (io.Address?.ToLower().Contains(searchLower) ?? false) ||

@@ -16,11 +16,11 @@ namespace KdxDesigner.Views
         public class RecordItem : INotifyPropertyChanged
         {
             private bool _isSelected;
-            
+
             public int Id { get; set; }
             public string Name { get; set; } = string.Empty;
-            public bool IsSelected 
-            { 
+            public bool IsSelected
+            {
                 get => _isSelected;
                 set
                 {
@@ -28,14 +28,14 @@ namespace KdxDesigner.Views
                     OnPropertyChanged();
                 }
             }
-            
+
             public event PropertyChangedEventHandler? PropertyChanged;
             protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
             {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-        
+
         private readonly TimerViewModel _timer;
         private readonly ISupabaseRepository _repository;
         private readonly int _plcId;
@@ -106,7 +106,7 @@ namespace KdxDesigner.Views
                 OnPropertyChanged();
             }
         }
-        
+
         public ObservableCollection<int> SelectedRecordIds
         {
             get => _selectedRecordIds;
@@ -116,12 +116,12 @@ namespace KdxDesigner.Views
                 OnPropertyChanged();
             }
         }
-        
+
         public string SelectedRecordIdsDisplay
         {
             get => string.Join(", ", _selectedRecordIds);
         }
-        
+
         public string FilterText
         {
             get => _filterText;
@@ -133,19 +133,23 @@ namespace KdxDesigner.Views
                 OnPropertyChanged(nameof(FilteredRecords));
             }
         }
-        
+
         public ICollectionView FilteredRecords => _filteredRecords;
-        
+
         private bool FilterRecords(object item)
         {
             if (item is not RecordItem record)
+            {
                 return false;
-                
+            }
+
             if (string.IsNullOrWhiteSpace(_filterText))
+            {
                 return true;
-                
+            }
+
             var searchText = _filterText.ToLower();
-            return record.Name.ToLower().Contains(searchText) || 
+            return record.Name.ToLower().Contains(searchText) ||
                    record.Id.ToString().Contains(searchText);
         }
 
@@ -154,7 +158,9 @@ namespace KdxDesigner.Views
             _availableRecords.Clear();
 
             if (!MnemonicId.HasValue)
+            {
                 return;
+            }
 
             // タイマーのCycleIdを取得
             var cycleId = _timer.CycleId;
@@ -247,7 +253,7 @@ namespace KdxDesigner.Views
             _filteredRecords?.Refresh();
             OnPropertyChanged(nameof(FilteredRecords));
         }
-        
+
         private void RecordCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             if (sender is CheckBox checkBox && checkBox.DataContext is RecordItem record)
@@ -259,7 +265,7 @@ namespace KdxDesigner.Views
                 }
             }
         }
-        
+
         private void RecordCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             if (sender is CheckBox checkBox && checkBox.DataContext is RecordItem record)
@@ -300,7 +306,7 @@ namespace KdxDesigner.Views
             DialogResult = false;
             Close();
         }
-        
+
         private void SelectAllButton_Click(object sender, RoutedEventArgs e)
         {
             // フィルターされたレコードのみを選択
@@ -317,7 +323,7 @@ namespace KdxDesigner.Views
             }
             OnPropertyChanged(nameof(SelectedRecordIdsDisplay));
         }
-        
+
         private void UnselectAllButton_Click(object sender, RoutedEventArgs e)
         {
             // フィルターされたレコードのみを解除
@@ -331,7 +337,7 @@ namespace KdxDesigner.Views
             }
             OnPropertyChanged(nameof(SelectedRecordIdsDisplay));
         }
-        
+
         private void ClearFilterButton_Click(object sender, RoutedEventArgs e)
         {
             FilterText = string.Empty;

@@ -233,7 +233,7 @@ namespace KdxDesigner.Services.MemonicTimerDevice
         public async Task<int> SaveWithOperation(
             List<Timer> timers,
             List<Operation> operations,
-            int startNum, 
+            int startNum,
             int plcId,
             int count)
         {
@@ -264,7 +264,10 @@ namespace KdxDesigner.Services.MemonicTimerDevice
                 // 3. Operationをループし、関連するタイマーを処理
                 foreach (Operation operation in operations)
                 {
-                    if (operation == null) continue;
+                    if (operation == null)
+                    {
+                        continue;
+                    }
 
                     // 現在のOperationに対応するタイマーがあるか、辞書から取得
                     if (timersByRecordId.TryGetValue(operation.Id, out var operationTimers))

@@ -885,7 +885,9 @@ namespace KdxDesigner.Utils.ProcessDetail
         protected string? GetSensorIO(string? sensorKey, string? detailName, int detailId)
         {
             if (string.IsNullOrWhiteSpace(sensorKey))
+            {
                 return null;
+            }
 
             return _ioAddressService.GetSingleAddress(
                 _ioList,
@@ -904,7 +906,9 @@ namespace KdxDesigner.Utils.ProcessDetail
         protected void AddSkipModeRows(List<LadderCsvRow> rows, MnemonicDeviceWithProcessDetail detail)
         {
             if (string.IsNullOrEmpty(detail.Detail.SkipMode))
+            {
                 return;
+            }
 
             var skipDevice = detail.Detail.SkipMode.TrimStart('_');
             var isNegated = detail.Detail.SkipMode.StartsWith("_", StringComparison.Ordinal);
@@ -937,14 +941,23 @@ namespace KdxDesigner.Utils.ProcessDetail
         protected string? ManualButtonBulider(MnemonicDeviceWithProcessDetail detail)
         {
             // ① OperationId が null なら終了
-            if (detail?.Detail?.OperationId is not int opId) return null;
+            if (detail?.Detail?.OperationId is not int opId)
+            {
+                return null;
+            }
 
             // ② Operation と Cylinder を特定
             var operation = _operations.FirstOrDefault(o => o.Operation.Id == opId);
-            if (operation is null) return null;
+            if (operation is null)
+            {
+                return null;
+            }
 
             var cylinder = _cylinders.FirstOrDefault(c => c.Cylinder.Id == operation.Operation.CYId);
-            if (cylinder is null) return null;
+            if (cylinder is null)
+            {
+                return null;
+            }
 
             // ③ 同一 Cylinder に属する OperationId 集合（高速判定用）
             var opIdsInCylinder = _operations
@@ -961,7 +974,10 @@ namespace KdxDesigner.Utils.ProcessDetail
 
             // ⑤ 現在の明細の位置（0始まり）
             int index = ordered.FindIndex(d => d.Detail.Id == detail.Detail.Id);
-            if (index < 0) return null;
+            if (index < 0)
+            {
+                return null;
+            }
 
             // ⑥ 1始まりに変換してラベル生成（0始まりにしたいなら +1 を外す）
             int detailNumber = index + 1;
@@ -977,14 +993,23 @@ namespace KdxDesigner.Utils.ProcessDetail
         protected string? ManualResetBulider(MnemonicDeviceWithProcessDetail detail)
         {
             // ① OperationId が null なら終了
-            if (detail?.Detail?.OperationId is not int opId) return null;
+            if (detail?.Detail?.OperationId is not int opId)
+            {
+                return null;
+            }
 
             // ② Operation と Cylinder を特定
             var operation = _operations.FirstOrDefault(o => o.Operation.Id == opId);
-            if (operation is null) return null;
+            if (operation is null)
+            {
+                return null;
+            }
 
             var cylinder = _cylinders.FirstOrDefault(c => c.Cylinder.Id == operation.Operation.CYId);
-            if (cylinder is null) return null;
+            if (cylinder is null)
+            {
+                return null;
+            }
 
             // ③ 同一 Cylinder に属する OperationId 集合（高速判定用）
             var opIdsInCylinder = _operations
@@ -1001,7 +1026,10 @@ namespace KdxDesigner.Utils.ProcessDetail
 
             // ⑤ 現在の明細の位置（0始まり）
             int index = ordered.FindIndex(d => d.Detail.Id == detail.Detail.Id);
-            if (index < 0) return null;
+            if (index < 0)
+            {
+                return null;
+            }
 
             // ⑥ 1始まりに変換してラベル生成（0始まりにしたいなら +1 を外す）
             int detailNumber = index + 1;
@@ -1017,14 +1045,23 @@ namespace KdxDesigner.Utils.ProcessDetail
         protected string? ManualOperateBulider(MnemonicDeviceWithProcessDetail detail)
         {
             // ① OperationId が null なら終了
-            if (detail?.Detail?.OperationId is not int opId) return null;
+            if (detail?.Detail?.OperationId is not int opId)
+            {
+                return null;
+            }
 
             // ② Operation と Cylinder を特定
             var operation = _operations.FirstOrDefault(o => o.Operation.Id == opId);
-            if (operation is null) return null;
+            if (operation is null)
+            {
+                return null;
+            }
 
             var cylinder = _cylinders.FirstOrDefault(c => c.Cylinder.Id == operation.Operation.CYId);
-            if (cylinder is null) return null;
+            if (cylinder is null)
+            {
+                return null;
+            }
 
             // ③ 同一 Cylinder に属する OperationId 集合（高速判定用）
             var opIdsInCylinder = _operations
@@ -1041,7 +1078,10 @@ namespace KdxDesigner.Utils.ProcessDetail
 
             // ⑤ 現在の明細の位置（0始まり）
             int index = ordered.FindIndex(d => d.Detail.Id == detail.Detail.Id);
-            if (index < 0) return null;
+            if (index < 0)
+            {
+                return null;
+            }
 
             // ⑥ 1始まりに変換してラベル生成（0始まりにしたいなら +1 を外す）
             int detailNumber = index + 1;
@@ -1057,23 +1097,38 @@ namespace KdxDesigner.Utils.ProcessDetail
         protected async Task<List<ControlBox>?> GetControlBoxesByCylinderId(MnemonicDeviceWithProcessDetail detail)
         {
             // ① OperationId が null なら終了
-            if (detail?.Detail?.OperationId is not int opId) return null;
+            if (detail?.Detail?.OperationId is not int opId)
+            {
+                return null;
+            }
 
             // ② Operation と Cylinder を特定
             var operation = _operations.FirstOrDefault(o => o.Operation.Id == opId);
-            if (operation is null) return null;
+            if (operation is null)
+            {
+                return null;
+            }
 
             var cylinder = _cylinders.FirstOrDefault(c => c.Cylinder.Id == operation.Operation.CYId);
-            if (cylinder is null) return null;
+            if (cylinder is null)
+            {
+                return null;
+            }
 
             // ③ plcId
             var plcId = _mainViewModel?.SelectedPlc?.Id ?? 0;
-            if (plcId == 0) return null;
+            if (plcId == 0)
+            {
+                return null;
+            }
 
             // ④ 中間テーブル（対象Cylinderのみ）
             var mapsAll = await _repository.GetCylinderControlBoxesByPlcIdAsync(plcId);
             var maps = mapsAll.Where(m => m.CylinderId == cylinder.Cylinder.Id).ToList();
-            if (maps.Count == 0) return null;
+            if (maps.Count == 0)
+            {
+                return null;
+            }
 
             // ⑤ ControlBox を辞書化（BoxNumber→ControlBox）
             var cbByNumber = (await _repository.GetControlBoxesByPlcIdAsync(plcId))

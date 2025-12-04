@@ -154,10 +154,16 @@ namespace KdxDesigner.ViewModels.Managers
         /// </summary>
         public void RestoreSelection(int? companyId, int? modelId, int? cycleId)
         {
-            if (!companyId.HasValue) return;
+            if (!companyId.HasValue)
+            {
+                return;
+            }
 
             var savedCompany = Companies.FirstOrDefault(c => c.Id == companyId.Value);
-            if (savedCompany == null) return;
+            if (savedCompany == null)
+            {
+                return;
+            }
 
             SelectedCompany = savedCompany;
 

@@ -115,7 +115,10 @@ namespace KdxDesigner.ViewModels
         [RelayCommand]
         private async Task DeleteSelectedProcessDetail()
         {
-            if (SelectedProcessDetail == null) return;
+            if (SelectedProcessDetail == null)
+            {
+                return;
+            }
 
             var result = MessageBox.Show(
                 $"工程詳細 '{SelectedProcessDetail.DetailName}' を削除しますか？",
@@ -171,7 +174,10 @@ namespace KdxDesigner.ViewModels
         /// </summary>
         public async Task LoadProcessDetailsAsync()
         {
-            if (ProcessId == null) return;
+            if (ProcessId == null)
+            {
+                return;
+            }
 
             try
             {

@@ -121,7 +121,10 @@ namespace KdxDesigner.ViewModels
         [RelayCommand]
         private async Task DeleteSelectedOperation()
         {
-            if (SelectedOperation == null) return;
+            if (SelectedOperation == null)
+            {
+                return;
+            }
 
             var result = MessageBox.Show(
                 $"操作 '{SelectedOperation.OperationName}' を削除しますか？",
@@ -198,7 +201,10 @@ namespace KdxDesigner.ViewModels
         /// </summary>
         public async Task LoadOperationsAsync()
         {
-            if (CycleId == null) return;
+            if (CycleId == null)
+            {
+                return;
+            }
 
             try
             {
@@ -221,7 +227,10 @@ namespace KdxDesigner.ViewModels
         /// </summary>
         public async Task ReloadOperationsAsync()
         {
-            if (CycleId == null) return;
+            if (CycleId == null)
+            {
+                return;
+            }
 
             try
             {

@@ -138,7 +138,11 @@ namespace KdxDesigner.ViewModels.Settings
             ApplySettingsToMainViewModel();
 
             // メモリ設定状態を「設定中」に更新
-            if (_memoryConfig == null) return;
+            if (_memoryConfig == null)
+            {
+                return;
+            }
+
             _memoryConfig.MemoryConfigurationStatus = "設定中...";
             _memoryConfig.IsMemoryConfigured = false;
 

@@ -32,7 +32,10 @@ namespace KdxDesigner.ViewModels
         /// </summary>
         public void AddLog(string message)
         {
-            if (Application.Current == null) return;
+            if (Application.Current == null)
+            {
+                return;
+            }
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -48,7 +51,10 @@ namespace KdxDesigner.ViewModels
         /// </summary>
         public void UpdateStatus(string message)
         {
-            if (Application.Current == null) return;
+            if (Application.Current == null)
+            {
+                return;
+            }
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -65,7 +71,10 @@ namespace KdxDesigner.ViewModels
         /// </summary>
         public void SetProgressMax(int max)
         {
-            if (Application.Current == null) return;
+            if (Application.Current == null)
+            {
+                return;
+            }
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -81,7 +90,10 @@ namespace KdxDesigner.ViewModels
         /// </summary>
         public void IncrementProgress()
         {
-            if (Application.Current == null) return;
+            if (Application.Current == null)
+            {
+                return;
+            }
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -95,7 +107,10 @@ namespace KdxDesigner.ViewModels
         /// </summary>
         public void MarkCompleted()
         {
-            if (Application.Current == null) return;
+            if (Application.Current == null)
+            {
+                return;
+            }
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -113,7 +128,10 @@ namespace KdxDesigner.ViewModels
         /// </summary>
         public void MarkError(string errorMessage)
         {
-            if (Application.Current == null) return;
+            if (Application.Current == null)
+            {
+                return;
+            }
 
             Application.Current.Dispatcher.Invoke(() =>
             {

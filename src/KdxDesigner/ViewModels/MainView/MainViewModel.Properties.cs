@@ -68,214 +68,460 @@ namespace KdxDesigner.ViewModels
         public ObservableCollection<Company> Companies
         {
             get => _selectionManager?.Companies ?? new();
-            set { if (_selectionManager != null) _selectionManager.Companies = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.Companies = value;
+                }
+            }
         }
         public ObservableCollection<Model> Models
         {
             get => _selectionManager?.Models ?? new();
-            set { if (_selectionManager != null) _selectionManager.Models = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.Models = value;
+                }
+            }
         }
         public ObservableCollection<PLC> Plcs
         {
             get => _selectionManager?.Plcs ?? new();
-            set { if (_selectionManager != null) _selectionManager.Plcs = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.Plcs = value;
+                }
+            }
         }
         public ObservableCollection<Cycle> Cycles
         {
             get => _selectionManager?.Cycles ?? new();
-            set { if (_selectionManager != null) _selectionManager.Cycles = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.Cycles = value;
+                }
+            }
         }
         public ObservableCollection<Process> Processes
         {
             get => _selectionManager?.Processes ?? new();
-            set { if (_selectionManager != null) _selectionManager.Processes = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.Processes = value;
+                }
+            }
         }
         public ObservableCollection<ProcessDetail> ProcessDetails
         {
             get => _selectionManager?.ProcessDetails ?? new();
-            set { if (_selectionManager != null) _selectionManager.ProcessDetails = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.ProcessDetails = value;
+                }
+            }
         }
         public ObservableCollection<Operation> SelectedOperations
         {
             get => _selectionManager?.SelectedOperations ?? new();
-            set { if (_selectionManager != null) _selectionManager.SelectedOperations = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.SelectedOperations = value;
+                }
+            }
         }
 
         public ObservableCollection<ProcessCategory> ProcessCategories
         {
             get => _selectionManager?.ProcessCategories ?? new();
-            set { if (_selectionManager != null) _selectionManager.ProcessCategories = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.ProcessCategories = value;
+                }
+            }
         }
         public ObservableCollection<ProcessDetailCategory> ProcessDetailCategories
         {
             get => _selectionManager?.ProcessDetailCategories ?? new();
-            set { if (_selectionManager != null) _selectionManager.ProcessDetailCategories = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.ProcessDetailCategories = value;
+                }
+            }
         }
         public ObservableCollection<OperationCategory> OperationCategories
         {
             get => _selectionManager?.OperationCategories ?? new();
-            set { if (_selectionManager != null) _selectionManager.OperationCategories = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.OperationCategories = value;
+                }
+            }
         }
 
         public Company? SelectedCompany
         {
             get => _selectionManager?.SelectedCompany;
-            set { if (_selectionManager != null) _selectionManager.SelectedCompany = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.SelectedCompany = value;
+                }
+            }
         }
         public Model? SelectedModel
         {
             get => _selectionManager?.SelectedModel;
-            set { if (_selectionManager != null) _selectionManager.SelectedModel = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.SelectedModel = value;
+                }
+            }
         }
         public PLC? SelectedPlc
         {
             get => _selectionManager?.SelectedPlc;
-            set { if (_selectionManager != null) _selectionManager.SelectedPlc = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.SelectedPlc = value;
+                }
+            }
         }
         public Cycle? SelectedCycle
         {
             get => _selectionManager?.SelectedCycle;
-            set { if (_selectionManager != null) _selectionManager.SelectedCycle = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.SelectedCycle = value;
+                }
+            }
         }
         public Process? SelectedProcess
         {
             get => _selectionManager?.SelectedProcess;
-            set { if (_selectionManager != null) _selectionManager.SelectedProcess = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.SelectedProcess = value;
+                }
+            }
         }
         public ProcessDetail? SelectedProcessDetail
         {
             get => _selectionManager?.SelectedProcessDetail;
-            set { if (_selectionManager != null) _selectionManager.SelectedProcessDetail = value; }
+            set
+            {
+                if (_selectionManager != null)
+                {
+                    _selectionManager.SelectedProcessDetail = value;
+                }
+            }
         }
 
         // デバイス設定プロパティ（DeviceConfigurationManagerから公開）
         public int ProcessDeviceStartL
         {
             get => _deviceConfig?.ProcessDeviceStartL ?? 14000;
-            set { if (_deviceConfig != null) _deviceConfig.ProcessDeviceStartL = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.ProcessDeviceStartL = value;
+                }
+            }
         }
         public int DetailDeviceStartL
         {
             get => _deviceConfig?.DetailDeviceStartL ?? 15000;
-            set { if (_deviceConfig != null) _deviceConfig.DetailDeviceStartL = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.DetailDeviceStartL = value;
+                }
+            }
         }
         public int OperationDeviceStartM
         {
             get => _deviceConfig?.OperationDeviceStartM ?? 20000;
-            set { if (_deviceConfig != null) _deviceConfig.OperationDeviceStartM = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.OperationDeviceStartM = value;
+                }
+            }
         }
         public int CylinderDeviceStartM
         {
             get => _deviceConfig?.CylinderDeviceStartM ?? 30000;
-            set { if (_deviceConfig != null) _deviceConfig.CylinderDeviceStartM = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.CylinderDeviceStartM = value;
+                }
+            }
         }
         public int CylinderDeviceStartD
         {
             get => _deviceConfig?.CylinderDeviceStartD ?? 5000;
-            set { if (_deviceConfig != null) _deviceConfig.CylinderDeviceStartD = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.CylinderDeviceStartD = value;
+                }
+            }
         }
         public int ErrorDeviceStartM
         {
             get => _deviceConfig?.ErrorDeviceStartM ?? 120000;
-            set { if (_deviceConfig != null) _deviceConfig.ErrorDeviceStartM = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.ErrorDeviceStartM = value;
+                }
+            }
         }
         public int ErrorDeviceStartT
         {
             get => _deviceConfig?.ErrorDeviceStartT ?? 2000;
-            set { if (_deviceConfig != null) _deviceConfig.ErrorDeviceStartT = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.ErrorDeviceStartT = value;
+                }
+            }
         }
         public int DeviceStartT
         {
             get => _deviceConfig?.DeviceStartT ?? 0;
-            set { if (_deviceConfig != null) _deviceConfig.DeviceStartT = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.DeviceStartT = value;
+                }
+            }
         }
         public int TimerStartZR
         {
             get => _deviceConfig?.TimerStartZR ?? 3000;
-            set { if (_deviceConfig != null) _deviceConfig.TimerStartZR = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.TimerStartZR = value;
+                }
+            }
         }
         public int ProsTimeStartZR
         {
             get => _deviceConfig?.ProsTimeStartZR ?? 12000;
-            set { if (_deviceConfig != null) _deviceConfig.ProsTimeStartZR = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.ProsTimeStartZR = value;
+                }
+            }
         }
         public int ProsTimePreviousStartZR
         {
             get => _deviceConfig?.ProsTimePreviousStartZR ?? 24000;
-            set { if (_deviceConfig != null) _deviceConfig.ProsTimePreviousStartZR = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.ProsTimePreviousStartZR = value;
+                }
+            }
         }
         public int CyTimeStartZR
         {
             get => _deviceConfig?.CyTimeStartZR ?? 30000;
-            set { if (_deviceConfig != null) _deviceConfig.CyTimeStartZR = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.CyTimeStartZR = value;
+                }
+            }
         }
 
         // メモリ/出力フラグ
         public bool IsProcessMemory
         {
             get => _deviceConfig?.IsProcessMemory ?? false;
-            set { if (_deviceConfig != null) _deviceConfig.IsProcessMemory = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.IsProcessMemory = value;
+                }
+            }
         }
         public bool IsDetailMemory
         {
             get => _deviceConfig?.IsDetailMemory ?? false;
-            set { if (_deviceConfig != null) _deviceConfig.IsDetailMemory = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.IsDetailMemory = value;
+                }
+            }
         }
         public bool IsOperationMemory
         {
             get => _deviceConfig?.IsOperationMemory ?? false;
-            set { if (_deviceConfig != null) _deviceConfig.IsOperationMemory = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.IsOperationMemory = value;
+                }
+            }
         }
         public bool IsCylinderMemory
         {
             get => _deviceConfig?.IsCylinderMemory ?? false;
-            set { if (_deviceConfig != null) _deviceConfig.IsCylinderMemory = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.IsCylinderMemory = value;
+                }
+            }
         }
         public bool IsErrorMemory
         {
             get => _deviceConfig?.IsErrorMemory ?? false;
-            set { if (_deviceConfig != null) _deviceConfig.IsErrorMemory = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.IsErrorMemory = value;
+                }
+            }
         }
         public bool IsTimerMemory
         {
             get => _deviceConfig?.IsTimerMemory ?? false;
-            set { if (_deviceConfig != null) _deviceConfig.IsTimerMemory = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.IsTimerMemory = value;
+                }
+            }
         }
         public bool IsProsTimeMemory
         {
             get => _deviceConfig?.IsProsTimeMemory ?? false;
-            set { if (_deviceConfig != null) _deviceConfig.IsProsTimeMemory = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.IsProsTimeMemory = value;
+                }
+            }
         }
         public bool IsCyTimeMemory
         {
             get => _deviceConfig?.IsCyTimeMemory ?? false;
-            set { if (_deviceConfig != null) _deviceConfig.IsCyTimeMemory = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.IsCyTimeMemory = value;
+                }
+            }
         }
 
         public bool IsProcessOutput
         {
             get => _deviceConfig?.IsProcessOutput ?? false;
-            set { if (_deviceConfig != null) _deviceConfig.IsProcessOutput = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.IsProcessOutput = value;
+                }
+            }
         }
         public bool IsDetailOutput
         {
             get => _deviceConfig?.IsDetailOutput ?? false;
-            set { if (_deviceConfig != null) _deviceConfig.IsDetailOutput = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.IsDetailOutput = value;
+                }
+            }
         }
         public bool IsOperationOutput
         {
             get => _deviceConfig?.IsOperationOutput ?? false;
-            set { if (_deviceConfig != null) _deviceConfig.IsOperationOutput = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.IsOperationOutput = value;
+                }
+            }
         }
         public bool IsCylinderOutput
         {
             get => _deviceConfig?.IsCylinderOutput ?? false;
-            set { if (_deviceConfig != null) _deviceConfig.IsCylinderOutput = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.IsCylinderOutput = value;
+                }
+            }
         }
         public bool IsDebug
         {
             get => _deviceConfig?.IsDebug ?? false;
-            set { if (_deviceConfig != null) _deviceConfig.IsDebug = value; }
+            set
+            {
+                if (_deviceConfig != null)
+                {
+                    _deviceConfig.IsDebug = value;
+                }
+            }
         }
 
 

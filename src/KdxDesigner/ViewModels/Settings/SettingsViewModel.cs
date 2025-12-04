@@ -56,10 +56,16 @@ namespace KdxDesigner.ViewModels
 
             foreach (var item in SettingItems)
             {
-                if (string.IsNullOrEmpty(item.Key)) continue;
+                if (string.IsNullOrEmpty(item.Key))
+                {
+                    continue;
+                }
 
                 var prop = settingsType.GetProperty(item.Key);
-                if (prop == null || !prop.CanWrite) continue;
+                if (prop == null || !prop.CanWrite)
+                {
+                    continue;
+                }
 
                 try
                 {

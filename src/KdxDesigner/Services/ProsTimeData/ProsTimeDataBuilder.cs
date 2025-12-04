@@ -152,7 +152,10 @@ namespace KdxDesigner.Services.ProsTimeData
 
             foreach (var operation in operations)
             {
-                if (operation == null || operation.CategoryId == null) continue;
+                if (operation == null || operation.CategoryId == null)
+                {
+                    continue;
+                }
 
                 var operationCategoryValue = operation.CategoryId.Value;
 

@@ -16,12 +16,18 @@ namespace KdxDesigner.Utils
         {
             value = 0;
             prefix = string.Empty;
-            if (string.IsNullOrEmpty(address)) return false;
+            if (string.IsNullOrEmpty(address))
+            {
+                return false;
+            }
 
             // 文字列の先頭から、数字(0-9)または16進文字(A-F)でない部分をプレフィックスとして抽出
             prefix = new string(address.TakeWhile(c => !Uri.IsHexDigit(c)).ToArray());
 
-            if (string.IsNullOrEmpty(prefix)) return false;
+            if (string.IsNullOrEmpty(prefix))
+            {
+                return false;
+            }
 
             string numberPart = address.Substring(prefix.Length);
             return long.TryParse(numberPart, System.Globalization.NumberStyles.HexNumber, null, out value);
@@ -35,14 +41,20 @@ namespace KdxDesigner.Utils
         {
             totalBitOffset = 0;
             prefix = string.Empty;
-            if (string.IsNullOrEmpty(address) || !address.Contains(".")) return false;
+            if (string.IsNullOrEmpty(address) || !address.Contains("."))
+            {
+                return false;
+            }
 
             var dotIndex = address.LastIndexOf('.');
             string wordPartStr = address.Substring(0, dotIndex);
             string bitPartStr = address.Substring(dotIndex + 1);
 
             prefix = new string(wordPartStr.TakeWhile(c => !Uri.IsHexDigit(c)).ToArray());
-            if (string.IsNullOrEmpty(prefix)) return false;
+            if (string.IsNullOrEmpty(prefix))
+            {
+                return false;
+            }
 
             string wordNumberPart = wordPartStr.Substring(prefix.Length);
 

@@ -9,10 +9,14 @@ namespace KdxDesigner.Utils
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null)
+            {
                 return "(なし)";
+            }
 
             if (value is TimerCategory category)
+            {
                 return category.CategoryName ?? string.Empty;
+            }
 
             return value;
         }

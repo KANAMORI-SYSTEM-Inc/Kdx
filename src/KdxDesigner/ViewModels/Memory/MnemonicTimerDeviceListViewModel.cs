@@ -30,14 +30,14 @@ namespace KdxDesigner.ViewModels
             _repository = repository;
             _mainViewModel = mainViewModel;
             _allTimerDevices = new List<MnemonicTimerDeviceViewModel>();
-            
+
             // MnemonicTypesの初期化
             _mnemonicTypes = new ObservableCollection<MnemonicTypeInfo>(MnemonicTypeInfo.GetAll());
-            
+
             // フィルタリング用のCollectionView
             FilteredTimerDevices = CollectionViewSource.GetDefaultView(_allTimerDevices);
             FilteredTimerDevices.Filter = FilterTimerDevices;
-            
+
             LoadTimerDevices();
         }
 
@@ -54,11 +54,15 @@ namespace KdxDesigner.ViewModels
         private bool FilterTimerDevices(object item)
         {
             if (item is not MnemonicTimerDeviceViewModel vm)
+            {
                 return false;
+            }
 
             // MnemonicTypeでフィルタ
             if (SelectedMnemonicType != null && vm.MnemonicId != SelectedMnemonicType.Id)
+            {
                 return false;
+            }
 
             // テキストフィルタ
             if (!string.IsNullOrWhiteSpace(FilterText))
@@ -80,7 +84,9 @@ namespace KdxDesigner.ViewModels
             _allTimerDevices.Clear();
 
             if (_mainViewModel.SelectedPlc == null)
+            {
                 return;
+            }
 
             // MnemonicTimerDeviceを取得
             var timerDevices = await _repository.GetMnemonicTimerDevicesAsync();
@@ -96,11 +102,11 @@ namespace KdxDesigner.ViewModels
             foreach (var device in timerDevices.Where(d => d.PlcId == _mainViewModel.SelectedPlc.Id))
             {
                 var vm = new MnemonicTimerDeviceViewModel(device);
-                
+
                 // Mnemonic名を設定
                 var mnemonicType = MnemonicTypes.FirstOrDefault(m => m.Id == device.MnemonicId);
                 vm.MnemonicName = mnemonicType?.TableName ?? $"Unknown({device.MnemonicId})";
-                
+
                 // レコード名を設定
                 switch (device.MnemonicId)
                 {
@@ -121,21 +127,21 @@ namespace KdxDesigner.ViewModels
                         vm.RecordName = cylinder?.CYNum ?? $"ID: {device.RecordId}";
                         break;
                 }
-                
+
                 // タイマー名を設定
                 var timer = timers.FirstOrDefault(t => t.ID == device.TimerId);
                 vm.TimerName = timer?.TimerName ?? $"ID: {device.TimerId}";
-                
+
                 // カテゴリ名を設定
                 if (device.TimerCategoryId.HasValue)
                 {
                     var category = timerCategories.FirstOrDefault(c => c.Id == device.TimerCategoryId.Value);
                     vm.CategoryName = category?.CategoryName ?? $"ID: {device.TimerCategoryId}";
                 }
-                
+
                 _allTimerDevices.Add(vm);
             }
-            
+
             FilteredTimerDevices.Refresh();
         }
     }

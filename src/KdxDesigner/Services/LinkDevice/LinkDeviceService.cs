@@ -53,7 +53,10 @@ namespace KdxDesigner.Services.LinkDevice
         /// </summary>
         private void ProcessDeviceType(List<IO> subordinateIoList, string devicePrefix, string? linkStartAddress, List<IO> masterUpdateList)
         {
-            if (string.IsNullOrEmpty(linkStartAddress)) return;
+            if (string.IsNullOrEmpty(linkStartAddress))
+            {
+                return;
+            }
 
             // 1. 対象のデバイスを抽出し、アドレスで並び替える（連番の基準にするため重要）
             var devicesToProcess = subordinateIoList
@@ -61,7 +64,10 @@ namespace KdxDesigner.Services.LinkDevice
                 .OrderBy(io => io.Address)
                 .ToList();
 
-            if (!devicesToProcess.Any()) return;
+            if (!devicesToProcess.Any())
+            {
+                return;
+            }
 
             // 2. メインPLC側のリンク開始アドレスを数値に変換
             if (!LinkDeviceCalculator.TryParseLinkAddress(linkStartAddress, out string mainPrefix, out long mainStartOffsetValue))

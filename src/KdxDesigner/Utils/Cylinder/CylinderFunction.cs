@@ -109,11 +109,30 @@ namespace KdxDesigner.Utils.Cylinder
             string? speedDevice)
         {
             // ---- Guard clauses
-            if (mainViewModel is null) throw new ArgumentNullException(nameof(mainViewModel));
-            if (errorAggregator is null) throw new ArgumentNullException(nameof(errorAggregator));
-            if (cylinder is null) throw new ArgumentNullException(nameof(cylinder));
-            if (ioAddressService is null) throw new ArgumentNullException(nameof(ioAddressService));
-            if (string.IsNullOrWhiteSpace(manualButton)) throw new ArgumentException("manualButton is required.", nameof(manualButton));
+            if (mainViewModel is null)
+            {
+                throw new ArgumentNullException(nameof(mainViewModel));
+            }
+
+            if (errorAggregator is null)
+            {
+                throw new ArgumentNullException(nameof(errorAggregator));
+            }
+
+            if (cylinder is null)
+            {
+                throw new ArgumentNullException(nameof(cylinder));
+            }
+
+            if (ioAddressService is null)
+            {
+                throw new ArgumentNullException(nameof(ioAddressService));
+            }
+
+            if (string.IsNullOrWhiteSpace(manualButton))
+            {
+                throw new ArgumentException("manualButton is required.", nameof(manualButton));
+            }
 
             _mainViewModel = mainViewModel;
             _errorAggregator = errorAggregator;
@@ -132,7 +151,10 @@ namespace KdxDesigner.Utils.Cylinder
             else
             {
                 _controlBox = NullControlBox.Create(manualButton);
-                if (err != null) _errorAggregator.AddError(err);
+                if (err != null)
+                {
+                    _errorAggregator.AddError(err);
+                }
             }
 
             // NullControlBox の場合でも ManualButton/ManualMode を補正
@@ -200,7 +222,9 @@ namespace KdxDesigner.Utils.Cylinder
             }
 
             if (offOperation.Count != 0)
+            {
                 result.Add(LadderRow.AddOUT(_label + (_startNum + 9).ToString())); // ラベルのLD命令を追加
+            }
 
             return result; // 生成されたLadderCsvRowのリストを返す
         }
@@ -226,7 +250,9 @@ namespace KdxDesigner.Utils.Cylinder
             }
 
             if (backOperation.Count != 0)
+            {
                 result.Add(LadderRow.AddOUT(_label + (_startNum + 1).ToString())); // ラベルのLD命令を追加
+            }
 
             return result; // 生成されたLadderCsvRowのリストを返す
         }
@@ -253,7 +279,9 @@ namespace KdxDesigner.Utils.Cylinder
             }
 
             if (goOperation.Count != 0)
+            {
                 result.Add(LadderRow.AddOUT(_label + (_startNum + 2).ToString())); // ラベルのLD命令を追加
+            }
 
             return result; // 生成されたLadderCsvRowのリストを返す
         }
@@ -279,7 +307,9 @@ namespace KdxDesigner.Utils.Cylinder
                 result.Add(LadderRow.AddORB()); // 出力命令を追加
             }
             if (backOperation.Count != 0)
+            {
                 result.Add(LadderRow.AddOUT(_label + (_startNum + 3).ToString())); // ラベルのLD命令を追加
+            }
 
             return result; // 生成されたLadderCsvRowのリストを返す
         }

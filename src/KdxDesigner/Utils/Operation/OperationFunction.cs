@@ -59,7 +59,11 @@ namespace KdxDesigner.Utils.Operation
 
                     result.Add(LadderRow.AddLD(detailLabel + (detailOutNum + 1).ToString()));
                     result.Add(LadderRow.AddANI(detailLabel + (detailOutNum + 4).ToString()));
-                    if (notFirst) result.Add(LadderRow.AddORB());
+                    if (notFirst)
+                    {
+                        result.Add(LadderRow.AddORB());
+                    }
+
                     notFirst = true;
                 }
                 result.Add(LadderRow.AddOUT(_label + (_outNum + 0).ToString()));
@@ -420,7 +424,9 @@ namespace KdxDesigner.Utils.Operation
                     foreach (var io in ioSensorMulti)
                     {
                         if (io.Address!.StartsWith("X"))
+                        {
                             result.Add(LadderRow.AddAND(io.Address!));
+                        }
                     }
                 }
             }
@@ -517,7 +523,10 @@ namespace KdxDesigner.Utils.Operation
 
             for (int i = 0; i < speedChangeCount; i++)
             {
-                if (i >= helper.s_speedChangeConfigs.Count) continue;
+                if (i >= helper.s_speedChangeConfigs.Count)
+                {
+                    continue;
+                }
 
                 if (!helper.TryGetSpeedChangeParameters(
                     i, _operation, operationTimers, out var speedTimer, out var speedSensor))

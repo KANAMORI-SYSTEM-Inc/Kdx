@@ -125,9 +125,13 @@ namespace KdxDesigner.ViewModels
         {
             double height = 45;
             if (ShowNodeId && ShowBlockNumber)
+            {
                 height = 60;
+            }
             else if (ShowNodeId || ShowBlockNumber)
+            {
                 height = 55;
+            }
 
             foreach (var node in AllNodes)
             {
@@ -510,7 +514,10 @@ namespace KdxDesigner.ViewModels
                     {
                         var level = levels.ContainsKey(detail.Id) ? levels[detail.Id] : 0;
                         if (!levelCounts.ContainsKey(level))
+                        {
                             levelCounts[level] = 0;
+                        }
+
                         levelCounts[level]++;
                     }
 
@@ -521,7 +528,9 @@ namespace KdxDesigner.ViewModels
                     {
                         var level = levels.ContainsKey(detail.Id) ? levels[detail.Id] : 0;
                         if (!currentLevelCounts.ContainsKey(level))
+                        {
                             currentLevelCounts[level] = 0;
+                        }
 
                         var index = currentLevelCounts[level];
 
@@ -595,17 +604,27 @@ namespace KdxDesigner.ViewModels
             foreach (var conn in _dbConnections)
             {
                 if (!nodeDict.ContainsKey(conn.FromProcessDetailId))
+                {
                     otherCycleDetailIds.Add(conn.FromProcessDetailId);
+                }
+
                 if (conn.ToProcessDetailId.HasValue && !nodeDict.ContainsKey(conn.ToProcessDetailId.Value))
+                {
                     otherCycleDetailIds.Add(conn.ToProcessDetailId.Value);
+                }
             }
 
             foreach (var finish in _dbFinishes)
             {
                 if (!nodeDict.ContainsKey(finish.ProcessDetailId))
+                {
                     otherCycleDetailIds.Add(finish.ProcessDetailId);
+                }
+
                 if (!nodeDict.ContainsKey(finish.FinishProcessDetailId))
+                {
                     otherCycleDetailIds.Add(finish.FinishProcessDetailId);
+                }
             }
 
             // 他サイクルのProcessDetailを取得
@@ -911,7 +930,9 @@ namespace KdxDesigner.ViewModels
             {
                 IncomingConnections.Add(conn);
                 if (conn.IsOtherCycleConnection)
+                {
                     HasOtherCycleConnections = true;
+                }
             }
 
             // 接続先（このノードからの接続）
@@ -920,7 +941,9 @@ namespace KdxDesigner.ViewModels
             {
                 OutgoingConnections.Add(conn);
                 if (conn.IsOtherCycleConnection)
+                {
                     HasOtherCycleConnections = true;
+                }
             }
         }
 
@@ -1061,7 +1084,10 @@ namespace KdxDesigner.ViewModels
         [RelayCommand]
         private void NodeMouseDown(ProcessFlowNode node)
         {
-            if (node == null) return;
+            if (node == null)
+            {
+                return;
+            }
 
             var position = MousePosition;
 
@@ -1086,7 +1112,9 @@ namespace KdxDesigner.ViewModels
                 if (node.IsSelected)
                 {
                     if (!_selectedNodes.Contains(node))
+                    {
                         _selectedNodes.Add(node);
+                    }
                 }
                 else
                 {
@@ -1131,7 +1159,10 @@ namespace KdxDesigner.ViewModels
         [RelayCommand]
         private async Task NodeMouseUp(ProcessFlowNode node)
         {
-            if (node == null) return;
+            if (node == null)
+            {
+                return;
+            }
 
             // 接続を完成させる
             if (IsConnecting && _connectionStartNode != null && _connectionStartNode != node)
@@ -1451,12 +1482,18 @@ namespace KdxDesigner.ViewModels
         [RelayCommand]
         private async Task DeleteSelectedNodeAsync()
         {
-            if (SelectedNode == null) return;
+            if (SelectedNode == null)
+            {
+                return;
+            }
 
             // ProcessDetailノードのみ削除可能
             if (SelectedNode.NodeType != ProcessFlowNodeType.ProcessDetail ||
                 SelectedNode.ProcessDetail == null ||
-                SelectedNode.ProcessDetail.CycleId != _cycleId) return;
+                SelectedNode.ProcessDetail.CycleId != _cycleId)
+            {
+                return;
+            }
 
             var result = MessageBox.Show($"選択したノード「{SelectedNode.DisplayName}」を削除しますか？",
                 "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -1485,7 +1522,9 @@ namespace KdxDesigner.ViewModels
                                 f.ProcessDetailId == conn.FromNode.ProcessDetail.Id &&
                                 f.FinishProcessDetailId == conn.ToNode.ProcessDetail.Id);
                             if (finish != null)
+                            {
                                 await _repository.DeleteProcessDetailFinishAsync(finish.ProcessDetailId, finish.FinishProcessDetailId);
+                            }
                         }
                     }
                     else
@@ -1499,7 +1538,9 @@ namespace KdxDesigner.ViewModels
                                 c.FromProcessDetailId == conn.FromNode.ProcessDetail.Id &&
                                 c.ToProcessDetailId == conn.ToNode.ProcessDetail.Id);
                             if (connection != null && connection.ToProcessDetailId.HasValue)
+                            {
                                 await _repository.DeleteProcessDetailConnectionAsync(connection.FromProcessDetailId, connection.ToProcessDetailId.Value);
+                            }
                         }
                     }
                 }
@@ -1518,7 +1559,10 @@ namespace KdxDesigner.ViewModels
         [RelayCommand]
         private void SelectConnection(ProcessFlowConnection connection)
         {
-            if (connection == null) return;
+            if (connection == null)
+            {
+                return;
+            }
 
             // 他の接続の選択を解除
             foreach (var conn in Connections)
@@ -1537,7 +1581,10 @@ namespace KdxDesigner.ViewModels
         [RelayCommand]
         private async Task DeleteConnectionAsync(ProcessFlowConnection connection)
         {
-            if (connection == null) return;
+            if (connection == null)
+            {
+                return;
+            }
 
             var result = MessageBox.Show("選択した接続を削除しますか？",
                 "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -1651,10 +1698,16 @@ namespace KdxDesigner.ViewModels
         [RelayCommand]
         private void ChangeConnectionType()
         {
-            if (SelectedConnection == null) return;
+            if (SelectedConnection == null)
+            {
+                return;
+            }
 
             // 期間工程の場合のみ接続タイプを変更可能
-            if (!CanChangeConnectionType) return;
+            if (!CanChangeConnectionType)
+            {
+                return;
+            }
 
             // 接続タイプを切り替え
             SelectedConnection.IsFinishConnection = !SelectedConnection.IsFinishConnection;
@@ -1761,7 +1814,10 @@ namespace KdxDesigner.ViewModels
         [RelayCommand]
         private void FilterBySelectedNode()
         {
-            if (SelectedNode == null || SelectedNode.ProcessDetail == null) return;
+            if (SelectedNode == null || SelectedNode.ProcessDetail == null)
+            {
+                return;
+            }
 
             FilterNode = SelectedNode;
             IsFiltered = true;
@@ -1818,7 +1874,10 @@ namespace KdxDesigner.ViewModels
         [RelayCommand]
         private void FilterByDirectNeighbors()
         {
-            if (SelectedNode == null || SelectedNode.ProcessDetail == null) return;
+            if (SelectedNode == null || SelectedNode.ProcessDetail == null)
+            {
+                return;
+            }
 
             FilterNode = SelectedNode;
             IsFiltered = true;
@@ -1878,7 +1937,10 @@ namespace KdxDesigner.ViewModels
         [RelayCommand]
         private async Task EditOperationAsync()
         {
-            if (SelectedNode == null || SelectedNode.ProcessDetail == null || SelectedNode.ProcessDetail.OperationId == null) return;
+            if (SelectedNode == null || SelectedNode.ProcessDetail == null || SelectedNode.ProcessDetail.OperationId == null)
+            {
+                return;
+            }
 
             try
             {
@@ -2089,11 +2151,15 @@ namespace KdxDesigner.ViewModels
         public async Task MoveProcessDetailToProcess(ProcessFlowNode detailNode, int newProcessId)
         {
             if (detailNode.NodeType != ProcessFlowNodeType.ProcessDetail || detailNode.ProcessDetail == null)
+            {
                 return;
+            }
 
             var oldProcessId = detailNode.ProcessDetail.ProcessId;
             if (oldProcessId == newProcessId)
+            {
                 return;
+            }
 
             try
             {
@@ -2151,7 +2217,10 @@ namespace KdxDesigner.ViewModels
         /// </summary>
         public void UpdateNodeFromProcessDetail(ProcessDetail updatedProcessDetail)
         {
-            if (updatedProcessDetail == null) return;
+            if (updatedProcessDetail == null)
+            {
+                return;
+            }
 
             // 対応するノードを検索
             var node = AllNodes.FirstOrDefault(n =>

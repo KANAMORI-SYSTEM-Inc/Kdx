@@ -17,7 +17,10 @@ namespace KdxDesigner.Services
             ISupabaseRepository repository,
             Kdx.Contracts.DTOs.MnemonicDevice device)
         {
-            if (device?.PlcId == null) return false; // PlcId が必須
+            if (device?.PlcId == null)
+            {
+                return false; // PlcId が必須
+            }
 
             try
             {

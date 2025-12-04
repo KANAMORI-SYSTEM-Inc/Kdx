@@ -153,7 +153,10 @@ namespace KdxDesigner.ViewModels
 
         private void DeletePreCondition1(object? parameter)
         {
-            if (SelectedPreCondition1 == null) return;
+            if (SelectedPreCondition1 == null)
+            {
+                return;
+            }
 
             var result = MessageBox.Show("選択した前提条件1を削除しますか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
@@ -179,7 +182,10 @@ namespace KdxDesigner.ViewModels
 
         private void DeletePreCondition2(object? parameter)
         {
-            if (SelectedPreCondition2 == null) return;
+            if (SelectedPreCondition2 == null)
+            {
+                return;
+            }
 
             var result = MessageBox.Show("選択した前提条件2を削除しますか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)

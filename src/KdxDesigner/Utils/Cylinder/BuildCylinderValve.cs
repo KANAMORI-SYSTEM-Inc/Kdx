@@ -117,11 +117,17 @@ namespace KdxDesigner.Utils.Cylinder
             result.AddRange(functions.CyclePulse());
 
             // 保持出力
-            if (cylinder.Cylinder.MachineNameId == null || cylinder.Cylinder.DriveSubId == null) return result;
+            if (cylinder.Cylinder.MachineNameId == null || cylinder.Cylinder.DriveSubId == null)
+            {
+                return result;
+            }
 
             Machine? machine = await _repository.GetMachineByIdAsync(cylinder.Cylinder.MachineNameId!.Value, cylinder.Cylinder.DriveSubId!.Value);
 
-            if (machine == null) return result;
+            if (machine == null)
+            {
+                return result;
+            }
 
             if (machine.UseValveRetention == false)
             {
@@ -369,11 +375,17 @@ namespace KdxDesigner.Utils.Cylinder
             result.AddRange(functions.CyclePulse());
 
             // 保持出力
-            if (cylinder.Cylinder.MachineNameId == null || cylinder.Cylinder.DriveSubId == null) return result;
+            if (cylinder.Cylinder.MachineNameId == null || cylinder.Cylinder.DriveSubId == null)
+            {
+                return result;
+            }
 
             Machine? machine = await _repository.GetMachineByIdAsync(cylinder.Cylinder.MachineNameId!.Value, cylinder.Cylinder.DriveSubId!.Value);
 
-            if (machine == null) return result;
+            if (machine == null)
+            {
+                return result;
+            }
 
             if (machine.UseValveRetention == false)
             {

@@ -73,7 +73,9 @@ namespace KdxDesigner.ViewModels.Managers
         private void InitializeMemoryOnlyServices()
         {
             if (MemoryStore == null || MemoryService == null)
+            {
                 throw new InvalidOperationException("MemoryStore and MemoryService must be initialized first");
+            }
 
             // MnemonicDeviceハイブリッドサービス
             var hybridService = new MnemonicDeviceHybridService(_repository, MemoryService, MemoryStore);

@@ -478,8 +478,8 @@ namespace KdxDesigner.ViewModels
 
         private bool FilterCylinder(object obj)
         {
-            if (obj is not CylinderViewModel cylinderVm) return false;
-            if (string.IsNullOrWhiteSpace(CylinderSearchText)) return true;
+            if (obj is not CylinderViewModel cylinderVm) { return false; }
+            if (string.IsNullOrWhiteSpace(CylinderSearchText)) { return true; }
 
             var searchLower = CylinderSearchText.ToLower();
             return (cylinderVm.CYNum?.ToLower().Contains(searchLower) ?? false) ||
@@ -560,7 +560,10 @@ namespace KdxDesigner.ViewModels
             InterlockConditions.Clear();
             InterlockIOs.Clear();
 
-            if (SelectedInterlock == null) return;
+            if (SelectedInterlock == null)
+            {
+                return;
+            }
 
             try
             {
@@ -598,7 +601,10 @@ namespace KdxDesigner.ViewModels
         {
             InterlockIOs.Clear();
 
-            if (SelectedCondition == null || SelectedInterlock == null) return;
+            if (SelectedCondition == null || SelectedInterlock == null)
+            {
+                return;
+            }
 
             try
             {
@@ -653,7 +659,10 @@ namespace KdxDesigner.ViewModels
 
         private void AddInterlock(object? parameter)
         {
-            if (_selectedCylinder == null) return;
+            if (_selectedCylinder == null)
+            {
+                return;
+            }
 
             var newInterlock = new Interlock
             {
@@ -676,7 +685,10 @@ namespace KdxDesigner.ViewModels
 
         private void DeleteInterlock(object? parameter)
         {
-            if (SelectedInterlock == null) return;
+            if (SelectedInterlock == null)
+            {
+                return;
+            }
 
             var result = MessageBox.Show("選択したインターロックを削除しますか？\n関連する条件とIOも削除されます。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
@@ -709,7 +721,10 @@ namespace KdxDesigner.ViewModels
 
         private void AddCondition(object? parameter)
         {
-            if (SelectedInterlock == null) return;
+            if (SelectedInterlock == null)
+            {
+                return;
+            }
 
             // Set default ConditionTypeId and populate ConditionType
             var defaultTypeId = ConditionTypes.FirstOrDefault()?.Id ?? 1;
@@ -738,7 +753,10 @@ namespace KdxDesigner.ViewModels
 
         private void DeleteCondition(object? parameter)
         {
-            if (SelectedCondition == null) return;
+            if (SelectedCondition == null)
+            {
+                return;
+            }
 
             var result = MessageBox.Show("選択した条件を削除しますか？\n関連するIOも削除されます。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
@@ -774,7 +792,10 @@ namespace KdxDesigner.ViewModels
 
         private void AddIO(object? parameter)
         {
-            if (SelectedCondition == null || _selectedCylinder == null) return;
+            if (SelectedCondition == null || _selectedCylinder == null)
+            {
+                return;
+            }
 
             // Open IO search window with cylinder CYNum as initial search
             var ioSearchWindow = new IOSearchWindow();
@@ -838,7 +859,10 @@ namespace KdxDesigner.ViewModels
 
         private void DeleteIO(object? parameter)
         {
-            if (SelectedIO == null) return;
+            if (SelectedIO == null)
+            {
+                return;
+            }
 
             var result = MessageBox.Show("選択したIOを削除しますか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
@@ -982,7 +1006,10 @@ namespace KdxDesigner.ViewModels
 
         private void EditPreConditions(object? parameter)
         {
-            if (SelectedInterlock == null) return;
+            if (SelectedInterlock == null)
+            {
+                return;
+            }
 
             var preConditionWindow = new InterlockPreConditionWindow();
             var preConditionViewModel = new InterlockPreConditionViewModel(

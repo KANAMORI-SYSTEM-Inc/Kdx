@@ -45,7 +45,11 @@ namespace KdxDesigner.ViewModels.Managers
         /// </summary>
         public void LoadFromProfile(MemoryProfile? profile)
         {
-            if (profile == null) return;
+            if (profile == null)
+            {
+                return;
+            }
+
             ProcessDeviceStartL = profile.ProcessDeviceStartL;
             DetailDeviceStartL = profile.DetailDeviceStartL;
             OperationDeviceStartM = profile.OperationDeviceStartM;

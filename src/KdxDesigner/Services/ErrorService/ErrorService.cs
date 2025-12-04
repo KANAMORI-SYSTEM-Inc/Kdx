@@ -47,7 +47,11 @@ namespace KdxDesigner.Services.ErrorService
             int alarmCount = startErrorNum;
             foreach (Operation operation in operations)
             {
-                if (operation == null) continue;
+                if (operation == null)
+                {
+                    continue;
+                }
+
                 var existing = allExisting.FirstOrDefault(m => m.RecordId == operation.Id);
                 var category = operation.CategoryId;
 

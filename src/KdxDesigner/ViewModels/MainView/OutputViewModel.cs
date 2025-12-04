@@ -259,7 +259,10 @@ namespace KdxDesigner.ViewModels
         /// </summary>
         private void ExportLadderCsvFile(List<LadderCsvRow> rows, string fileName)
         {
-            if (!rows.Any()) return;
+            if (!rows.Any())
+            {
+                return;
+            }
 
             try
             {
@@ -279,9 +282,21 @@ namespace KdxDesigner.ViewModels
         private List<string> ValidateProcessOutput()
         {
             var errors = new List<string>();
-            if (_mainViewModel.SelectedCycle == null) errors.Add("Cycleが選択されていません。");
-            if (_mainViewModel.SelectedPlc == null) errors.Add("PLCが選択されていません。");
-            if (_mainViewModel.Processes.Count == 0) errors.Add("Processが選択されていません。");
+            if (_mainViewModel.SelectedCycle == null)
+            {
+                errors.Add("Cycleが選択されていません。");
+            }
+
+            if (_mainViewModel.SelectedPlc == null)
+            {
+                errors.Add("PLCが選択されていません。");
+            }
+
+            if (_mainViewModel.Processes.Count == 0)
+            {
+                errors.Add("Processが選択されていません。");
+            }
+
             return errors;
         }
 

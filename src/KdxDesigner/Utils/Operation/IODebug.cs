@@ -226,7 +226,10 @@ namespace KdxDesigner.Utils.Operation
                     case 0:
                         if (_operation.Operation.SS1 != null)
                         {
-                            if (_operation.Operation.SS1 == "T") break;
+                            if (_operation.Operation.SS1 == "T")
+                            {
+                                break;
+                            }
 
                             var speedSensor = _ioAddressService.GetSingleAddressOperation(
                                 _ioList,
@@ -361,7 +364,10 @@ namespace KdxDesigner.Utils.Operation
 
                     foreach (var sensor in finishSensors)
                     {
-                        if (sensor.Address != null) result.Add(LadderRow.AddSET(sensor.Address));
+                        if (sensor.Address != null)
+                        {
+                            result.Add(LadderRow.AddSET(sensor.Address));
+                        }
                     }
                 }
                 else
@@ -375,7 +381,10 @@ namespace KdxDesigner.Utils.Operation
                        _operation.Operation,
                        isnotInclude: null);
 
-                    if (finishSensor != null) result.Add(LadderRow.AddSET(finishSensor));
+                    if (finishSensor != null)
+                    {
+                        result.Add(LadderRow.AddSET(finishSensor));
+                    }
                 }
             }
             return result;
@@ -427,8 +436,10 @@ namespace KdxDesigner.Utils.Operation
                             _operation.Operation.Id,
                             isnotInclude: null);
 
-                        if (valve1Address == null) valve1Address = SettingsManager.Settings.AlwaysON;
-
+                        if (valve1Address == null)
+                        {
+                            valve1Address = SettingsManager.Settings.AlwaysON;
+                        }
                     }
                     result.Add(LadderRow.AddAND(valve1Address));
                     break;
