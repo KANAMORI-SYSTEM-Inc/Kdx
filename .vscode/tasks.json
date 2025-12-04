@@ -1,0 +1,116 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-libraries",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/Kdx.sln",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary",
+        "-c",
+        "Debug",
+        "-p:UseLocalProjects=true"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "build-designer-debug",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/KdxDesigner/KdxDesigner.csproj",
+        "/property:GenerateFullPaths=true",
+        "/property:Configuration=Debug",
+        "/property:UseLocalProjects=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "dependsOn": ["build-libraries"]
+    },
+    {
+      "label": "build-designer-release",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/KdxDesigner/KdxDesigner.csproj",
+        "/property:GenerateFullPaths=true",
+        "/property:Configuration=Release",
+        "/property:UseLocalProjects=false",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "test",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "test",
+        "${workspaceFolder}/Kdx.sln",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "test"
+    },
+    {
+      "label": "clean",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "clean",
+        "${workspaceFolder}/Kdx.sln"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "restore",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "restore",
+        "${workspaceFolder}/Kdx.sln"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "watch-designer",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "watch",
+        "run",
+        "--project",
+        "${workspaceFolder}/src/KdxDesigner/KdxDesigner.csproj",
+        "/property:UseLocalProjects=true"
+      ],
+      "problemMatcher": "$msCompile",
+      "isBackground": true
+    },
+    {
+      "label": "pack-libraries",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "pack",
+        "${workspaceFolder}/Kdx.sln",
+        "-c",
+        "Release",
+        "-o",
+        "${workspaceFolder}/artifacts/packages"
+      ],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

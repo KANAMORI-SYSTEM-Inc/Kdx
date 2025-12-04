@@ -1,0 +1,5 @@
+# Ignore actual test configuration with credentials
+appsettings.test.json
+
+# Only the template should be committed
+!appsettings.test.json.template

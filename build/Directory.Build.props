@@ -1,0 +1,38 @@
+<Project>
+  <!-- バージョン情報をインポート -->
+  <Import Project="Version.props" />
+
+  <PropertyGroup>
+    <!-- 共通設定（TargetFrameworkは各プロジェクトで定義） -->
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- ビルド設定 -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);CS1591</NoWarn> <!-- XMLドキュメントコメントの警告を無効化 -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- KdxProjectsライブラリプロジェクト用の設定 -->
+  <PropertyGroup Condition="'$(IsKdxLibrary)' == 'true'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- NuGetパッケージ設定 -->
+    <PackageOutputPath>$(MSBuildThisFileDirectory)..\artifacts\packages</PackageOutputPath>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- ソースリンク -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <!-- 共通パッケージ参照 -->
+  <ItemGroup Condition="'$(IsKdxLibrary)' == 'true'">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+</Project>

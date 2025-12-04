@@ -1,0 +1,64 @@
+root = true
+
+# すべてのファイル
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# C#ファイル
+[*.cs]
+indent_style = space
+indent_size = 4
+
+# C# コーディング規約
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+# 改行設定
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_members_in_anonymous_types = true
+
+# インデント設定
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+
+# スペース設定
+csharp_space_after_cast = false
+csharp_space_after_keywords_in_control_flow_statements = true
+
+# 優先スタイル
+csharp_prefer_braces = true:warning
+csharp_prefer_simple_using_statement = true:suggestion
+dotnet_style_prefer_auto_properties = true:suggestion
+dotnet_style_prefer_conditional_expression_over_return = false:suggestion
+
+# 命名規則
+dotnet_naming_rule.interfaces_should_be_prefixed_with_i.severity = warning
+dotnet_naming_rule.interfaces_should_be_prefixed_with_i.symbols = interface
+dotnet_naming_rule.interfaces_should_be_prefixed_with_i.style = begins_with_i
+
+dotnet_naming_symbols.interface.applicable_kinds = interface
+dotnet_naming_style.begins_with_i.required_prefix = I
+dotnet_naming_style.begins_with_i.capitalization = pascal_case
+
+# プロジェクトファイル、propsファイル
+[*.{csproj,props,targets}]
+indent_size = 2
+
+# JSONファイル
+[*.json]
+indent_size = 2
+
+# YAMLファイル
+[*.{yml,yaml}]
+indent_size = 2
+
+# Markdownファイル
+[*.md]
+trim_trailing_whitespace = false

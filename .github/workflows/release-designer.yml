@@ -1,0 +1,51 @@
+name: Release KdxDesigner
+
+on:
+  push:
+    tags:
+      - 'designer-v*.*.*'
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  CONFIGURATION: Release
+
+jobs:
+  release:
+    name: Build and Release KdxDesigner
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: \${{ env.DOTNET_VERSION }}
+    
+    - name: Extract version from tag
+      id: get_version
+      run: |
+        \$version = "\${{ github.ref }}".Replace('refs/tags/designer-v', '')
+        echo "VERSION=\$version" >> \$env:GITHUB_OUTPUT
+      shell: pwsh
+    
+    - name: Restore dependencies
+      run: dotnet restore src/KdxDesigner/KdxDesigner.csproj
+    
+    - name: Build
+      run: dotnet build src/KdxDesigner/KdxDesigner.csproj --configuration \${{ env.CONFIGURATION }} --no-restore /p:UseLocalProjects=false /p:Version=\${{ steps.get_version.outputs.VERSION }}
+    
+    - name: Publish
+      run: dotnet publish src/KdxDesigner/KdxDesigner.csproj --configuration \${{ env.CONFIGURATION }} --output ./publish /p:UseLocalProjects=false /p:Version=\${{ steps.get_version.outputs.VERSION }}
+    
+    - name: Create ZIP archive
+      run: Compress-Archive -Path ./publish/* -DestinationPath KdxDesigner-v\${{ steps.get_version.outputs.VERSION }}.zip
+      shell: pwsh
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: KdxDesigner-v\${{ steps.get_version.outputs.VERSION }}.zip
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}

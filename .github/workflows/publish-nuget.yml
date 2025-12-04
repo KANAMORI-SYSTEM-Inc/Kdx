@@ -1,0 +1,52 @@
+name: Publish NuGet Packages
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  CONFIGURATION: Release
+
+jobs:
+  publish:
+    name: Build and Publish to NuGet
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: \${{ env.DOTNET_VERSION }}
+    
+    - name: Extract version from tag
+      id: get_version
+      run: echo "VERSION=\${GITHUB_REF#refs/tags/v}" >> \$GITHUB_OUTPUT
+    
+    - name: Restore dependencies
+      run: dotnet restore Kdx.sln
+    
+    - name: Build
+      run: dotnet build Kdx.sln --configuration \${{ env.CONFIGURATION }} --no-restore /p:Version=\${{ steps.get_version.outputs.VERSION }}
+    
+    - name: Test
+      run: dotnet test Kdx.sln --configuration \${{ env.CONFIGURATION }} --no-build --verbosity normal
+    
+    - name: Pack
+      run: dotnet pack Kdx.sln --configuration \${{ env.CONFIGURATION }} --no-build --output ./packages /p:Version=\${{ steps.get_version.outputs.VERSION }}
+    
+    - name: Publish to NuGet.org
+      run: dotnet nuget push ./packages/*.nupkg --api-key \${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./packages/*.nupkg
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}

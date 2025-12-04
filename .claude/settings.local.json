@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build)",
+      "Bash(dotnet clean:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git tag:*)",
+      "Bash(git push:*)",
+      "Bash(git reset --soft HEAD~1)",
+      "Bash(Select-String -Pattern \"error|warning\")",
+      "Bash(Select-Object -Last 20)",
+      "Bash(findstr:*)",
+      "Bash(Select-String -Pattern \"error|警告|succeeded|failed\")",
+      "Bash(Select-String -Pattern \"error|warning|succeeded|failed\")",
+      "Bash(Select-String -Pattern \"warning|警告\")",
+      "Bash(if not exist \"Services\\ProsTimeData\" mkdir \"Services\\ProsTimeData\")",
+      "Bash(move:*)",
+      "Bash(if not exist \".vscode\" mkdir \".vscode\")",
+      "Bash(dir:*)",
+      "Bash(mkdir:*)",
+      "Bash(git init:*)",
+      "Bash(git config:*)",
+      "Bash(Get-ChildItem -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(tree:*)",
+      "Bash(dotnet new:*)",
+      "Bash(dotnet sln:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

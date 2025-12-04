@@ -1,0 +1,26 @@
+<Project>
+  <PropertyGroup>
+    <!-- バージョン管理（セマンティックバージョニング） -->
+    <VersionPrefix>3.2.5</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
+
+    <!-- デバッグ時はローカルプロジェクト参照、リリース時はNuGet参照 -->
+    <UseLocalProjects Condition="'$(Configuration)' == 'Debug'">true</UseLocalProjects>
+    <UseLocalProjects Condition="'$(Configuration)' == 'Release'">false</UseLocalProjects>
+
+    <!-- CI環境では常にNuGet参照 -->
+    <UseLocalProjects Condition="'$(CI)' == 'true'">false</UseLocalProjects>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- NuGetパッケージ共通メタデータ -->
+    <Authors>KANAMORI SYSTEM Inc.</Authors>
+    <Company>KANAMORI SYSTEM Inc.</Company>
+    <Copyright>Copyright © KANAMORI SYSTEM Inc.</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/HayatoShimada/Kdx</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/HayatoShimada/Kdx</PackageProjectUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
+</Project>

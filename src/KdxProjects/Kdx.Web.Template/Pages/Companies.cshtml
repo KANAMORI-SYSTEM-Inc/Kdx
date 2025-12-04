@@ -1,0 +1,48 @@
+@page
+@model Kdx.Web.Template.Pages.CompaniesModel
+@{
+    ViewData["Title"] = "Companies";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Companies</h1>
+    <p>Sample page demonstrating Kdx.Infrastructure.Supabase usage</p>
+</div>
+
+<div class="container mt-4">
+    @if (Model.Companies != null && Model.Companies.Any())
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Company Name</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var company in Model.Companies)
+                {
+                    <tr>
+                        <td>@company.Id</td>
+                        <td>@company.CompanyName</td>
+                        <td>@company.CreatedAt</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <p>No companies found. Make sure your Supabase configuration is correct in appsettings.json</p>
+        </div>
+    }
+</div>
+
+@if (Model.ErrorMessage != null)
+{
+    <div class="alert alert-danger mt-3">
+        <strong>Error:</strong> @Model.ErrorMessage
+    </div>
+}

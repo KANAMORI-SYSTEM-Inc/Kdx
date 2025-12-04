@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="9.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kdx.Contracts\Kdx.Contracts.csproj" />
+    <ProjectReference Include="..\Kdx.Infrastructure.Supabase\Kdx.Infrastructure.Supabase.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.9" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!-- Kdxライブラリとして識別 -->
+    <IsKdxLibrary>true</IsKdxLibrary>
+
+    <!-- NuGet Package metadata -->
+    <PackageId>Kdx.Core</PackageId>
+    <Description>Core business logic and application services for KDX Projects</Description>
+    <PackageTags>kdx;core;business-logic</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

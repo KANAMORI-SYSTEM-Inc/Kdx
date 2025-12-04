@@ -1,0 +1,96 @@
+﻿  <Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>False</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <UseWPF>True</UseWPF>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="KdxDesigner.csproj~RF16879f89.TMP" />
+  </ItemGroup>
+
+  <!-- 条件付き参照: Debugビルド時はローカルプロジェクト参照 -->
+  <ItemGroup Condition="'$(UseLocalProjects)' == 'true'">
+    <ProjectReference Include="..\KdxProjects\Kdx.Contracts\Kdx.Contracts.csproj" />
+    <ProjectReference Include="..\KdxProjects\Kdx.Core\Kdx.Core.csproj" />
+    <ProjectReference Include="..\KdxProjects\Kdx.Infrastructure\Kdx.Infrastructure.csproj" />
+    <ProjectReference Include="..\KdxProjects\Kdx.Infrastructure.Supabase\Kdx.Infrastructure.Supabase.csproj" />
+  </ItemGroup>
+
+  <!-- 条件付き参照: ReleaseビルドまたはCI時はNuGet参照 -->
+  <ItemGroup Condition="'$(UseLocalProjects)' != 'true'">
+    <PackageReference Include="Kdx.Contracts" Version="$(VersionPrefix)" />
+    <PackageReference Include="Kdx.Core" Version="$(VersionPrefix)" />
+    <PackageReference Include="Kdx.Infrastructure" Version="$(VersionPrefix)" />
+    <PackageReference Include="Kdx.Infrastructure.Supabase" Version="$(VersionPrefix)" />
+  </ItemGroup>
+
+  <!-- その他のパッケージ参照 -->
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+    <PackageReference Include="Npgsql" Version="9.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="Views\*.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\*.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\*.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="Views\*.cs" />
+    <Compile Include="Controls\*.cs" />
+    <Compile Include="ViewModels\**\*.cs" />
+    <Compile Include="Models\*.cs" />
+    <Compile Include="Services\**\*.cs" />
+    <Compile Include="Utils\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include=".github\copilot-instructions.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ViewModels\InterlockViewModels\" />
+  </ItemGroup>
+
+</Project>

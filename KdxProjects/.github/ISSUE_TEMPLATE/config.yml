@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 質問・ディスカッション
+    url: https://github.com/KANAMORI-SYSTEM-Inc/KdxProjects/discussions
+    about: 質問や議論はDiscussionsで行ってください
+  - name: 📚 ドキュメント
+    url: https://github.com/KANAMORI-SYSTEM-Inc/KdxProjects/blob/main/README.md
+    about: README、QUICK-UPDATE-GUIDEなどのドキュメントを参照してください
+  - name: 🖥️ KdxDesignerのIssue
+    url: https://github.com/KANAMORI-SYSTEM-Inc/KdxDesigner/issues
+    about: アプリケーション側の問題はKdxDesignerリポジトリで報告してください

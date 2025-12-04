@@ -1,0 +1,57 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to Kdx Web Template</h1>
+    <p class="lead">A starter template using Kdx.Contracts and Kdx.Infrastructure.Supabase packages</p>
+</div>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Kdx.Contracts</h5>
+                    <p class="card-text">Provides DTOs and repository interfaces for data access</p>
+                    <span class="badge bg-primary">v2.0.0-alpha</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Kdx.Infrastructure.Supabase</h5>
+                    <p class="card-text">Supabase implementation of the repository pattern</p>
+                    <span class="badge bg-primary">v2.0.0-alpha</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Getting Started</h5>
+                    <p class="card-text">Configure your Supabase credentials in appsettings.json</p>
+                    <a href="/Companies" class="btn btn-primary">View Sample</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h5>Configuration Required</h5>
+                <p>Update your <code>appsettings.json</code> with your Supabase credentials:</p>
+                <pre class="mb-0"><code>{
+  "Supabase": {
+    "Url": "https://your-project.supabase.co",
+    "Key": "your-anon-key-here"
+  }
+}</code></pre>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Kdx.Contracts": {
+      "commandName": "Project"
+    },
+    "プロファイル 1": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\amdet\\source\\repos\\KANAMORI-SYSTEM-Inc\\KDX_Projects\\KdxDesigner"
+    }
+  }
+}

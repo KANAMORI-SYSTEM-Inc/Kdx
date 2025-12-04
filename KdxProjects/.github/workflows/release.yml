@@ -1,0 +1,124 @@
+name: Create Release
+
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # v1.0.0, v1.2.3 など
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Extract version from tag
+      id: get_version
+      shell: pwsh
+      run: |
+        $version = "${{ github.ref }}" -replace 'refs/tags/v', ''
+        $tagName = "${{ github.ref }}" -replace 'refs/tags/', ''
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+        echo "TAG_NAME=$tagName" >> $env:GITHUB_OUTPUT
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build Release
+      run: dotnet build -c Release --no-restore /p:Version=${{ steps.get_version.outputs.VERSION }}
+
+    - name: Run tests (if any)
+      run: dotnet test -c Release --no-build --verbosity normal || echo "No tests found"
+      continue-on-error: true
+
+    - name: Pack NuGet packages
+      run: dotnet pack -c Release --no-build --output ./nupkgs /p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
+
+    - name: List generated packages
+      shell: pwsh
+      run: |
+        Write-Host "📦 Generated packages:"
+        Get-ChildItem ./nupkgs/ | Format-Table Name, Length
+
+    - name: Publish to GitHub Packages
+      shell: pwsh
+      run: |
+        Get-ChildItem ./nupkgs/*.nupkg | ForEach-Object {
+          dotnet nuget push $_.FullName `
+            --source "https://nuget.pkg.github.com/KANAMORI-SYSTEM-Inc/index.json" `
+            --api-key ${{ secrets.GITHUB_TOKEN }} `
+            --skip-duplicate
+        }
+      continue-on-error: true
+
+    - name: Read CHANGELOG
+      id: changelog
+      shell: pwsh
+      run: |
+        if (Test-Path "CHANGELOG.md") {
+          $content = Get-Content "CHANGELOG.md" -Raw
+          $version = "${{ steps.get_version.outputs.VERSION }}"
+          if ($content -match "(?s)## \[$version\](.+?)(?=## \[|\z)") {
+            $changelogContent = $matches[1].Trim()
+          } else {
+            $changelogContent = "Release $version"
+          }
+          "CONTENT<<EOF" >> $env:GITHUB_OUTPUT
+          $changelogContent >> $env:GITHUB_OUTPUT
+          "EOF" >> $env:GITHUB_OUTPUT
+        } else {
+          "CONTENT=Release ${{ steps.get_version.outputs.VERSION }}" >> $env:GITHUB_OUTPUT
+        }
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.get_version.outputs.TAG_NAME }}
+        name: Release ${{ steps.get_version.outputs.VERSION }}
+        body: |
+          ## 📦 KdxProjects ${{ steps.get_version.outputs.VERSION }}
+
+          ${{ steps.changelog.outputs.CONTENT }}
+
+          ### 📥 Installation
+
+          ```bash
+          # NuGetパッケージの更新
+          dotnet add package Kdx.Contracts --version ${{ steps.get_version.outputs.VERSION }}
+          dotnet add package Kdx.Core --version ${{ steps.get_version.outputs.VERSION }}
+          dotnet add package Kdx.Infrastructure --version ${{ steps.get_version.outputs.VERSION }}
+          dotnet add package Kdx.Infrastructure.Supabase --version ${{ steps.get_version.outputs.VERSION }}
+          ```
+
+          ### 📚 Documentation
+
+          - [CHANGELOG](https://github.com/KANAMORI-SYSTEM-Inc/KdxProjects/blob/master/CHANGELOG.md)
+          - [README](https://github.com/KANAMORI-SYSTEM-Inc/KdxProjects/blob/master/README.md)
+          - [Quick Update Guide](https://github.com/KANAMORI-SYSTEM-Inc/KdxProjects/blob/master/QUICK-UPDATE-GUIDE.md)
+
+          ### 📦 Packages
+
+          すべてのパッケージはGitHub Packagesで利用可能です。
+        files: ./nupkgs/*.nupkg
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-packages-${{ steps.get_version.outputs.VERSION }}
+        path: ./nupkgs/*.nupkg
+        retention-days: 90

@@ -1,0 +1,49 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "KdxDesigner (Debug - Local Projects)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-designer-debug",
+      "program": "${workspaceFolder}/src/KdxDesigner/bin/Debug/net8.0-windows10.0.17763.0/KdxDesigner.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/KdxDesigner",
+      "stopAtEntry": false,
+      "console": "internalConsole"
+    },
+    {
+      "name": "KdxDesigner (Release - NuGet Packages)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-designer-release",
+      "program": "${workspaceFolder}/src/KdxDesigner/bin/Release/net8.0-windows10.0.17763.0/KdxDesigner.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/KdxDesigner",
+      "stopAtEntry": false,
+      "console": "internalConsole"
+    },
+    {
+      "name": "Run Tests",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "test",
+      "program": "dotnet",
+      "args": [
+        "test",
+        "${workspaceFolder}/tests/Kdx.Infrastructure.Supabase.Tests/Kdx.Infrastructure.Supabase.Tests.csproj",
+        "--logger:console;verbosity=detailed"
+      ],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "console": "internalConsole"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug All",
+      "configurations": ["KdxDesigner (Debug - Local Projects)"],
+      "stopAll": true
+    }
+  ]
+}

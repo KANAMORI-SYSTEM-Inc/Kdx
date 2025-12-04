@@ -1,0 +1,86 @@
+name: CI - Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  CONFIGURATION: Release
+
+jobs:
+  build-libraries:
+    name: Build Kdx Libraries
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: \${{ env.DOTNET_VERSION }}
+    
+    - name: Restore dependencies
+      run: dotnet restore Kdx.sln
+    
+    - name: Build libraries
+      run: dotnet build Kdx.sln --configuration \${{ env.CONFIGURATION }} --no-restore -p:UseLocalProjects=true
+    
+    - name: Run tests
+      run: dotnet test Kdx.sln --configuration \${{ env.CONFIGURATION }} --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: '**/test-results.trx'
+    
+    - name: Pack NuGet packages
+      run: dotnet pack Kdx.sln --configuration \${{ env.CONFIGURATION }} --no-build --output ./artifacts/packages
+    
+    - name: Upload NuGet packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-packages
+        path: ./artifacts/packages/*.nupkg
+
+  build-designer:
+    name: Build KdxDesigner
+    runs-on: windows-latest
+    needs: build-libraries
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: \${{ env.DOTNET_VERSION }}
+    
+    - name: Download NuGet packages
+      uses: actions/download-artifact@v4
+      with:
+        name: nuget-packages
+        path: ./artifacts/packages
+    
+    - name: Add local NuGet source
+      run: dotnet nuget add source \${{ github.workspace }}/artifacts/packages --name local
+    
+    - name: Restore dependencies
+      run: dotnet restore src/KdxDesigner/KdxDesigner.csproj
+    
+    - name: Build KdxDesigner
+      run: dotnet build src/KdxDesigner/KdxDesigner.csproj --configuration \${{ env.CONFIGURATION }} --no-restore -p:UseLocalProjects=false
+    
+    - name: Publish KdxDesigner
+      run: dotnet publish src/KdxDesigner/KdxDesigner.csproj --configuration \${{ env.CONFIGURATION }} --output ./publish
+    
+    - name: Upload KdxDesigner build
+      uses: actions/upload-artifact@v4
+      with:
+        name: kdx-designer-build
+        path: ./publish
