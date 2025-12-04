@@ -6,6 +6,9 @@ using KdxDesigner.Views;
 using System.Collections.ObjectModel;
 using System.Windows;
 
+// Views名前空間エイリアス
+using ViewsProcessFlow = KdxDesigner.Views.ProcessFlow;
+
 namespace KdxDesigner.ViewModels
 {
     /// <summary>
@@ -175,7 +178,7 @@ namespace KdxDesigner.ViewModels
             try
             {
                 // ProcessPropertiesWindowを開く
-                var window = new ProcessPropertiesWindow(_repository, SelectedProcess);
+                var window = new ViewsProcessFlow.ProcessPropertiesWindow(_repository, SelectedProcess);
                 var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
                 if (mainWindow != null)
                 {

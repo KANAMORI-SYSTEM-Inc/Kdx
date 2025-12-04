@@ -5,6 +5,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
+// Views名前空間エイリアス
+using ViewsProcessFlow = KdxDesigner.Views.ProcessFlow;
+
 namespace KdxDesigner.Views
 {
     public partial class MainView : Window
@@ -52,7 +55,7 @@ namespace KdxDesigner.Views
                 if (dataGrid?.SelectedItem is Operation selectedOperation)
                 {
                     var plcId = vm.SelectedPlc?.Id;
-                    var window = new OperationPropertiesWindow(vm.Repository!, selectedOperation, plcId)
+                    var window = new ViewsProcessFlow.OperationPropertiesWindow(vm.Repository!, selectedOperation, plcId)
                     {
                         Owner = this
                     };

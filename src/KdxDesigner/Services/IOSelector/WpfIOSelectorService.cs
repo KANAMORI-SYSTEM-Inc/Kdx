@@ -3,6 +3,9 @@ using Kdx.Contracts.Interfaces;
 using KdxDesigner.ViewModels;
 using KdxDesigner.Views;
 
+// Views名前空間エイリアス
+using ViewsCommon = KdxDesigner.Views.Common;
+
 namespace KdxDesigner.Services.IOSelector
 {
     /// <summary>
@@ -13,7 +16,7 @@ namespace KdxDesigner.Services.IOSelector
         public IO? SelectIoFromMultiple(string ioText, List<IO> candidates, string recordName, int? recordId)
         {
             var viewModel = new IOSelectViewModel(ioText, candidates, recordName, recordId);
-            var view = new IOSelectView(viewModel)
+            var view = new ViewsCommon.IOSelectView(viewModel)
             {
                 Title = $"複数候補の選択: '{ioText}' (対象: {recordName})"
             };

@@ -7,6 +7,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 
+// Views名前空間エイリアス
+using ViewsToolsCylinderManagement = KdxDesigner.Views.Tools.CylinderManagement;
+
 namespace KdxDesigner.ViewModels
 {
     /// <summary>
@@ -189,7 +192,7 @@ namespace KdxDesigner.ViewModels
 
             try
             {
-                var window = new CylinderPropertiesWindow(_repository, SelectedCylinder.Cylinder);
+                var window = new ViewsToolsCylinderManagement.CylinderPropertiesWindow(_repository, SelectedCylinder.Cylinder);
                 var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
                 if (mainWindow != null)
                 {

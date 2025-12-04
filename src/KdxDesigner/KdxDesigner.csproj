@@ -55,7 +55,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Views\*.xaml">
+    <Page Include="Views\**\*.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -67,7 +67,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="Views\*.cs" />
+    <Compile Include="Views\**\*.cs" />
     <Compile Include="Controls\*.cs" />
     <Compile Include="ViewModels\**\*.cs" />
     <Compile Include="Models\*.cs" />

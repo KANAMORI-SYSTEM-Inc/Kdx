@@ -6,6 +6,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
+// Views名前空間エイリアス
+using ViewsProcessFlow = KdxDesigner.Views.ProcessFlow;
+
 namespace KdxDesigner.Controls
 {
     /// <summary>
@@ -148,7 +151,7 @@ namespace KdxDesigner.Controls
             // ヘッダーやスクロールバーをダブルクリックした場合は無視
             if (OperationGrid.SelectedItem is Operation selectedOperation && Repository != null)
             {
-                var window = new OperationPropertiesWindow(Repository, selectedOperation, PlcId)
+                var window = new ViewsProcessFlow.OperationPropertiesWindow(Repository, selectedOperation, PlcId)
                 {
                     Owner = Window.GetWindow(this)
                 };
@@ -344,7 +347,7 @@ namespace KdxDesigner.Controls
             try
             {
                 // OperationPropertiesWindowを開く
-                var window = new OperationPropertiesWindow(Repository, SelectedOperation, PlcId)
+                var window = new ViewsProcessFlow.OperationPropertiesWindow(Repository, SelectedOperation, PlcId)
                 {
                     Owner = Window.GetWindow(this)
                 };

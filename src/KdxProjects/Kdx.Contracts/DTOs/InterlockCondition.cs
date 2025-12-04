@@ -16,5 +16,7 @@ namespace Kdx.Contracts.DTOs
         public string? Device { get; set; }
 
         public bool? IsOnCondition { get; set; }
+
+        public string? Comment { get; set; }
     }
 }

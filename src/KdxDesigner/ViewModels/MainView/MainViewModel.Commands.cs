@@ -5,6 +5,16 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.Windows;
 
+// Views名前空間エイリアス
+using ViewsOutput = KdxDesigner.Views.Output;
+using ViewsMemory = KdxDesigner.Views.Memory;
+using ViewsTools = KdxDesigner.Views.Tools;
+using ViewsToolsCylinderManagement = KdxDesigner.Views.Tools.CylinderManagement;
+using ViewsSettings = KdxDesigner.Views.Settings;
+using ViewsProcessFlow = KdxDesigner.Views.ProcessFlow;
+using ViewsInterlock = KdxDesigner.Views.Interlock;
+using ViewsToolsTimer = KdxDesigner.Views.Tools.Timer;
+
 namespace KdxDesigner.ViewModels
 {
     public partial class MainViewModel
@@ -18,7 +28,7 @@ namespace KdxDesigner.ViewModels
         [RelayCommand]
         private void ProcessOutput()
         {
-            var outputWindow = new OutputWindow(this);
+            var outputWindow = new ViewsOutput.OutputWindow(this);
             var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
             if (mainWindow != null)
             {
@@ -40,7 +50,7 @@ namespace KdxDesigner.ViewModels
             }
 
             // MemorySettingWindowを開く
-            var window = new MemorySettingWindow(_repository, this);
+            var window = new ViewsMemory.MemorySettingWindow(_repository, this);
 
             // Ownerを設定
             var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
@@ -60,7 +70,7 @@ namespace KdxDesigner.ViewModels
                 MessageBox.Show("PLCを選択してください。", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            var window = new KdxDesigner.Views.ControlBoxViews(_repository, SelectedPlc.Id);
+            var window = new ViewsTools.ControlBoxViews(_repository, SelectedPlc.Id);
             var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
             if (mainWindow != null)
             {
@@ -90,7 +100,7 @@ namespace KdxDesigner.ViewModels
             }
 
             // Viewにリポジトリのインスタンスを渡して生成
-            var view = new IoEditorView(_repository, this);
+            var view = new ViewsTools.IoEditorView(_repository, this);
             view.Show(); // モードレスダイアログとして表示
         }
 
@@ -103,7 +113,7 @@ namespace KdxDesigner.ViewModels
                 return;
             }
 
-            var window = new IOConversionWindow();
+            var window = new ViewsTools.IOConversionWindow();
             var viewModel = new IOConversionViewModel(_repository);
             window.DataContext = viewModel;
             var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
@@ -126,7 +136,7 @@ namespace KdxDesigner.ViewModels
 
             try
             {
-                var window = new CylinderManagementWindow(_repository!, SelectedPlc.Id);
+                var window = new ViewsToolsCylinderManagement.CylinderManagementWindow(_repository!, SelectedPlc.Id);
                 var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
                 if (mainWindow != null)
                 {
@@ -144,7 +154,7 @@ namespace KdxDesigner.ViewModels
         [RelayCommand]
         private void OpenSettings()
         {
-            var view = new SettingsView();
+            var view = new ViewsSettings.SettingsView();
             var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
             if (mainWindow != null)
             {
@@ -175,7 +185,7 @@ namespace KdxDesigner.ViewModels
             var plcId = SelectedPlc?.Id;
 
             // 新しいウィンドウを作成（既存データを渡す）
-            var window = new ProcessFlowDetailWindow(
+            var window = new ViewsProcessFlow.ProcessFlowDetailWindow(
                 _repository,
                 SelectedCycle.Id,
                 SelectedCycle.CycleName ?? $"サイクル{SelectedCycle.Id}",
@@ -343,7 +353,7 @@ namespace KdxDesigner.ViewModels
             }
 
             // インターロック設定ウィンドウを表示（シリンダー選択を含む）
-            var window = new InterlockSettingsWindow();
+            var window = new ViewsInterlock.InterlockSettingsWindow();
             var viewModel = new InterlockSettingsViewModel(supabaseRepo, _repository!, SelectedPlc.Id, SelectedCycle.Id, window);
             window.DataContext = viewModel;
             var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
@@ -363,7 +373,7 @@ namespace KdxDesigner.ViewModels
                 return;
             }
 
-            var view = new MemoryEditorView(SelectedPlc.Id, _repository);
+            var view = new ViewsMemory.MemoryEditorView(SelectedPlc.Id, _repository);
             var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
             if (mainWindow != null)
             {
@@ -382,7 +392,7 @@ namespace KdxDesigner.ViewModels
             }
 
             // Viewにリポジトリのインスタンスを渡す
-            var view = new LinkDeviceView(_repository);
+            var view = new ViewsTools.LinkDeviceView(_repository);
             var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
             if (mainWindow != null)
             {
@@ -400,7 +410,7 @@ namespace KdxDesigner.ViewModels
                 return;
             }
 
-            var view = new TimerEditorView(_repository, this);
+            var view = new ViewsToolsTimer.TimerEditorView(_repository, this);
             var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
             if (mainWindow != null)
             {

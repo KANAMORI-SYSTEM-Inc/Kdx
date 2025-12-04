@@ -11,6 +11,9 @@ using System.Windows.Input;
 using Process = Kdx.Contracts.DTOs.Process;
 using Timer = Kdx.Contracts.DTOs.Timer;
 
+// Views名前空間エイリアス
+using ViewsProcessFlow = KdxDesigner.Views.ProcessFlow;
+
 namespace KdxDesigner.ViewModels
 {
     public partial class ProcessFlowDetailViewModel : ObservableObject
@@ -33,7 +36,7 @@ namespace KdxDesigner.ViewModels
         private bool _hasMouseMoved;
         private List<ProcessFlowNode> _selectedNodes = new();
         private Dictionary<ProcessFlowNode, Point> _dragOffsets = new();
-        private ProcessPropertiesWindow? _openProcessWindow;
+        private Window? _openProcessWindow;
 
         [ObservableProperty] private string _windowTitle;
         [ObservableProperty] private string _cycleName;
@@ -1765,7 +1768,7 @@ namespace KdxDesigner.ViewModels
             }
 
             // 新しいウィンドウを作成
-            var window = new ProcessPropertiesWindow(_repository, process);
+            var window = new ViewsProcessFlow.ProcessPropertiesWindow(_repository, process);
 
             // ViewModelを取得してイベントハンドラを設定
             if (window.DataContext is ProcessPropertiesViewModel vm)
@@ -1955,7 +1958,7 @@ namespace KdxDesigner.ViewModels
 
                 // Operation編集ダイアログを開く
                 var operationViewModel = new OperationViewModel(_repository, operation, _plcId);
-                var operationDialog = new Views.OperationEditorDialog
+                var operationDialog = new ViewsProcessFlow.OperationEditorDialog
                 {
                     DataContext = operationViewModel
                 };
@@ -2199,7 +2202,7 @@ namespace KdxDesigner.ViewModels
             }
 
             // Process選択ダイアログを表示
-            var dialog = new ProcessSelectionDialog(Processes.ToList(), SelectedNode.ProcessDetail.ProcessId);
+            var dialog = new ViewsProcessFlow.ProcessSelectionDialog(Processes.ToList(), SelectedNode.ProcessDetail.ProcessId);
             var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
             if (mainWindow != null)
             {

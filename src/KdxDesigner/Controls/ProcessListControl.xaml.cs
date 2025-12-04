@@ -6,6 +6,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
+// Views名前空間エイリアス
+using ViewsProcessFlow = KdxDesigner.Views.ProcessFlow;
+
 namespace KdxDesigner.Controls
 {
     /// <summary>
@@ -351,7 +354,7 @@ namespace KdxDesigner.Controls
                 var selectedProcessId = SelectedProcess.Id;
 
                 // ProcessPropertiesWindowを開く
-                var window = new ProcessPropertiesWindow(Repository, SelectedProcess)
+                var window = new ViewsProcessFlow.ProcessPropertiesWindow(Repository, SelectedProcess)
                 {
                     Owner = Window.GetWindow(this)
                 };

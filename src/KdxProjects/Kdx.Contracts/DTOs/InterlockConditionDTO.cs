@@ -86,6 +86,18 @@ namespace Kdx.Contracts.DTOs
             }
         }
 
+        private string? _comment;
+
+        public string? Comment
+        {
+            get => _comment;
+            set
+            {
+                _comment = value;
+                OnPropertyChanged();
+            }
+        }
+
         // Navigation property (not mapped to database)
         [JsonIgnore]
         public InterlockConditionType? ConditionType

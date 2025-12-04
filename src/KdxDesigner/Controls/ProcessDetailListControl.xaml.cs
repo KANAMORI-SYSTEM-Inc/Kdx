@@ -7,6 +7,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
+// Views名前空間エイリアス
+using ViewsProcessFlow = KdxDesigner.Views.ProcessFlow;
+
 namespace KdxDesigner.Controls
 {
     /// <summary>
@@ -366,7 +369,7 @@ namespace KdxDesigner.Controls
                 );
 
                 // ProcessDetailPropertiesWindowを作成
-                var window = new ProcessDetailPropertiesWindow
+                var window = new ViewsProcessFlow.ProcessDetailPropertiesWindow
                 {
                     DataContext = viewModel,
                     Owner = Window.GetWindow(this)
