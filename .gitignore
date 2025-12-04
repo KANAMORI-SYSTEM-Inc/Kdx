@@ -126,3 +126,7 @@ StyleCopReport.xml
 *.cache
 *.swp
 *~
+
+# Environment-specific configuration files
+appsettings.*.json
+appsettings.*.Development.json
