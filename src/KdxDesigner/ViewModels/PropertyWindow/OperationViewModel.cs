@@ -187,7 +187,7 @@ namespace KdxDesigner.ViewModels
         }
 
         [RelayCommand]
-        private async void Save()
+        private async Task SaveAsync()
         {
             if (_closeAction != null)
             {
@@ -196,7 +196,7 @@ namespace KdxDesigner.ViewModels
         }
 
         [RelayCommand]
-        private async void Cancel()
+        private async Task CancelAsync()
         {
             if (_closeAction != null)
             {

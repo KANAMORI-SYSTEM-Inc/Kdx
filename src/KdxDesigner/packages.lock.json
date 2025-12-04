@@ -410,8 +410,8 @@
       "kdx.core": {
         "type": "Project",
         "dependencies": {
-          "Kdx.Contracts": "[1.0.0, )",
-          "Kdx.Infrastructure.Supabase": "[1.0.0, )",
+          "Kdx.Contracts": "[3.2.5, )",
+          "Kdx.Infrastructure.Supabase": "[3.2.5, )",
           "Npgsql": "[9.0.3, )"
         }
       },
@@ -419,9 +419,9 @@
         "type": "Project",
         "dependencies": {
           "EPPlus": "[8.2.0, )",
-          "Kdx.Contracts": "[1.0.0, )",
-          "Kdx.Core": "[1.0.0, )",
-          "Kdx.Infrastructure.Supabase": "[1.0.0, )",
+          "Kdx.Contracts": "[3.2.5, )",
+          "Kdx.Core": "[3.2.5, )",
+          "Kdx.Infrastructure.Supabase": "[3.2.5, )",
           "Microsoft.Extensions.Configuration.Binder": "[9.0.9, )",
           "Microsoft.Extensions.Options": "[9.0.9, )",
           "Npgsql": "[9.0.3, )"
@@ -430,7 +430,7 @@
       "kdx.infrastructure.supabase": {
         "type": "Project",
         "dependencies": {
-          "Kdx.Contracts": "[1.0.0, )",
+          "Kdx.Contracts": "[3.2.5, )",
           "Npgsql": "[9.0.3, )",
           "postgrest-csharp": "[3.5.1, )",
           "supabase-csharp": "[0.16.2, )"

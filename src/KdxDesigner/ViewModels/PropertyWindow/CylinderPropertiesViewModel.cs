@@ -193,7 +193,7 @@ namespace KdxDesigner.ViewModels
         /// 保存コマンド
         /// </summary>
         [RelayCommand]
-        private async void Save()
+        private async Task SaveAsync()
         {
             // Cylinderのプロパティを更新
             _cylinder.PUCO = Puco;

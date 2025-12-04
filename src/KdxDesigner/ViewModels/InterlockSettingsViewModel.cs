@@ -217,7 +217,7 @@ namespace KdxDesigner.ViewModels
             get => _interlockIO.IOAddress;
             set
             {
-                _interlockIO.IOAddress = value;
+                _interlockIO.IOAddress = value ?? string.Empty;
                 OnPropertyChanged();
             }
         }
@@ -440,11 +440,11 @@ namespace KdxDesigner.ViewModels
             CancelCommand = new RelayCommand(() => Cancel(null));
             ClearCylinderSearchCommand = new RelayCommand(() => CylinderSearchText = string.Empty);
 
-            LoadCylinders();
+            _ = LoadCylindersAsync();
             _ = LoadConditionTypesAsync();
         }
 
-        private async Task LoadCylinders()
+        private async Task LoadCylindersAsync()
         {
             // 選択されたサイクルに紐づくCylinderのみを取得
             var allCylinders = await _accessRepository.GetCyListAsync(_plcId);

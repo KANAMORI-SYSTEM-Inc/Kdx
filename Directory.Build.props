@@ -1,0 +1,9 @@
+<Project>
+  <!-- 共通のビルド設定をインポート -->
+  <Import Project="build\Directory.Build.props" />
+
+  <PropertyGroup>
+    <!-- 開発時はローカルプロジェクト参照をデフォルトで有効化 -->
+    <UseLocalProjects Condition="'$(UseLocalProjects)' == ''">true</UseLocalProjects>
+  </PropertyGroup>
+</Project>

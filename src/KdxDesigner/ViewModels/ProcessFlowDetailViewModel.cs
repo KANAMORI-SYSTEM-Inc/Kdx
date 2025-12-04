@@ -1319,7 +1319,7 @@ namespace KdxDesigner.ViewModels
         }
 
         [RelayCommand]
-        private async void SaveChanges()
+        private async Task SaveChangesAsync()
         {
             try
             {
@@ -1329,7 +1329,7 @@ namespace KdxDesigner.ViewModels
                                                          n.ProcessDetail.CycleId == _cycleId))
                 {
                     // ProcessDetailの位置情報を更新
-                    await _repository.UpdateProcessDetailAsync(node.ProcessDetail);
+                    await _repository.UpdateProcessDetailAsync(node.ProcessDetail!);
                     node.IsModified = false;
                 }
 
@@ -1424,7 +1424,7 @@ namespace KdxDesigner.ViewModels
         }
 
         [RelayCommand]
-        private async void AddNewNode()
+        private async Task AddNewNodeAsync()
         {
             // 新しいノードを追加するロジック
             var newDetail = new ProcessDetail
@@ -1449,7 +1449,7 @@ namespace KdxDesigner.ViewModels
         }
 
         [RelayCommand]
-        private async void DeleteSelectedNode()
+        private async Task DeleteSelectedNodeAsync()
         {
             if (SelectedNode == null) return;
 
@@ -1535,7 +1535,7 @@ namespace KdxDesigner.ViewModels
         }
 
         [RelayCommand]
-        private async void DeleteConnection(ProcessFlowConnection connection)
+        private async Task DeleteConnectionAsync(ProcessFlowConnection connection)
         {
             if (connection == null) return;
 
@@ -1640,11 +1640,11 @@ namespace KdxDesigner.ViewModels
         }
 
         [RelayCommand]
-        private void DeleteSelectedConnection()
+        private async Task DeleteSelectedConnectionAsync()
         {
             if (SelectedConnection != null)
             {
-                DeleteConnection(SelectedConnection);
+                await DeleteConnectionAsync(SelectedConnection);
             }
         }
 
@@ -1778,13 +1778,13 @@ namespace KdxDesigner.ViewModels
                 foreach (var id in currentIds)
                 {
 
-                    var node = AllNodes.FirstOrDefault(n => n.ProcessDetail.Id == id);
+                    var node = AllNodes.FirstOrDefault(n => n.ProcessDetail != null && n.ProcessDetail.Id == id);
                     if (node != null)
                     {
                         // このノードへの接続
-                        var incoming = AllConnections.Where(c => c.ToNode == node).Select(c => c.FromNode.ProcessDetail.Id);
+                        var incoming = AllConnections.Where(c => c.ToNode == node && c.FromNode.ProcessDetail != null).Select(c => c.FromNode.ProcessDetail!.Id);
                         // このノードからの接続
-                        var outgoing = AllConnections.Where(c => c.FromNode == node).Select(c => c.ToNode.ProcessDetail.Id);
+                        var outgoing = AllConnections.Where(c => c.FromNode == node && c.ToNode.ProcessDetail != null).Select(c => c.ToNode.ProcessDetail!.Id);
 
                         foreach (var relatedId in incoming.Concat(outgoing))
                         {
@@ -1801,12 +1801,13 @@ namespace KdxDesigner.ViewModels
             Nodes.Clear();
             Connections.Clear();
 
-            foreach (var node in AllNodes.Where(n => relatedNodeIds.Contains(n.ProcessDetail.Id)))
+            foreach (var node in AllNodes.Where(n => n.ProcessDetail != null && relatedNodeIds.Contains(n.ProcessDetail.Id)))
             {
                 Nodes.Add(node);
             }
 
             foreach (var conn in AllConnections.Where(c =>
+                c.FromNode.ProcessDetail != null && c.ToNode.ProcessDetail != null &&
                 relatedNodeIds.Contains(c.FromNode.ProcessDetail.Id) &&
                 relatedNodeIds.Contains(c.ToNode.ProcessDetail.Id)))
             {
@@ -1817,7 +1818,7 @@ namespace KdxDesigner.ViewModels
         [RelayCommand]
         private void FilterByDirectNeighbors()
         {
-            if (SelectedNode == null) return;
+            if (SelectedNode == null || SelectedNode.ProcessDetail == null) return;
 
             FilterNode = SelectedNode;
             IsFiltered = true;
@@ -1826,9 +1827,9 @@ namespace KdxDesigner.ViewModels
             var relatedNodeIds = new HashSet<int> { SelectedNode.ProcessDetail.Id };
 
             // 直接の接続元
-            var incoming = AllConnections.Where(c => c.ToNode == SelectedNode).Select(c => c.FromNode.ProcessDetail.Id);
+            var incoming = AllConnections.Where(c => c.ToNode == SelectedNode && c.FromNode.ProcessDetail != null).Select(c => c.FromNode.ProcessDetail!.Id);
             // 直接の接続先
-            var outgoing = AllConnections.Where(c => c.FromNode == SelectedNode).Select(c => c.ToNode.ProcessDetail.Id);
+            var outgoing = AllConnections.Where(c => c.FromNode == SelectedNode && c.ToNode.ProcessDetail != null).Select(c => c.ToNode.ProcessDetail!.Id);
 
             foreach (var id in incoming.Concat(outgoing))
             {
@@ -1839,12 +1840,13 @@ namespace KdxDesigner.ViewModels
             Nodes.Clear();
             Connections.Clear();
 
-            foreach (var node in AllNodes.Where(n => relatedNodeIds.Contains(n.ProcessDetail.Id)))
+            foreach (var node in AllNodes.Where(n => n.ProcessDetail != null && relatedNodeIds.Contains(n.ProcessDetail.Id)))
             {
                 Nodes.Add(node);
             }
 
             foreach (var conn in AllConnections.Where(c =>
+                c.FromNode.ProcessDetail != null && c.ToNode.ProcessDetail != null &&
                 relatedNodeIds.Contains(c.FromNode.ProcessDetail.Id) &&
                 relatedNodeIds.Contains(c.ToNode.ProcessDetail.Id)))
             {
@@ -1874,7 +1876,7 @@ namespace KdxDesigner.ViewModels
         }
 
         [RelayCommand]
-        private async void EditOperation()
+        private async Task EditOperationAsync()
         {
             if (SelectedNode == null || SelectedNode.ProcessDetail == null || SelectedNode.ProcessDetail.OperationId == null) return;
 
@@ -2119,7 +2121,7 @@ namespace KdxDesigner.ViewModels
         /// ProcessDetailのProcess選択ダイアログを表示
         /// </summary>
         [RelayCommand]
-        private async void ChangeProcessDetailProcess()
+        private async Task ChangeProcessDetailProcessAsync()
         {
             if (SelectedNode == null ||
                 SelectedNode.NodeType != ProcessFlowNodeType.ProcessDetail ||

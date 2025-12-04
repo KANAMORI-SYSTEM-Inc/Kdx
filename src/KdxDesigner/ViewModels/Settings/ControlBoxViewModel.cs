@@ -75,7 +75,7 @@ namespace KdxDesigner.ViewModels.Settings
         public CylinderViewModel? SelectedCylinder
         {
             get => _selectedCylinder;
-            set { if (Set(ref _selectedCylinder, value)) LoadMappingsForSelection(); }
+            set { if (Set(ref _selectedCylinder, value)) _ = LoadMappingsForSelection(); }
         }
 
         public ICommand AddMappingCommand { get; }
@@ -106,8 +106,8 @@ namespace KdxDesigner.ViewModels.Settings
                 if (m is MappingItem item) Mappings.Remove(item);
             }, _ => SelectedCylinder != null);
 
-            SaveAllMappingsCommand = new RelayCommand(_ => SaveAllMappings(), _ => SelectedCylinder != null);
-            DeleteAllMappingsCommand = new RelayCommand(_ => DeleteAllMappings(), _ => SelectedCylinder != null && Mappings.Count > 0);
+            SaveAllMappingsCommand = new RelayCommand(_ => _ = SaveAllMappings(), _ => SelectedCylinder != null);
+            DeleteAllMappingsCommand = new RelayCommand(_ => _ = DeleteAllMappings(), _ => SelectedCylinder != null && Mappings.Count > 0);
         }
 
         public static async Task<ControlBoxViewModel> CreateAsync(ISupabaseRepository repo, int plcId)

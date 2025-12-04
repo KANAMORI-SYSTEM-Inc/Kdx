@@ -28,7 +28,11 @@
       "Bash(tree:*)",
       "Bash(dotnet new:*)",
       "Bash(dotnet sln:*)",
-      "Bash(Get-ChildItem src -Directory)"
+      "Bash(Get-ChildItem src -Directory)",
+      "Bash(c:/Users/amdet/source/repos/KANAMORI-SYSTEM-Inc/src/KdxDesigner/bin/Debug/net8.0-windows10.0.17763.0/KdxDesigner.exe)",
+      "Bash(pushd:*)",
+      "Bash(./KdxDesigner.exe:*)",
+      "Bash(popd:*)"
     ],
     "deny": [],
     "ask": []

@@ -61,11 +61,6 @@ namespace KdxDesigner.ViewModels
         public event EventHandler<ProcessDetail>? ProcessDetailDeleted;
 
         /// <summary>
-        /// ProcessDetailが更新されたときに発生するイベント
-        /// </summary>
-        public event EventHandler<ProcessDetail>? ProcessDetailUpdated;
-
-        /// <summary>
         /// ProcessDetailが追加されたときに発生するイベント
         /// </summary>
         public event EventHandler<ProcessDetail>? ProcessDetailAdded;
