@@ -5,6 +5,7 @@ using Kdx.Infrastructure.Supabase.Repositories;
 using KdxDesigner.Models;
 using KdxDesigner.Services;
 using KdxDesigner.Services.ErrorService;
+using KdxDesigner.Services.InterlockDevice;
 using KdxDesigner.Services.MemonicTimerDevice;
 using KdxDesigner.Services.MnemonicDevice;
 using KdxDesigner.Services.MnemonicSpeedDevice;
@@ -33,6 +34,8 @@ namespace KdxDesigner.ViewModels.Settings
         private readonly IMemoryService? _memoryService;
         private readonly ErrorService? _errorService;
         private readonly MemoryConfigurationManager? _memoryConfig = null;
+        private readonly IInterlockDeviceService? _interlockDeviceService;
+        private readonly CylinderInterlockDataBuilder? _cylinderInterlockDataBuilder;
 
         // メモリ設定状態プロパティ
         public int TotalMemoryDeviceCount
@@ -136,6 +139,9 @@ namespace KdxDesigner.ViewModels.Settings
         private int _errorDeviceStartT = 2000;
 
         [ObservableProperty]
+        private int _errorStartNum = 0;
+
+        [ObservableProperty]
         private int _deviceStartT = 0;
 
         [ObservableProperty]
@@ -149,6 +155,12 @@ namespace KdxDesigner.ViewModels.Settings
 
         [ObservableProperty]
         private int _cyTimeStartZR = 30000;
+
+        [ObservableProperty]
+        private int _interlockDeviceStartM = 50000;
+
+        [ObservableProperty]
+        private int _interlockStartNum = 0;
 
         // メモリ保存フラグ
         [ObservableProperty]
@@ -175,9 +187,17 @@ namespace KdxDesigner.ViewModels.Settings
         [ObservableProperty]
         private bool _isCyTimeMemory;
 
+        [ObservableProperty]
+        private bool _isInterlockMemory;
+
         // 選択されたPLCとCycle（MainViewModelから取得）
         private PLC? SelectedPlc => _mainViewModel.SelectedPlc;
         private Cycle? SelectedCycle => _mainViewModel.SelectedCycle;
         private ObservableCollection<Process> Processes => _mainViewModel.Processes;
+
+        /// <summary>
+        /// Cycleプロファイルが選択されていないかどうか
+        /// </summary>
+        public bool HasNoCycleProfileSelected => SelectedCycleProfiles == null || !SelectedCycleProfiles.Any();
     }
 }

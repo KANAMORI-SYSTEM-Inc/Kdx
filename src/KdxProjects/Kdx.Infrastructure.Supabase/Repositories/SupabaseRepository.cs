@@ -1854,11 +1854,49 @@ namespace Kdx.Infrastructure.Supabase.Repositories
 
         public async Task DeleteInterlockAsync(Interlock interlock)
         {
-            await _supabaseClient
-                .From<InterlockEntity>()
-                .Where(i => i.CylinderId == interlock.CylinderId)
-                .Where(i => i.SortId == interlock.SortId)
-                .Delete();
+            Debug.WriteLine($"[DeleteInterlockAsync] 削除開始");
+            Debug.WriteLine($"  CylinderId: {interlock.CylinderId}");
+            Debug.WriteLine($"  SortId: {interlock.SortId}");
+
+            try
+            {
+                // 削除前に対象レコードが存在するか確認
+                var existingRecords = await _supabaseClient
+                    .From<InterlockEntity>()
+                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlock.CylinderId.ToString())
+                    .Filter("SortId", Postgrest.Constants.Operator.Equals, interlock.SortId.ToString())
+                    .Get();
+
+                Debug.WriteLine($"  削除前のレコード数: {existingRecords?.Models?.Count ?? 0}");
+
+                // 削除実行 - Filterを使用
+                await _supabaseClient
+                    .From<InterlockEntity>()
+                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlock.CylinderId.ToString())
+                    .Filter("SortId", Postgrest.Constants.Operator.Equals, interlock.SortId.ToString())
+                    .Delete();
+
+                Debug.WriteLine($"  削除完了");
+
+                // 削除後に確認
+                var afterRecords = await _supabaseClient
+                    .From<InterlockEntity>()
+                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlock.CylinderId.ToString())
+                    .Filter("SortId", Postgrest.Constants.Operator.Equals, interlock.SortId.ToString())
+                    .Get();
+
+                Debug.WriteLine($"  削除後のレコード数: {afterRecords?.Models?.Count ?? 0}");
+
+                if (afterRecords?.Models?.Any() == true)
+                {
+                    Debug.WriteLine($"  ⚠️ 警告: 削除後もレコードが残っています！");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[DeleteInterlockAsync] エラー: {ex.Message}");
+                throw;
+            }
         }
 
         public async Task DeleteInterlocksAsync(List<Interlock> interlocks)
@@ -1867,18 +1905,18 @@ namespace Kdx.Infrastructure.Supabase.Repositories
             {
                 await _supabaseClient
                     .From<InterlockEntity>()
-                    .Where(i => i.CylinderId == interlock.CylinderId)
-                    .Where(i => i.SortId == interlock.SortId)
+                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlock.CylinderId.ToString())
+                    .Filter("SortId", Postgrest.Constants.Operator.Equals, interlock.SortId.ToString())
                     .Delete();
             }
         }
 
         // InterlockCondition
-        public async Task<List<InterlockConditionDTO>> GetInterlockConditionsByInterlockIdAsync(int interlockId)
+        public async Task<List<InterlockConditionDTO>> GetInterlockConditionsByCylinderIdAsync(int cylinderId)
         {
             var response = await _supabaseClient
                 .From<InterlockConditionDTOEntity>()
-                .Where(ic => ic.InterlockId == interlockId)
+                .Where(ic => ic.CylinderId == cylinderId)
                 .Get();
             return response.Models.Select(e => e.ToDto()).ToList();
         }
@@ -1888,7 +1926,7 @@ namespace Kdx.Infrastructure.Supabase.Repositories
             // Create a clean copy without navigation properties
             var cleanCondition = new InterlockCondition
             {
-                InterlockId = interlockCondition.InterlockId,
+                CylinderId = interlockCondition.CylinderId,
                 ConditionNumber = interlockCondition.ConditionNumber,
                 InterlockSortId = interlockCondition.InterlockSortId,
                 ConditionTypeId = interlockCondition.ConditionTypeId,
@@ -1909,7 +1947,7 @@ namespace Kdx.Infrastructure.Supabase.Repositories
             // Create clean copies without navigation properties
             var cleanConditions = interlockConditions.Select(c => new InterlockCondition
             {
-                InterlockId = c.InterlockId,
+                CylinderId = c.CylinderId,
                 ConditionNumber = c.ConditionNumber,
                 InterlockSortId = c.InterlockSortId,
                 ConditionTypeId = c.ConditionTypeId,
@@ -1919,22 +1957,22 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 // ConditionType is intentionally not copied
             }).ToList();
 
-            // 重複を除去（同じInterlockId + ConditionNumber + InterlockSortIdを持つレコードは1つだけ保持）
+            // 重複を除去（同じCylinderId + ConditionNumber + InterlockSortIdを持つレコードは1つだけ保持）
             var uniqueConditions = cleanConditions
-                .GroupBy(c => new { c.InterlockId, c.ConditionNumber, c.InterlockSortId })
+                .GroupBy(c => new { c.CylinderId, c.ConditionNumber, c.InterlockSortId })
                 .Select(g => g.First()) // 最初のレコードを使用
                 .ToList();
 
             // 既存レコードを取得して、Insert/Updateを判断
-            var interlockIds = uniqueConditions.Select(c => c.InterlockId).Distinct().ToList();
-            if (!interlockIds.Any()) return;
+            var cylinderIds = uniqueConditions.Select(c => c.CylinderId).Distinct().ToList();
+            if (!cylinderIds.Any()) return;
 
             var existingRecords = new List<InterlockCondition>();
-            foreach (var interlockId in interlockIds)
+            foreach (var cylinderId in cylinderIds)
             {
                 var records = await _supabaseClient
                     .From<InterlockConditionEntity>()
-                    .Where(c => c.InterlockId == interlockId)
+                    .Where(c => c.CylinderId == cylinderId)
                     .Get();
                 existingRecords.AddRange(records.Models.Select(e => e.ToDto()));
             }
@@ -1946,7 +1984,7 @@ namespace Kdx.Infrastructure.Supabase.Repositories
             foreach (var condition in uniqueConditions)
             {
                 var existing = existingRecords.FirstOrDefault(e =>
-                    e.InterlockId == condition.InterlockId &&
+                    e.CylinderId == condition.CylinderId &&
                     e.ConditionNumber == condition.ConditionNumber &&
                     e.InterlockSortId == condition.InterlockSortId);
 
@@ -1979,7 +2017,7 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                     var entity = InterlockConditionEntity.FromDto(condition);
                     await _supabaseClient
                         .From<InterlockConditionEntity>()
-                        .Where(c => c.InterlockId == entity.InterlockId)
+                        .Where(c => c.CylinderId == entity.CylinderId)
                         .Where(c => c.ConditionNumber == entity.ConditionNumber)
                         .Where(c => c.InterlockSortId == entity.InterlockSortId)
                         .Update(entity);
@@ -1989,12 +2027,62 @@ namespace Kdx.Infrastructure.Supabase.Repositories
 
         public async Task DeleteInterlockConditionAsync(InterlockConditionDTO interlockCondition)
         {
-            await _supabaseClient
-                .From<InterlockConditionEntity>()
-                .Where(ic => ic.InterlockId == interlockCondition.InterlockId)
-                .Where(ic => ic.ConditionNumber == interlockCondition.ConditionNumber)
-                .Where(ic => ic.InterlockSortId == interlockCondition.InterlockSortId)
-                .Delete();
+            Debug.WriteLine($"[DeleteInterlockConditionAsync] 削除開始");
+            Debug.WriteLine($"  CylinderId: {interlockCondition.CylinderId}");
+            Debug.WriteLine($"  ConditionNumber: {interlockCondition.ConditionNumber}");
+            Debug.WriteLine($"  InterlockSortId: {interlockCondition.InterlockSortId}");
+
+            try
+            {
+                // 削除前に対象レコードが存在するか確認
+                var existingRecords = await _supabaseClient
+                    .From<InterlockConditionEntity>()
+                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlockCondition.CylinderId.ToString())
+                    .Filter("ConditionNumber", Postgrest.Constants.Operator.Equals, interlockCondition.ConditionNumber.ToString())
+                    .Filter("InterlockSortId", Postgrest.Constants.Operator.Equals, interlockCondition.InterlockSortId.ToString())
+                    .Get();
+
+                Debug.WriteLine($"  削除前のレコード数: {existingRecords?.Models?.Count ?? 0}");
+
+                if (existingRecords?.Models?.Any() == true)
+                {
+                    foreach (var record in existingRecords.Models)
+                    {
+                        Debug.WriteLine($"    対象レコード: CylinderId={record.CylinderId}, ConditionNumber={record.ConditionNumber}, InterlockSortId={record.InterlockSortId}");
+                    }
+                }
+
+                // 削除実行 - Filterを使用
+                await _supabaseClient
+                    .From<InterlockConditionEntity>()
+                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlockCondition.CylinderId.ToString())
+                    .Filter("ConditionNumber", Postgrest.Constants.Operator.Equals, interlockCondition.ConditionNumber.ToString())
+                    .Filter("InterlockSortId", Postgrest.Constants.Operator.Equals, interlockCondition.InterlockSortId.ToString())
+                    .Delete();
+
+                Debug.WriteLine($"  削除完了");
+
+                // 削除後に確認
+                var afterRecords = await _supabaseClient
+                    .From<InterlockConditionEntity>()
+                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlockCondition.CylinderId.ToString())
+                    .Filter("ConditionNumber", Postgrest.Constants.Operator.Equals, interlockCondition.ConditionNumber.ToString())
+                    .Filter("InterlockSortId", Postgrest.Constants.Operator.Equals, interlockCondition.InterlockSortId.ToString())
+                    .Get();
+
+                Debug.WriteLine($"  削除後のレコード数: {afterRecords?.Models?.Count ?? 0}");
+
+                if (afterRecords?.Models?.Any() == true)
+                {
+                    Debug.WriteLine($"  ⚠️ 警告: 削除後もレコードが残っています！");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[DeleteInterlockConditionAsync] エラー: {ex.Message}");
+                Debug.WriteLine($"  スタックトレース: {ex.StackTrace}");
+                throw;
+            }
         }
 
         public async Task DeleteInterlockConditionsAsync(List<InterlockConditionDTO> interlockConditions)
@@ -2003,9 +2091,9 @@ namespace Kdx.Infrastructure.Supabase.Repositories
             {
                 await _supabaseClient
                     .From<InterlockConditionEntity>()
-                    .Where(ic => ic.InterlockId == condition.InterlockId)
-                    .Where(ic => ic.ConditionNumber == condition.ConditionNumber)
-                    .Where(ic => ic.InterlockSortId == condition.InterlockSortId)
+                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, condition.CylinderId.ToString())
+                    .Filter("ConditionNumber", Postgrest.Constants.Operator.Equals, condition.ConditionNumber.ToString())
+                    .Filter("InterlockSortId", Postgrest.Constants.Operator.Equals, condition.InterlockSortId.ToString())
                     .Delete();
             }
         }
@@ -2020,11 +2108,11 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         }
 
         // InterlockIO
-        public async Task<List<InterlockIO>> GetInterlockIOsByInterlockIdAsync(int interlockId)
+        public async Task<List<InterlockIO>> GetInterlockIOsByCylinderIdAsync(int cylinderId)
         {
             var response = await _supabaseClient
                 .From<InterlockIOEntity>()
-                .Where(i => i.InterlockId == interlockId)
+                .Where(i => i.CylinderId == cylinderId)
                 .Get();
             return response.Models.Select(e => e.ToDto()).ToList();
         }
@@ -2047,14 +2135,61 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         }
         public async Task DeleteInterlockIOAsync(InterlockIO interlockIO)
         {
-            await _supabaseClient
-                .From<InterlockIOEntity>()
-                .Where(i => i.InterlockId == interlockIO.InterlockId)
-                .Where(i => i.PlcId == interlockIO.PlcId)
-                .Where(i => i.IOAddress == interlockIO.IOAddress)
-                .Where(i => i.InterlockSortId == interlockIO.InterlockSortId)
-                .Where(i => i.ConditionNumber == interlockIO.ConditionNumber)
-                .Delete();
+            Debug.WriteLine($"[DeleteInterlockIOAsync] 削除開始");
+            Debug.WriteLine($"  CylinderId: {interlockIO.CylinderId}");
+            Debug.WriteLine($"  PlcId: {interlockIO.PlcId}");
+            Debug.WriteLine($"  IOAddress: {interlockIO.IOAddress}");
+            Debug.WriteLine($"  InterlockSortId: {interlockIO.InterlockSortId}");
+            Debug.WriteLine($"  ConditionNumber: {interlockIO.ConditionNumber}");
+
+            try
+            {
+                // 削除前に対象レコードが存在するか確認
+                var existingRecords = await _supabaseClient
+                    .From<InterlockIOEntity>()
+                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlockIO.CylinderId.ToString())
+                    .Filter("PlcId", Postgrest.Constants.Operator.Equals, interlockIO.PlcId.ToString())
+                    .Filter("IOAddress", Postgrest.Constants.Operator.Equals, interlockIO.IOAddress)
+                    .Filter("InterlockSortId", Postgrest.Constants.Operator.Equals, interlockIO.InterlockSortId.ToString())
+                    .Filter("ConditionNumber", Postgrest.Constants.Operator.Equals, interlockIO.ConditionNumber.ToString())
+                    .Get();
+
+                Debug.WriteLine($"  削除前のレコード数: {existingRecords?.Models?.Count ?? 0}");
+
+                // 削除実行 - Filterを使用
+                await _supabaseClient
+                    .From<InterlockIOEntity>()
+                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlockIO.CylinderId.ToString())
+                    .Filter("PlcId", Postgrest.Constants.Operator.Equals, interlockIO.PlcId.ToString())
+                    .Filter("IOAddress", Postgrest.Constants.Operator.Equals, interlockIO.IOAddress)
+                    .Filter("InterlockSortId", Postgrest.Constants.Operator.Equals, interlockIO.InterlockSortId.ToString())
+                    .Filter("ConditionNumber", Postgrest.Constants.Operator.Equals, interlockIO.ConditionNumber.ToString())
+                    .Delete();
+
+                Debug.WriteLine($"  削除完了");
+
+                // 削除後に確認
+                var afterRecords = await _supabaseClient
+                    .From<InterlockIOEntity>()
+                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlockIO.CylinderId.ToString())
+                    .Filter("PlcId", Postgrest.Constants.Operator.Equals, interlockIO.PlcId.ToString())
+                    .Filter("IOAddress", Postgrest.Constants.Operator.Equals, interlockIO.IOAddress)
+                    .Filter("InterlockSortId", Postgrest.Constants.Operator.Equals, interlockIO.InterlockSortId.ToString())
+                    .Filter("ConditionNumber", Postgrest.Constants.Operator.Equals, interlockIO.ConditionNumber.ToString())
+                    .Get();
+
+                Debug.WriteLine($"  削除後のレコード数: {afterRecords?.Models?.Count ?? 0}");
+
+                if (afterRecords?.Models?.Any() == true)
+                {
+                    Debug.WriteLine($"  ⚠️ 警告: 削除後もレコードが残っています！");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[DeleteInterlockIOAsync] エラー: {ex.Message}");
+                throw;
+            }
         }
 
         public async Task<List<InterlockConditionType>> GetInterlockConditionTypesAsync()

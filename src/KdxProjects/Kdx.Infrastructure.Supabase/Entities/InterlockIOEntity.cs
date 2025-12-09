@@ -7,9 +7,9 @@ namespace Kdx.Infrastructure.Supabase.Entities
     [Table("InterlockIO")]
     internal class InterlockIOEntity : BaseModel
     {
-        [PrimaryKey("InterlockId")] // 複合主キー
-        [Column("InterlockId")]
-        public int InterlockId { get; set; }
+        [PrimaryKey("CylinderId")] // 複合主キー
+        [Column("CylinderId")]
+        public int CylinderId { get; set; }
 
         [PrimaryKey("PlcId")] // 複合主キー
         [Column("PlcId")]
@@ -32,7 +32,7 @@ namespace Kdx.Infrastructure.Supabase.Entities
 
         public static InterlockIOEntity FromDto(InterlockIO dto) => new()
         {
-            InterlockId = dto.InterlockId,
+            CylinderId = dto.CylinderId,
             PlcId = dto.PlcId,
             IOAddress = dto.IOAddress,
             InterlockSortId = dto.InterlockSortId,
@@ -42,7 +42,7 @@ namespace Kdx.Infrastructure.Supabase.Entities
 
         public InterlockIO ToDto() => new()
         {
-            InterlockId = this.InterlockId,
+            CylinderId = this.CylinderId,
             PlcId = this.PlcId,
             IOAddress = this.IOAddress,
             InterlockSortId = this.InterlockSortId,

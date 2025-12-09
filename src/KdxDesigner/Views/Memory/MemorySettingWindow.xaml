@@ -73,9 +73,11 @@
                             </ComboBox>
                         </StackPanel>
 
-                        <Button Content="新規PLC用プロファイル作成" Command="{Binding CreateNewPlcProfileCommand}"
-                                Width="200" Margin="0,10,0,0" Padding="5"
-                                Background="#2196F3" Foreground="White" FontSize="11"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button Content="新規作成" Command="{Binding CreateNewPlcProfileCommand}"
+                                    Width="80" Padding="5"
+                                    Background="#2196F3" Foreground="White" FontSize="11"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
@@ -116,9 +118,11 @@
                             </ListBox>
                         </StackPanel>
 
-                        <Button Content="新規Cycle用プロファイル作成" Command="{Binding CreateNewCycleProfileCommand}"
-                                Width="200" Margin="0,10,0,0" Padding="5"
-                                Background="#4CAF50" Foreground="White" FontSize="11"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button Content="新規作成" Command="{Binding CreateNewCycleProfileCommand}"
+                                    Width="80" Padding="5"
+                                    Background="#4CAF50" Foreground="White" FontSize="11"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </Grid>
@@ -171,6 +175,11 @@
                                         <TextBlock Text="Tデバイス [エラー]" Width="160"/>
                                         <TextBox Text="{Binding ErrorDeviceStartT}" Width="100"/>
                                     </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="エラー開始番号" Width="160"/>
+                                        <TextBox Text="{Binding ErrorStartNum}" Width="100"/>
+                                    </StackPanel>
                                 </StackPanel>
                             </Border>
 
@@ -193,7 +202,7 @@
                             </Border>
 
                             <!-- 工程時間デバイス -->
-                            <Border BorderBrush="LightGray" BorderThickness="1" Padding="10">
+                            <Border BorderBrush="LightGray" BorderThickness="1" Padding="10" Margin="0,0,0,10">
                                 <StackPanel>
                                     <TextBlock Text="工程時間デバイス" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
 
@@ -215,6 +224,31 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
+
+                            <!-- インターロックデバイス -->
+                            <Border BorderBrush="LightGray" BorderThickness="1" Padding="10">
+                                <StackPanel>
+                                    <TextBlock Text="インターロックデバイス" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Mデバイス [インターロック]" Width="160"/>
+                                        <TextBox Text="{Binding InterlockDeviceStartM}" Width="100"/>
+                                        <CheckBox Content="メモリ保存" IsChecked="{Binding IsInterlockMemory}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="インターロック開始番号" Width="160"/>
+                                        <TextBox Text="{Binding InterlockStartNum}" Width="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- PLC用プロファイル適用ボタン -->
+                            <Button Content="プロファイルから適用" Command="{Binding ApplyPlcProfileCommand}"
+                                    Width="150" Padding="8" Margin="0,15,0,0"
+                                    Background="#FF9800" Foreground="White" FontSize="12" FontWeight="Bold"
+                                    HorizontalAlignment="Left"
+                                    ToolTip="選択したPLC用プロファイルの設定値を上記のフィールドに適用します"/>
                         </StackPanel>
                     </Border>
 
@@ -223,37 +257,79 @@
                         <StackPanel>
                             <TextBlock Text="Cycle用デバイス (Cycleごとに適用)" FontWeight="Bold" FontSize="14" Foreground="#4CAF50" Margin="0,0,0,10"/>
 
-                            <!-- 工程デバイス -->
+                            <!-- メモリ保存フラグ（共通設定） -->
                             <Border BorderBrush="LightGray" BorderThickness="1" Padding="10" Margin="0,0,0,10">
                                 <StackPanel>
-                                    <TextBlock Text="工程デバイス" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
-
+                                    <TextBlock Text="メモリ保存設定（共通）" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Lデバイス [工程]" Width="160"/>
-                                        <TextBox Text="{Binding ProcessDeviceStartL}" Width="100"/>
-                                        <CheckBox Content="メモリ保存" IsChecked="{Binding IsProcessMemory}"/>
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Lデバイス [工程詳細]" Width="160"/>
-                                        <TextBox Text="{Binding DetailDeviceStartL}" Width="100"/>
-                                        <CheckBox Content="メモリ保存" IsChecked="{Binding IsDetailMemory}"/>
+                                        <CheckBox Content="工程" IsChecked="{Binding IsProcessMemory}" Margin="0,0,15,0"/>
+                                        <CheckBox Content="工程詳細" IsChecked="{Binding IsDetailMemory}" Margin="0,0,15,0"/>
+                                        <CheckBox Content="操作" IsChecked="{Binding IsOperationMemory}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
 
-                            <!-- 操作デバイス -->
-                            <Border BorderBrush="LightGray" BorderThickness="1" Padding="10">
-                                <StackPanel>
-                                    <TextBlock Text="操作デバイス" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                            <!-- 選択されたCycleプロファイル一覧 -->
+                            <TextBlock Text="選択されたCycleプロファイル" FontWeight="Bold" FontSize="12" Margin="0,0,0,5"/>
+                            <TextBlock Text="※各プロファイルの設定値を個別に編集できます" FontSize="10" Foreground="Gray" Margin="0,0,0,5"/>
 
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Mデバイス [操作]" Width="160"/>
-                                        <TextBox Text="{Binding OperationDeviceStartM}" Width="100"/>
-                                        <CheckBox Content="メモリ保存" IsChecked="{Binding IsOperationMemory}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
+                            <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding SelectedCycleProfiles}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#4CAF50" BorderThickness="1" Padding="10" Margin="0,0,0,10" CornerRadius="3">
+                                                <StackPanel>
+                                                    <!-- プロファイル名とCycle名 -->
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                                        <TextBlock Text="📁" FontSize="14" Margin="0,0,5,0"/>
+                                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="12" Foreground="#4CAF50"/>
+                                                        <TextBlock Text=" (CycleId: " Foreground="Gray" FontSize="10" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                                        <TextBlock Text="{Binding CycleId}" Foreground="Gray" FontSize="10" VerticalAlignment="Center"/>
+                                                        <TextBlock Text=")" Foreground="Gray" FontSize="10" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+
+                                                    <!-- デバイス設定 -->
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="80"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="80"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="80"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Grid.Column="0" Text="L[工程]:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                                        <TextBox Grid.Column="1" Text="{Binding ProcessDeviceStartL, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                 Width="70" Margin="0,0,10,0"/>
+
+                                                        <TextBlock Grid.Column="2" Text="L[詳細]:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                                        <TextBox Grid.Column="3" Text="{Binding DetailDeviceStartL, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                 Width="70" Margin="0,0,10,0"/>
+
+                                                        <TextBlock Grid.Column="4" Text="M[操作]:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                                        <TextBox Grid.Column="5" Text="{Binding OperationDeviceStartM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                 Width="70"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+
+                            <!-- プロファイルが選択されていない場合のメッセージ -->
+                            <TextBlock Text="Cycleプロファイルを選択してください"
+                                       Foreground="Gray" FontStyle="Italic"
+                                       HorizontalAlignment="Center" Margin="0,20,0,0"
+                                       Visibility="{Binding HasNoCycleProfileSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                            <!-- Cycle用プロファイル適用ボタン -->
+                            <Button Content="プロファイルから適用" Command="{Binding ApplyCycleProfileCommand}"
+                                    Width="150" Padding="8" Margin="0,15,0,0"
+                                    Background="#FF9800" Foreground="White" FontSize="12" FontWeight="Bold"
+                                    HorizontalAlignment="Left"
+                                    ToolTip="選択したCycle用プロファイルの設定値を上記のフィールドに適用します"/>
                         </StackPanel>
                     </Border>
                 </Grid>

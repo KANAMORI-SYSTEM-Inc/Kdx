@@ -2,8 +2,8 @@ namespace Kdx.Contracts.DTOs
 {
     public class InterlockIO
     {
-        // 複合主キー: (InterlockId, PlcId, IOAddress, InterlockSortId, ConditionNumber)
-        public int InterlockId { get; set; }
+        // 複合主キー: (CylinderId, PlcId, IOAddress, InterlockSortId, ConditionNumber)
+        public int CylinderId { get; set; }
 
         public int PlcId { get; set; }
 

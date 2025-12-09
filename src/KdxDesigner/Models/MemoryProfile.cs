@@ -18,11 +18,16 @@ namespace KdxDesigner.Models
         public int CylinderDeviceStartD { get; set; }
         public int ErrorDeviceStartM { get; set; }
         public int ErrorDeviceStartT { get; set; }
+        public int ErrorStartNum { get; set; }
         public int DeviceStartT { get; set; }
         public int TimerStartZR { get; set; }
         public int ProsTimeStartZR { get; set; }
         public int ProsTimePreviousStartZR { get; set; }
         public int CyTimeStartZR { get; set; }
+
+        // Interlockデバイス設定
+        public int InterlockDeviceStartM { get; set; }
+        public int InterlockStartNum { get; set; }
 
         // デフォルトプロファイルかどうか
         public bool IsDefault { get; set; }

@@ -90,7 +90,7 @@ namespace KdxDesigner.ViewModels
 
         private bool CanDeleteInterlock(object? parameter) => SelectedInterlock != null;
 
-        private void DeleteInterlock(object? parameter)
+        private async void DeleteInterlock(object? parameter)
         {
             if (SelectedInterlock == null)
             {
@@ -100,27 +100,43 @@ namespace KdxDesigner.ViewModels
             var result = MessageBox.Show("選択したインターロックを削除しますか？\n関連する条件とIOも削除されます。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                // Track for deletion（複合キー対応）
-                _deletedInterlocks.Add(SelectedInterlock);
-
-                // Also mark all related conditions and IOs for deletion
-                var interlockKey = (SelectedInterlock.CylinderId, SelectedInterlock.SortId);
-                if (_allConditionsByInterlockKey.TryGetValue(interlockKey, out var relatedConditions))
+                try
                 {
-                    foreach (var condition in relatedConditions)
+                    var interlockKey = (SelectedInterlock.CylinderId, SelectedInterlock.SortId);
+
+                    // 関連するIOと条件を先に削除（外部キー制約のため）
+                    if (_allConditionsByInterlockKey.TryGetValue(interlockKey, out var relatedConditions))
                     {
-                        _deletedConditions.Add(condition);
-
-                        var conditionKey = (condition.InterlockId, condition.InterlockSortId, condition.ConditionNumber);
-                        if (_allIOsByConditionKey.TryGetValue(conditionKey, out var relatedIOs))
+                        foreach (var condition in relatedConditions)
                         {
-                            _deletedIOs.AddRange(relatedIOs.Select(vm => vm.GetInterlockIO()));
-                        }
-                    }
-                }
+                            // IOを削除
+                            var conditionKey = (condition.CylinderId, condition.InterlockSortId, condition.ConditionNumber);
+                            if (_allIOsByConditionKey.TryGetValue(conditionKey, out var relatedIOs))
+                            {
+                                foreach (var ioVm in relatedIOs)
+                                {
+                                    await _supabaseRepository.DeleteInterlockIOAsync(ioVm.GetInterlockIO());
+                                }
+                                _allIOsByConditionKey.Remove(conditionKey);
+                            }
 
-                Interlocks.Remove(SelectedInterlock);
-                SelectedInterlock = null;
+                            // 条件を削除
+                            await _supabaseRepository.DeleteInterlockConditionAsync(condition);
+                        }
+                        _allConditionsByInterlockKey.Remove(interlockKey);
+                    }
+
+                    // インターロック本体を削除
+                    await _supabaseRepository.DeleteInterlockAsync(SelectedInterlock.GetInterlock());
+
+                    // UIから削除
+                    Interlocks.Remove(SelectedInterlock);
+                    SelectedInterlock = null;
+                }
+                catch (Exception ex)
+                {
+                    ErrorDialog.Show($"インターロックの削除に失敗しました: {ex.Message}", "エラー", _window);
+                }
             }
         }
 
@@ -137,7 +153,7 @@ namespace KdxDesigner.ViewModels
             var defaultTypeId = ConditionTypes.FirstOrDefault()?.Id ?? 1;
             var newCondition = new InterlockConditionDTO
             {
-                InterlockId = SelectedInterlock.CylinderId,
+                CylinderId = SelectedInterlock.CylinderId,
                 InterlockSortId = SelectedInterlock.SortId,
                 ConditionNumber = InterlockConditions.Count + 1,
                 ConditionTypeId = defaultTypeId,
@@ -169,7 +185,7 @@ namespace KdxDesigner.ViewModels
 
         private bool CanDeleteCondition(object? parameter) => SelectedCondition != null;
 
-        private void DeleteCondition(object? parameter)
+        private async void DeleteCondition(object? parameter)
         {
             if (SelectedCondition == null)
             {
@@ -179,30 +195,41 @@ namespace KdxDesigner.ViewModels
             var result = MessageBox.Show("選択した条件を削除しますか？\n関連するIOも削除されます。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                // Track for deletion (複合キーに対応)
-                _deletedConditions.Add(SelectedCondition);
-
-                // Also mark all related IOs for deletion
-                var conditionKey = (SelectedCondition.InterlockId, SelectedCondition.InterlockSortId, SelectedCondition.ConditionNumber);
-                if (_allIOsByConditionKey.TryGetValue(conditionKey, out var relatedIOs))
+                try
                 {
-                    _deletedIOs.AddRange(relatedIOs.Select(vm => vm.GetInterlockIO()));
-                    _allIOsByConditionKey.Remove(conditionKey);
-                }
-
-                InterlockConditions.Remove(SelectedCondition);
-
-                // キャッシュからも削除
-                if (SelectedInterlock != null)
-                {
-                    var interlockKey = (SelectedInterlock.CylinderId, SelectedInterlock.SortId);
-                    if (_allConditionsByInterlockKey.TryGetValue(interlockKey, out var conditions))
+                    // 関連するIOを先に削除（外部キー制約のため）
+                    var conditionKey = (SelectedCondition.CylinderId, SelectedCondition.InterlockSortId, SelectedCondition.ConditionNumber);
+                    if (_allIOsByConditionKey.TryGetValue(conditionKey, out var relatedIOs))
                     {
-                        conditions.Remove(SelectedCondition);
+                        foreach (var ioVm in relatedIOs)
+                        {
+                            await _supabaseRepository.DeleteInterlockIOAsync(ioVm.GetInterlockIO());
+                        }
+                        _allIOsByConditionKey.Remove(conditionKey);
                     }
-                }
 
-                SelectedCondition = null;
+                    // DBから条件を削除
+                    await _supabaseRepository.DeleteInterlockConditionAsync(SelectedCondition);
+
+                    // UIから削除
+                    InterlockConditions.Remove(SelectedCondition);
+
+                    // キャッシュからも削除
+                    if (SelectedInterlock != null)
+                    {
+                        var interlockKey = (SelectedInterlock.CylinderId, SelectedInterlock.SortId);
+                        if (_allConditionsByInterlockKey.TryGetValue(interlockKey, out var conditions))
+                        {
+                            conditions.Remove(SelectedCondition);
+                        }
+                    }
+
+                    SelectedCondition = null;
+                }
+                catch (Exception ex)
+                {
+                    ErrorDialog.Show($"インターロック条件の削除に失敗しました: {ex.Message}", "エラー", _window);
+                }
             }
         }
 
@@ -246,7 +273,7 @@ namespace KdxDesigner.ViewModels
 
                 var newIO = new InterlockIO
                 {
-                    InterlockId = SelectedCondition.InterlockId,
+                    CylinderId = SelectedCondition.CylinderId,
                     InterlockSortId = SelectedCondition.InterlockSortId,
                     ConditionNumber = SelectedCondition.ConditionNumber,
                     PlcId = plcId,
@@ -267,7 +294,7 @@ namespace KdxDesigner.ViewModels
                     InterlockIOs.Add(ioViewModel);
 
                     // キャッシュにも追加
-                    var conditionKey = (SelectedCondition.InterlockId, SelectedCondition.InterlockSortId, SelectedCondition.ConditionNumber);
+                    var conditionKey = (SelectedCondition.CylinderId, SelectedCondition.InterlockSortId, SelectedCondition.ConditionNumber);
                     if (!_allIOsByConditionKey.ContainsKey(conditionKey))
                     {
                         _allIOsByConditionKey[conditionKey] = new List<InterlockIOViewModel>();
@@ -285,7 +312,7 @@ namespace KdxDesigner.ViewModels
 
         private bool CanDeleteIO(object? parameter) => SelectedIO != null;
 
-        private void DeleteIO(object? parameter)
+        private async void DeleteIO(object? parameter)
         {
             if (SelectedIO == null)
             {
@@ -295,31 +322,33 @@ namespace KdxDesigner.ViewModels
             var result = MessageBox.Show("選択したIOを削除しますか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                // Track for deletion (保存時に削除)
-                if (!SelectedIO.IsNew)
+                try
                 {
-                    _deletedIOs.Add(SelectedIO.GetInterlockIO());
+                    // DBから削除（新規作成されたもの以外）
+                    if (!SelectedIO.IsNew)
+                    {
+                        await _supabaseRepository.DeleteInterlockIOAsync(SelectedIO.GetInterlockIO());
+                    }
+
+                    // UIから削除
+                    InterlockIOs.Remove(SelectedIO);
+
+                    // キャッシュからも削除
+                    if (SelectedCondition != null)
+                    {
+                        var conditionKey = (SelectedCondition.CylinderId, SelectedCondition.InterlockSortId, SelectedCondition.ConditionNumber);
+                        if (_allIOsByConditionKey.TryGetValue(conditionKey, out var ios))
+                        {
+                            ios.Remove(SelectedIO);
+                        }
+                    }
+
+                    SelectedIO = null;
                 }
-
-                // UIから削除
-                InterlockIOs.Remove(SelectedIO);
-
-                // キャッシュからも削除
-                if (SelectedCondition != null)
+                catch (Exception ex)
                 {
-                    var conditionKey = (SelectedCondition.InterlockId, SelectedCondition.InterlockSortId, SelectedCondition.ConditionNumber);
-                    if (_allIOsByConditionKey.TryGetValue(conditionKey, out var ios))
-                    {
-                        var removed = ios.Remove(SelectedIO);
-                        System.Diagnostics.Debug.WriteLine($"キャッシュからIO削除: Key={conditionKey}, 削除成功={removed}, 残り={ios.Count}");
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"キャッシュにキーが見つかりません: {conditionKey}");
-                    }
+                    ErrorDialog.Show($"インターロックIOの削除に失敗しました: {ex.Message}", "エラー", _window);
                 }
-
-                SelectedIO = null;
             }
         }
 
@@ -327,45 +356,7 @@ namespace KdxDesigner.ViewModels
         {
             try
             {
-                // First, delete all tracked items from database
-                // Delete IOs first (due to foreign key constraints)
-                foreach (var io in _deletedIOs)
-                {
-                    try
-                    {
-                        await _supabaseRepository.DeleteInterlockIOAsync(io);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Failed to delete InterlockIO: {ex.Message}");
-                    }
-                }
-
-                // Delete InterlockConditions
-                foreach (var condition in _deletedConditions)
-                {
-                    try
-                    {
-                        await _supabaseRepository.DeleteInterlockConditionAsync(condition);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Failed to delete InterlockCondition: {ex.Message}");
-                    }
-                }
-
-                // Delete Interlocks
-                foreach (var interlockVm in _deletedInterlocks)
-                {
-                    try
-                    {
-                        await _supabaseRepository.DeleteInterlockAsync(interlockVm.GetInterlock());
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Failed to delete Interlock: {ex.Message}");
-                    }
-                }
+                // 削除は各削除メソッドで即座にDBに反映されるため、ここでは保存のみ行う
 
                 // Save Interlocks
                 var interlocksToSave = Interlocks.Select(vm => vm.GetInterlock()).ToList();

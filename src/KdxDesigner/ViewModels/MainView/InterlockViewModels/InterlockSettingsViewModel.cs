@@ -213,12 +213,12 @@ namespace KdxDesigner.ViewModels
         }
 
         // InterlockIOのプロパティをプロキシ（複合キー対応）
-        public int InterlockId
+        public int CylinderId
         {
-            get => _interlockIO.InterlockId;
+            get => _interlockIO.CylinderId;
             set
             {
-                _interlockIO.InterlockId = value;
+                _interlockIO.CylinderId = value;
                 OnPropertyChanged();
             }
         }
@@ -525,7 +525,7 @@ namespace KdxDesigner.ViewModels
                 }
                 else
                 {
-                    conditions = await _supabaseRepository.GetInterlockConditionsByInterlockIdAsync(SelectedInterlock.CylinderId);
+                    conditions = await _supabaseRepository.GetInterlockConditionsByCylinderIdAsync(SelectedInterlock.CylinderId);
                     _allConditionsByInterlockKey[interlockKey] = conditions;
                 }
 
@@ -556,7 +556,7 @@ namespace KdxDesigner.ViewModels
 
             try
             {
-                var conditionKey = (SelectedCondition.InterlockId, SelectedCondition.InterlockSortId, SelectedCondition.ConditionNumber);
+                var conditionKey = (SelectedCondition.CylinderId, SelectedCondition.InterlockSortId, SelectedCondition.ConditionNumber);
 
                 // キャッシュから取得するか、データベースから読み込む
                 List<InterlockIOViewModel> ioViewModels;
@@ -567,7 +567,7 @@ namespace KdxDesigner.ViewModels
                 }
                 else
                 {
-                    var ios = await _supabaseRepository.GetInterlockIOsByInterlockIdAsync(SelectedCondition.InterlockId);
+                    var ios = await _supabaseRepository.GetInterlockIOsByCylinderIdAsync(SelectedCondition.CylinderId);
                     ioViewModels = new List<InterlockIOViewModel>();
 
                     foreach (var io in ios)

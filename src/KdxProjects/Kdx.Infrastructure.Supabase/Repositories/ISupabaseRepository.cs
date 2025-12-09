@@ -1342,11 +1342,11 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         #region InterlockCondition
 
         /// <summary>
-        /// 指定されたインターロックIDに紐づくインターロック条件を取得します。
+        /// 指定されたシリンダーIDに紐づくインターロック条件を取得します。
         /// </summary>
-        /// <param name="interlockId">インターロックID。</param>
+        /// <param name="cylinderId">シリンダーID。</param>
         /// <returns>インターロック条件のリスト。</returns>
-        Task<List<InterlockConditionDTO>> GetInterlockConditionsByInterlockIdAsync(int interlockId);
+        Task<List<InterlockConditionDTO>> GetInterlockConditionsByCylinderIdAsync(int cylinderId);
 
         /// <summary>
         /// インターロック条件を挿入または更新します。
@@ -1384,11 +1384,11 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         #region InterlockIO
 
         /// <summary>
-        /// 指定されたインターロックIDに紐づくインターロックIO情報を取得します。
+        /// 指定されたシリンダーIDに紐づくインターロックIO情報を取得します。
         /// </summary>
-        /// <param name="interlockId">インターロックID。</param>
+        /// <param name="cylinderId">シリンダーID。</param>
         /// <returns>インターロックIO情報のリスト。</returns>
-        Task<List<InterlockIO>> GetInterlockIOsByInterlockIdAsync(int interlockId);
+        Task<List<InterlockIO>> GetInterlockIOsByCylinderIdAsync(int cylinderId);
 
         /// <summary>
         /// 指定されたIOアドレスとPLC IDに紐づくインターロック情報を取得します。

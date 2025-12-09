@@ -4,6 +4,7 @@ using Kdx.Contracts.Enums;
 using Kdx.Infrastructure.Supabase.Repositories;
 using KdxDesigner.Models;
 using KdxDesigner.Services;
+using KdxDesigner.Services.InterlockDevice;
 using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using System.Windows;
@@ -33,12 +34,21 @@ namespace KdxDesigner.ViewModels.Settings
             _errorService = mainViewModel._errorService;
             _memoryConfig = mainViewModel._memoryConfig;
 
-            // プロファイルの読み込み
+            // Interlockサービスの初期化
+            _interlockDeviceService = new InterlockDeviceService();
+            _cylinderInterlockDataBuilder = new CylinderInterlockDataBuilder(
+                repository,
+                (SupabaseRepository)repository);
+
+            // Cycleプロファイル選択変更の監視を設定
+            SelectedCycleProfiles.CollectionChanged += OnSelectedCycleProfilesCollectionChanged;
+
+            // MainViewModelの現在の設定を読み込み（プロファイル読み込み前に実行）
+            LoadCurrentSettingsFromMainViewModel();
+
+            // プロファイルの読み込み（選択されたプロファイルの設定値で上書きされる）
             LoadPlcProfiles();
             LoadCycleProfiles();
-
-            // MainViewModelの現在の設定を読み込み
-            LoadCurrentSettingsFromMainViewModel();
         }
 
         /// <summary>
@@ -123,6 +133,47 @@ namespace KdxDesigner.ViewModels.Settings
         }
 
         /// <summary>
+        /// PLC用プロファイル選択変更時に自動的に設定値をUIに反映
+        /// </summary>
+        partial void OnSelectedPlcProfileChanged(PlcMemoryProfile? value)
+        {
+            if (value != null)
+            {
+                // プロファイルの設定値をUIプロパティに反映
+                CylinderDeviceStartM = value.CylinderDeviceStartM;
+                CylinderDeviceStartD = value.CylinderDeviceStartD;
+                ErrorDeviceStartM = value.ErrorDeviceStartM;
+                ErrorDeviceStartT = value.ErrorDeviceStartT;
+                ErrorStartNum = value.ErrorStartNum;
+                DeviceStartT = value.DeviceStartT;
+                TimerStartZR = value.TimerStartZR;
+                ProsTimeStartZR = value.ProsTimeStartZR;
+                ProsTimePreviousStartZR = value.ProsTimePreviousStartZR;
+                CyTimeStartZR = value.CyTimeStartZR;
+                InterlockDeviceStartM = value.InterlockDeviceStartM;
+                InterlockStartNum = value.InterlockStartNum;
+            }
+        }
+
+        /// <summary>
+        /// Cycle用プロファイル選択変更時に自動的に設定値をUIに反映
+        /// </summary>
+        private void OnSelectedCycleProfilesCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            // HasNoCycleProfileSelectedプロパティの変更を通知
+            OnPropertyChanged(nameof(HasNoCycleProfileSelected));
+
+            // 最初に選択されたプロファイルの設定値をUIに反映（参考値として表示）
+            var firstSelectedProfile = SelectedCycleProfiles?.FirstOrDefault();
+            if (firstSelectedProfile != null)
+            {
+                ProcessDeviceStartL = firstSelectedProfile.ProcessDeviceStartL;
+                DetailDeviceStartL = firstSelectedProfile.DetailDeviceStartL;
+                OperationDeviceStartM = firstSelectedProfile.OperationDeviceStartM;
+            }
+        }
+
+        /// <summary>
         /// PLC用プロファイルを適用
         /// Cylinder/Error/Timer/工程時間デバイスの設定をViewModelに反映
         /// </summary>
@@ -132,11 +183,14 @@ namespace KdxDesigner.ViewModels.Settings
             CylinderDeviceStartD = profile.CylinderDeviceStartD;
             ErrorDeviceStartM = profile.ErrorDeviceStartM;
             ErrorDeviceStartT = profile.ErrorDeviceStartT;
+            ErrorStartNum = profile.ErrorStartNum;
             DeviceStartT = profile.DeviceStartT;
             TimerStartZR = profile.TimerStartZR;
             ProsTimeStartZR = profile.ProsTimeStartZR;
             ProsTimePreviousStartZR = profile.ProsTimePreviousStartZR;
             CyTimeStartZR = profile.CyTimeStartZR;
+            InterlockDeviceStartM = profile.InterlockDeviceStartM;
+            InterlockStartNum = profile.InterlockStartNum;
 
             // MainViewModelにも反映
             _mainViewModel.CylinderDeviceStartM = profile.CylinderDeviceStartM;
@@ -291,6 +345,35 @@ namespace KdxDesigner.ViewModels.Settings
             {
                 _speedService.DeleteSpeedTable();
                 _speedService.Save(cylinders, CylinderDeviceStartD, SelectedPlc.Id);
+            }
+
+            // Interlockデバイスの保存
+            progressViewModel?.UpdateStatus("インターロックデバイスを保存中...");
+            if (_interlockDeviceService != null && _cylinderInterlockDataBuilder != null)
+            {
+                // CylinderInterlockDataを構築
+                var cylinderInterlockDataList = await _cylinderInterlockDataBuilder.BuildByPlcIdAsync(SelectedPlc.Id);
+
+                // デバイスを割り当て
+                int interlockDeviceCount = _interlockDeviceService.AssignDevices(
+                    cylinderInterlockDataList,
+                    InterlockDeviceStartM,
+                    InterlockStartNum);
+
+                // Memoryエンティティを生成して保存
+                var interlockMemories = _interlockDeviceService.GenerateMemoryEntities(
+                    cylinderInterlockDataList,
+                    SelectedPlc.Id);
+
+                if (interlockMemories.Count > 0)
+                {
+                    await _repository.SaveOrUpdateMemoriesBatchAsync(interlockMemories);
+                    progressViewModel?.AddLog($"インターロックデバイス保存完了 ({interlockDeviceCount}件)");
+                }
+                else
+                {
+                    progressViewModel?.AddLog("インターロックデバイス: 対象データなし");
+                }
             }
 
             progressViewModel?.AddLog("PLC全体のデバイス保存完了");

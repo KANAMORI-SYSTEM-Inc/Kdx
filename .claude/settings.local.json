@@ -32,7 +32,10 @@
       "Bash(c:/Users/amdet/source/repos/KANAMORI-SYSTEM-Inc/src/KdxDesigner/bin/Debug/net8.0-windows10.0.17763.0/KdxDesigner.exe)",
       "Bash(pushd:*)",
       "Bash(./KdxDesigner.exe:*)",
-      "Bash(popd:*)"
+      "Bash(popd:*)",
+      "Bash(Remove-Item -Recurse -Force obj -ErrorAction SilentlyContinue)",
+      "Bash(Remove-Item -Recurse -Force bin -ErrorAction SilentlyContinue)",
+      "Bash(powershell -Command \"cd ''c:\\Users\\amdet\\source\\repos\\KANAMORI-SYSTEM-Inc\\Kdx\\src\\KdxDesigner''; Remove-Item -Recurse -Force obj -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force bin -ErrorAction SilentlyContinue; Write-Host ''Cleaned obj and bin folders''\")"
     ],
     "deny": [],
     "ask": []

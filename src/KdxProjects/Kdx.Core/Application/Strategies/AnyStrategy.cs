@@ -16,7 +16,7 @@ namespace Kdx.Core.Application.Strategies
             var rows = new List<LadderCsvRow>();
 
             InterlockCondition? condition = ctx.Conditions
-                .Where(c => c.InterlockId == ctx.Interlock.CylinderId)
+                .Where(c => c.CylinderId == ctx.Interlock.CylinderId)
                 .Where(c => c.InterlockSortId == ctx.Interlock.SortId)
                 .FirstOrDefault();
 

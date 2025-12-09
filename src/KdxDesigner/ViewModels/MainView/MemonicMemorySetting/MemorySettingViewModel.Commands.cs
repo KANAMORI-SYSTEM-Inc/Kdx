@@ -19,6 +19,62 @@ namespace KdxDesigner.ViewModels.Settings
     public partial class MemorySettingViewModel : ObservableObject
     {
         /// <summary>
+        /// PLC用プロファイルを適用
+        /// 選択されているプロファイルの設定値をUIに反映
+        /// </summary>
+        [RelayCommand]
+        private void ApplyPlcProfile()
+        {
+            if (SelectedPlcProfile == null)
+            {
+                MessageBox.Show("適用するプロファイルを選択してください。", "エラー",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // プロファイルの設定値をUIプロパティに反映
+            CylinderDeviceStartM = SelectedPlcProfile.CylinderDeviceStartM;
+            CylinderDeviceStartD = SelectedPlcProfile.CylinderDeviceStartD;
+            ErrorDeviceStartM = SelectedPlcProfile.ErrorDeviceStartM;
+            ErrorDeviceStartT = SelectedPlcProfile.ErrorDeviceStartT;
+            ErrorStartNum = SelectedPlcProfile.ErrorStartNum;
+            DeviceStartT = SelectedPlcProfile.DeviceStartT;
+            TimerStartZR = SelectedPlcProfile.TimerStartZR;
+            ProsTimeStartZR = SelectedPlcProfile.ProsTimeStartZR;
+            ProsTimePreviousStartZR = SelectedPlcProfile.ProsTimePreviousStartZR;
+            CyTimeStartZR = SelectedPlcProfile.CyTimeStartZR;
+            InterlockDeviceStartM = SelectedPlcProfile.InterlockDeviceStartM;
+            InterlockStartNum = SelectedPlcProfile.InterlockStartNum;
+
+            MessageBox.Show($"PLC用プロファイル '{SelectedPlcProfile.Name}' の設定を適用しました。", "適用完了",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        /// <summary>
+        /// Cycle用プロファイルを適用
+        /// 選択されているプロファイルの設定値をUIに反映
+        /// </summary>
+        [RelayCommand]
+        private void ApplyCycleProfile()
+        {
+            var firstSelectedProfile = SelectedCycleProfiles?.FirstOrDefault();
+            if (firstSelectedProfile == null)
+            {
+                MessageBox.Show("適用するプロファイルを選択してください。", "エラー",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // プロファイルの設定値をUIプロパティに反映
+            ProcessDeviceStartL = firstSelectedProfile.ProcessDeviceStartL;
+            DetailDeviceStartL = firstSelectedProfile.DetailDeviceStartL;
+            OperationDeviceStartM = firstSelectedProfile.OperationDeviceStartM;
+
+            MessageBox.Show($"Cycle用プロファイル '{firstSelectedProfile.Name}' の設定を適用しました。", "適用完了",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        /// <summary>
         /// 新規PLC用プロファイル作成
         /// </summary>
         [RelayCommand]
@@ -43,11 +99,14 @@ namespace KdxDesigner.ViewModels.Settings
                     CylinderDeviceStartD = CylinderDeviceStartD,
                     ErrorDeviceStartM = ErrorDeviceStartM,
                     ErrorDeviceStartT = ErrorDeviceStartT,
+                    ErrorStartNum = ErrorStartNum,
                     DeviceStartT = DeviceStartT,
                     TimerStartZR = TimerStartZR,
                     ProsTimeStartZR = ProsTimeStartZR,
                     ProsTimePreviousStartZR = ProsTimePreviousStartZR,
                     CyTimeStartZR = CyTimeStartZR,
+                    InterlockDeviceStartM = InterlockDeviceStartM,
+                    InterlockStartNum = InterlockStartNum,
                     IsDefault = false
                 };
 
@@ -186,7 +245,7 @@ namespace KdxDesigner.ViewModels.Settings
 
                     // 2. Cycle用プロファイルをループして各Cycleの設定を適用
                     int totalTimerCount = 0;
-                    int totalErrorCount = 0;
+                    int totalErrorCount = ErrorStartNum;
                     if (SelectedCycleProfiles != null && SelectedCycleProfiles.Any())
                     {
                         int cycleIndex = 0;

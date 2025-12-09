@@ -223,7 +223,7 @@ public class SupabaseRepositoryTests : TestBase
         // Arrange
         var testInterlockIO = new InterlockIO
         {
-            InterlockId = 999,
+            CylinderId = 999,
             PlcId = 999,
             IOAddress = "X9999",
             InterlockSortId = 999,

@@ -21,6 +21,7 @@ namespace KdxDesigner.Models
         // Errorデバイス設定（PLC全体で1回のみ）
         public int ErrorDeviceStartM { get; set; } = 120000;
         public int ErrorDeviceStartT { get; set; } = 2000;
+        public int ErrorStartNum { get; set; } = 0;
 
         // Timerデバイス設定（PLC全体で1回のみ）
         public int DeviceStartT { get; set; } = 0;
@@ -30,6 +31,10 @@ namespace KdxDesigner.Models
         public int ProsTimeStartZR { get; set; } = 12000;
         public int ProsTimePreviousStartZR { get; set; } = 24000;
         public int CyTimeStartZR { get; set; } = 30000;
+
+        // Interlockデバイス設定（PLC全体で1回のみ）
+        public int InterlockDeviceStartM { get; set; } = 50000;
+        public int InterlockStartNum { get; set; } = 0;
 
         // デフォルトプロファイルかどうか
         public bool IsDefault { get; set; }

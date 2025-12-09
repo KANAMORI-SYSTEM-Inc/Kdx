@@ -7,9 +7,9 @@ namespace Kdx.Infrastructure.Supabase.Entities
     [Table("InterlockCondition")]
     internal class InterlockConditionEntity : BaseModel
     {
-        [PrimaryKey("InterlockId")] // 複合主キー
-        [Column("InterlockId")]
-        public int InterlockId { get; set; }
+        [PrimaryKey("CylinderId")] // 複合主キー
+        [Column("CylinderId")]
+        public int CylinderId { get; set; }
 
         [PrimaryKey("ConditionNumber")] // 複合主キー
         [Column("ConditionNumber")]
@@ -33,7 +33,7 @@ namespace Kdx.Infrastructure.Supabase.Entities
 
         public static InterlockConditionEntity FromDto(InterlockCondition dto) => new()
         {
-            InterlockId = dto.InterlockId,
+            CylinderId = dto.CylinderId,
             ConditionNumber = dto.ConditionNumber,
             InterlockSortId = dto.InterlockSortId,
             ConditionTypeId = dto.ConditionTypeId,
@@ -44,7 +44,7 @@ namespace Kdx.Infrastructure.Supabase.Entities
 
         public InterlockCondition ToDto() => new()
         {
-            InterlockId = this.InterlockId,
+            CylinderId = this.CylinderId,
             ConditionNumber = this.ConditionNumber,
             InterlockSortId = this.InterlockSortId,
             ConditionTypeId = this.ConditionTypeId,
