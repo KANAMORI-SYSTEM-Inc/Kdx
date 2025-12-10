@@ -24,6 +24,9 @@ namespace KdxDesigner.ViewModels
         [ObservableProperty]
         private string _email = string.Empty;
 
+        [ObservableProperty]
+        private bool _isPasswordResetMode = false;
+
         public LoginViewModel(IAuthenticationService authService, IOAuthCallbackListener callbackListener)
         {
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
@@ -248,6 +251,162 @@ namespace KdxDesigner.ViewModels
             {
                 IsLoading = false;
                 StatusMessage = string.Empty;
+            }
+        }
+
+        [RelayCommand]
+        private async Task ResetPasswordAsync()
+        {
+            if (string.IsNullOrWhiteSpace(Email))
+            {
+                ErrorMessage = "メールアドレスを入力してください。";
+                return;
+            }
+
+            IsLoading = true;
+            ErrorMessage = string.Empty;
+            StatusMessage = "パスワードリセットメールを送信しています...";
+
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"Attempting password reset for: {Email}");
+
+                var success = await _authService.ResetPasswordForEmailAsync(Email);
+
+                if (success)
+                {
+                    StatusMessage = "パスワードリセットメールを送信しました。メールをご確認ください。";
+                    System.Diagnostics.Debug.WriteLine("Password reset email sent successfully");
+                    IsPasswordResetMode = false;
+                }
+                else
+                {
+                    ErrorMessage = "パスワードリセットメールの送信に失敗しました。";
+                    System.Diagnostics.Debug.WriteLine("Password reset failed");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"パスワードリセットエラー: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Password reset error: {ex}");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        [RelayCommand]
+        private void TogglePasswordResetMode()
+        {
+            IsPasswordResetMode = !IsPasswordResetMode;
+            ErrorMessage = string.Empty;
+            StatusMessage = IsPasswordResetMode
+                ? "パスワードをリセットするメールアドレスを入力してください。"
+                : string.Empty;
+        }
+
+        [RelayCommand]
+        private void CancelPasswordReset()
+        {
+            IsPasswordResetMode = false;
+            ErrorMessage = string.Empty;
+            StatusMessage = string.Empty;
+        }
+
+        [RelayCommand]
+        private async Task SignInWithGitHubAsync()
+        {
+            IsLoading = true;
+            ErrorMessage = string.Empty;
+            StatusMessage = "GitHubでサインインしています...";
+
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("Starting GitHub OAuth flow...");
+
+                // OAuthコールバックリスナーを開始
+                var listenerStarted = await _callbackListener.StartListenerAsync(3000);
+                if (!listenerStarted)
+                {
+                    ErrorMessage = "認証サーバーの起動に失敗しました。ポート3000が使用中の可能性があります。";
+                    return;
+                }
+
+                // GitHub OAuth URLを取得してブラウザで開く
+                var authUrl = await _authService.SignInWithGitHubAsync();
+
+                if (string.IsNullOrEmpty(authUrl))
+                {
+                    ErrorMessage = "GitHub認証URLの取得に失敗しました。";
+                    _callbackListener.StopListener();
+                    return;
+                }
+
+                StatusMessage = "ブラウザでGitHub認証を行ってください...";
+
+                // タイムアウト付きでコールバックを待機（5分）
+                using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+
+                // Implicit FlowとCode Flowの両方に対応したコールバックを待機
+                var callbackResult = await _callbackListener.WaitForCallbackWithTokenAsync(cts.Token);
+
+                if (callbackResult == null)
+                {
+                    ErrorMessage = "GitHub認証がキャンセルされたか、タイムアウトしました。";
+                    return;
+                }
+
+                StatusMessage = "認証情報を確認しています...";
+
+                Supabase.Gotrue.Session? session = null;
+
+                if (callbackResult.IsImplicitFlow)
+                {
+                    // Implicit Flow: access_tokenとrefresh_tokenを直接使用
+                    System.Diagnostics.Debug.WriteLine("Using Implicit Flow - setting session from tokens");
+                    session = await _authService.SetSessionFromTokenAsync(
+                        callbackResult.AccessToken!,
+                        callbackResult.RefreshToken ?? string.Empty);
+                }
+                else if (callbackResult.IsCodeFlow)
+                {
+                    // Code Flow: 認証コードをセッションに交換
+                    System.Diagnostics.Debug.WriteLine("Using Code Flow - exchanging code for session");
+                    session = await _authService.ExchangeCodeForSessionAsync(callbackResult.Code!);
+                }
+
+                if (session != null)
+                {
+                    StatusMessage = "GitHubでのログインに成功しました！";
+                    System.Diagnostics.Debug.WriteLine("GitHub sign in successful");
+                    await Task.Delay(500);
+                    OpenMainWindow();
+                }
+                else
+                {
+                    ErrorMessage = "GitHub認証に失敗しました。もう一度お試しください。";
+                    System.Diagnostics.Debug.WriteLine("GitHub sign in failed - session exchange failed");
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                ErrorMessage = "GitHub認証がタイムアウトしました。";
+                System.Diagnostics.Debug.WriteLine("GitHub sign in timed out");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"GitHubサインインエラー: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"GitHub sign in error: {ex}");
+            }
+            finally
+            {
+                _callbackListener.StopListener();
+                IsLoading = false;
+                if (string.IsNullOrEmpty(ErrorMessage))
+                {
+                    StatusMessage = string.Empty;
+                }
             }
         }
     }

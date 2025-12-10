@@ -14,6 +14,9 @@ namespace KdxDesigner.Services.Authentication
         Task<Session?> ExchangeCodeForSessionAsync(string code);
         Task<bool> SignInWithEmailAsync(string email, string password);
         Task<bool> SignUpWithEmailAsync(string email, string password);
+        Task<bool> ResetPasswordForEmailAsync(string email);
+        Task<bool> UpdatePasswordAsync(string newPassword);
+        Task<Session?> SetSessionFromTokenAsync(string accessToken, string refreshToken);
     }
 
     public class AuthenticationService : IAuthenticationService
@@ -275,6 +278,83 @@ namespace KdxDesigner.Services.Authentication
             {
                 System.Diagnostics.Debug.WriteLine($"Email sign up failed: {ex.Message}");
                 throw new InvalidOperationException($"メール新規登録に失敗しました: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<bool> ResetPasswordForEmailAsync(string email)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"Attempting password reset for: {email}");
+
+                // パスワードリセットメールを送信
+                var result = await _supabaseClient.Auth.ResetPasswordForEmail(email);
+
+                System.Diagnostics.Debug.WriteLine("Password reset email sent successfully");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Password reset failed: {ex.Message}");
+                throw new InvalidOperationException($"パスワードリセットに失敗しました: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<bool> UpdatePasswordAsync(string newPassword)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("Attempting to update password");
+
+                if (_currentSession == null)
+                {
+                    throw new InvalidOperationException("ログインしていません。");
+                }
+
+                // パスワードを更新
+                var user = await _supabaseClient.Auth.Update(new Supabase.Gotrue.UserAttributes
+                {
+                    Password = newPassword
+                });
+
+                if (user != null)
+                {
+                    System.Diagnostics.Debug.WriteLine("Password updated successfully");
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Password update failed: {ex.Message}");
+                throw new InvalidOperationException($"パスワード更新に失敗しました: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<Session?> SetSessionFromTokenAsync(string accessToken, string refreshToken)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("Setting session from token (Implicit Flow)...");
+
+                // トークンからセッションを設定
+                var session = await _supabaseClient.Auth.SetSession(accessToken, refreshToken);
+                _currentSession = session;
+
+                // セッションを保存
+                if (session != null)
+                {
+                    await SaveSessionAsync(session);
+                    System.Diagnostics.Debug.WriteLine("Session set successfully from token");
+                }
+
+                return session;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"SetSessionFromToken failed: {ex.Message}");
+                throw new InvalidOperationException($"トークンからのセッション設定に失敗しました: {ex.Message}", ex);
             }
         }
     }

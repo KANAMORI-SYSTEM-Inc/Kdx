@@ -1484,5 +1484,40 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         Task DeleteMemoryProfileAsync(int cycleId);
 
         #endregion
+
+        #region AuditLog
+
+        /// <summary>
+        /// 監査ログを取得します（新しい順）。
+        /// </summary>
+        /// <param name="limit">取得件数（デフォルト: 100）。</param>
+        /// <param name="offset">スキップ件数（デフォルト: 0）。</param>
+        /// <returns>監査ログのリスト。</returns>
+        Task<List<AuditLog>> GetAuditLogsAsync(int limit = 100, int offset = 0);
+
+        /// <summary>
+        /// 指定されたテーブルの監査ログを取得します。
+        /// </summary>
+        /// <param name="tableName">テーブル名。</param>
+        /// <param name="limit">取得件数（デフォルト: 100）。</param>
+        /// <returns>監査ログのリスト。</returns>
+        Task<List<AuditLog>> GetAuditLogsByTableAsync(string tableName, int limit = 100);
+
+        /// <summary>
+        /// 指定された期間の監査ログを取得します。
+        /// </summary>
+        /// <param name="from">開始日時。</param>
+        /// <param name="to">終了日時。</param>
+        /// <param name="limit">取得件数（デフォルト: 100）。</param>
+        /// <returns>監査ログのリスト。</returns>
+        Task<List<AuditLog>> GetAuditLogsByDateRangeAsync(DateTime from, DateTime to, int limit = 100);
+
+        /// <summary>
+        /// 監査ログの総件数を取得します。
+        /// </summary>
+        /// <returns>監査ログの総件数。</returns>
+        Task<int> GetAuditLogCountAsync();
+
+        #endregion
     }
 }

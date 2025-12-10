@@ -15,6 +15,7 @@
             <MenuItem Header="_ファイル">
                 <MenuItem Header="設定を開く" Command="{Binding OpenSettingsCommand}" />
                 <Separator />
+                <MenuItem Header="ログアウト" Command="{Binding SignOutCommand}" />
                 <MenuItem Header="終了" Command="{Binding ExitCommand}" />
             </MenuItem>
             <MenuItem Header="_ツール">
@@ -29,6 +30,11 @@
                 <MenuItem Header="工程フロー詳細" Command="{Binding OpenProcessFlowDetailCommand}" />
                 <MenuItem Header="全ての工程フロー詳細を閉じる" Command="{Binding CloseAllProcessFlowWindowsCommand}" />
                 <Separator/>
+            </MenuItem>
+            <MenuItem Header="_アカウント">
+                <MenuItem Header="{Binding CurrentUserEmail}" IsEnabled="False" />
+                <Separator />
+                <MenuItem Header="ログアウト" Command="{Binding SignOutCommand}" />
             </MenuItem>
         </Menu>
 

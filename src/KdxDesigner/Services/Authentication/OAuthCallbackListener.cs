@@ -8,11 +8,26 @@ using System.Web;
 
 namespace KdxDesigner.Services.Authentication
 {
+    /// <summary>
+    /// OAuth認証コールバック結果
+    /// </summary>
+    public class OAuthCallbackResult
+    {
+        public string? Code { get; set; }
+        public string? AccessToken { get; set; }
+        public string? RefreshToken { get; set; }
+        public string? ProviderToken { get; set; }
+        public int? ExpiresIn { get; set; }
+        public bool IsImplicitFlow => !string.IsNullOrEmpty(AccessToken);
+        public bool IsCodeFlow => !string.IsNullOrEmpty(Code);
+    }
+
     public interface IOAuthCallbackListener
     {
         Task<string?> ListenForCallbackAsync(int port = 3000, CancellationToken cancellationToken = default);
         Task<bool> StartListenerAsync(int port = 3000);
         Task<string?> WaitForCallbackAsync(CancellationToken cancellationToken = default);
+        Task<OAuthCallbackResult?> WaitForCallbackWithTokenAsync(CancellationToken cancellationToken = default);
         void StopListener();
     }
 
@@ -135,6 +150,73 @@ namespace KdxDesigner.Services.Authentication
             }
         }
         
+        /// <summary>
+        /// フラグメントからトークンを抽出するためのHTML（JavaScriptで再送信）
+        /// </summary>
+        private string CreateFragmentExtractorHtml()
+        {
+            return @"
+<!DOCTYPE html>
+<html lang='ja'>
+<head>
+    <meta charset='UTF-8'>
+    <title>認証処理中... - KDX Designer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+        }
+        h1 { color: #2196F3; margin-bottom: 20px; }
+        p { color: #666; line-height: 1.6; }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2196F3;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='spinner'></div>
+        <h1>認証処理中...</h1>
+        <p>認証情報を処理しています。<br>しばらくお待ちください。</p>
+    </div>
+    <script>
+        // URLフラグメントからトークンを抽出
+        var hash = window.location.hash.substring(1);
+        if (hash) {
+            // フラグメントをクエリパラメータとしてサーバーに送信
+            window.location.href = '/callback?' + hash;
+        } else {
+            // フラグメントがない場合はエラー
+            document.querySelector('h1').textContent = 'エラー';
+            document.querySelector('p').textContent = '認証情報が見つかりませんでした。';
+            document.querySelector('.spinner').style.display = 'none';
+        }
+    </script>
+</body>
+</html>";
+        }
+
         private string CreateSuccessHtml()
         {
             return @"
@@ -459,6 +541,155 @@ namespace KdxDesigner.Services.Authentication
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error stopping listener: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// OAuthコールバックを待機し、トークン情報を取得（Implicit Flow対応）
+        /// </summary>
+        public async Task<OAuthCallbackResult?> WaitForCallbackWithTokenAsync(CancellationToken cancellationToken = default)
+        {
+            if (_listener == null || !_listener.IsListening)
+            {
+                System.Diagnostics.Debug.WriteLine("Listener is not started");
+                return null;
+            }
+
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("Waiting for OAuth callback (with token support)...");
+
+                // キャンセレーショントークンを設定
+                using (cancellationToken.Register(() => _listener?.Stop()))
+                {
+                    // 最初のリクエスト（フラグメント付きURL）を待機
+                    var context = await _listener.GetContextAsync();
+                    var requestPath = context.Request.Url?.AbsolutePath ?? "/";
+                    var query = context.Request.Url?.Query;
+
+                    System.Diagnostics.Debug.WriteLine("=== OAuth Callback受信 ===");
+                    System.Diagnostics.Debug.WriteLine($"Request URL: {context.Request.Url}");
+                    System.Diagnostics.Debug.WriteLine($"Path: {requestPath}");
+                    System.Diagnostics.Debug.WriteLine($"Query: {query}");
+
+                    // /callback パスにトークン情報が来た場合（JavaScriptからの再送信）
+                    if (requestPath == "/callback" && !string.IsNullOrEmpty(query))
+                    {
+                        var queryParams = HttpUtility.ParseQueryString(query);
+                        var accessToken = queryParams["access_token"];
+                        var refreshToken = queryParams["refresh_token"];
+                        var providerToken = queryParams["provider_token"];
+                        var expiresIn = queryParams["expires_in"];
+
+                        if (!string.IsNullOrEmpty(accessToken))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Implicit Flow: Access token received!");
+                            System.Diagnostics.Debug.WriteLine($"Access Token: {accessToken?.Substring(0, Math.Min(20, accessToken?.Length ?? 0))}...");
+
+                            // 成功レスポンスを送信
+                            await SendResponseAsync(context.Response, CreateSuccessHtml());
+
+                            return new OAuthCallbackResult
+                            {
+                                AccessToken = accessToken,
+                                RefreshToken = refreshToken,
+                                ProviderToken = providerToken,
+                                ExpiresIn = int.TryParse(expiresIn, out var exp) ? exp : null
+                            };
+                        }
+
+                        // エラーチェック
+                        var error = queryParams["error"];
+                        if (!string.IsNullOrEmpty(error))
+                        {
+                            var errorDescription = queryParams["error_description"];
+                            var errorCode = queryParams["error_code"];
+                            System.Diagnostics.Debug.WriteLine($"OAuth Error: {error}");
+                            await SendResponseAsync(context.Response, CreateErrorHtml(error, errorDescription, errorCode));
+                            return null;
+                        }
+                    }
+
+                    // クエリパラメータに code がある場合（Authorization Code Flow）
+                    if (!string.IsNullOrEmpty(query))
+                    {
+                        var queryParams = HttpUtility.ParseQueryString(query);
+                        var code = queryParams["code"];
+
+                        if (!string.IsNullOrEmpty(code))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Code Flow: Authorization code received!");
+                            await SendResponseAsync(context.Response, CreateSuccessHtml());
+
+                            return new OAuthCallbackResult { Code = code };
+                        }
+
+                        // エラーチェック
+                        var error = queryParams["error"];
+                        if (!string.IsNullOrEmpty(error))
+                        {
+                            var errorDescription = queryParams["error_description"];
+                            var errorCode = queryParams["error_code"];
+                            System.Diagnostics.Debug.WriteLine($"OAuth Error: {error}");
+                            await SendResponseAsync(context.Response, CreateErrorHtml(error, errorDescription, errorCode));
+                            return null;
+                        }
+                    }
+
+                    // フラグメントからトークンを抽出するためのHTMLを返す
+                    System.Diagnostics.Debug.WriteLine("Sending fragment extractor HTML...");
+                    await SendResponseAsync(context.Response, CreateFragmentExtractorHtml());
+
+                    // 2回目のリクエスト（JavaScriptからの再送信）を待機
+                    System.Diagnostics.Debug.WriteLine("Waiting for second request with token...");
+                    var context2 = await _listener.GetContextAsync();
+                    var query2 = context2.Request.Url?.Query;
+
+                    System.Diagnostics.Debug.WriteLine($"Second request URL: {context2.Request.Url}");
+                    System.Diagnostics.Debug.WriteLine($"Second query: {query2}");
+
+                    if (!string.IsNullOrEmpty(query2))
+                    {
+                        var queryParams = HttpUtility.ParseQueryString(query2);
+                        var accessToken = queryParams["access_token"];
+                        var refreshToken = queryParams["refresh_token"];
+                        var providerToken = queryParams["provider_token"];
+                        var expiresIn = queryParams["expires_in"];
+
+                        if (!string.IsNullOrEmpty(accessToken))
+                        {
+                            System.Diagnostics.Debug.WriteLine("Implicit Flow (2nd request): Access token received!");
+
+                            await SendResponseAsync(context2.Response, CreateSuccessHtml());
+
+                            return new OAuthCallbackResult
+                            {
+                                AccessToken = accessToken,
+                                RefreshToken = refreshToken,
+                                ProviderToken = providerToken,
+                                ExpiresIn = int.TryParse(expiresIn, out var exp) ? exp : null
+                            };
+                        }
+
+                        // エラーチェック
+                        var error = queryParams["error"];
+                        if (!string.IsNullOrEmpty(error))
+                        {
+                            var errorDescription = queryParams["error_description"];
+                            var errorCode = queryParams["error_code"];
+                            await SendResponseAsync(context2.Response, CreateErrorHtml(error, errorDescription, errorCode));
+                            return null;
+                        }
+                    }
+
+                    System.Diagnostics.Debug.WriteLine("No token or code received");
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"OAuth callback listener error: {ex.Message}");
+                return null;
             }
         }
     }

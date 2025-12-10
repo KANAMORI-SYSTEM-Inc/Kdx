@@ -23,7 +23,39 @@ namespace KdxDesigner.ViewModels
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
             _supabaseHelper = supabaseHelper;
 
+            // 認証状態変更イベントをリッスン
+            _authService.AuthStateChanged += OnAuthStateChanged;
+
+            // 初期ユーザー情報を設定
+            UpdateCurrentUserEmail();
+
             Initialize();
+        }
+
+        /// <summary>
+        /// 認証状態変更時のハンドラ
+        /// </summary>
+        private void OnAuthStateChanged(object? sender, Supabase.Gotrue.Session? session)
+        {
+            Application.Current?.Dispatcher.Invoke(() =>
+            {
+                UpdateCurrentUserEmail();
+            });
+        }
+
+        /// <summary>
+        /// 現在のユーザーメールアドレスを更新
+        /// </summary>
+        private void UpdateCurrentUserEmail()
+        {
+            if (_authService?.CurrentSession != null)
+            {
+                CurrentUserEmail = _authService.CurrentSession.User?.Email ?? "Unknown User";
+            }
+            else
+            {
+                CurrentUserEmail = string.Empty;
+            }
         }
 
 
@@ -178,12 +210,6 @@ namespace KdxDesigner.ViewModels
 
             try
             {
-                // 現在のユーザー情報を設定
-                if (_authService?.CurrentSession != null)
-                {
-                    CurrentUserEmail = _authService.CurrentSession.User?.Email ?? "Unknown User";
-                }
-
                 // 初期データの読み込み
                 await LoadMasterDataAsync();
             }
