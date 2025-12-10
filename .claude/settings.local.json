@@ -39,7 +39,18 @@
       "Bash(Get-ChildItem -Path \"c:\\Users\\amdet\\source\\repos\\KANAMORI-SYSTEM-Inc\\Kdx\\src\\KdxDesigner\" -Directory)",
       "Bash(ls:*)",
       "Bash(xargs:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(powershell:*)",
+      "Bash(where:*)",
+      "Bash(npm install:*)",
+      "Bash(scoop install:*)",
+      "Bash(supabase --version:*)",
+      "Bash(supabase projects list:*)",
+      "Bash(supabase login:*)",
+      "Bash(echo $SUPABASE_ACCESS_TOKEN)",
+      "Bash(supabase link:*)",
+      "Bash(supabase db execute:*)",
+      "Bash(supabase db:*)"
     ],
     "deny": [],
     "ask": []

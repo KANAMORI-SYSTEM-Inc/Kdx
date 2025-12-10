@@ -391,6 +391,9 @@ namespace KdxDesigner.ViewModels
             ClearCylinderSearchCommand = new RelayCommand(() => CylinderSearchText = string.Empty);
             ReloadCommand = new RelayCommand(async () => await ReloadAsync());
             ShowCylinderPropertiesCommand = new RelayCommand(ShowCylinderProperties, () => SelectedCylinder != null);
+            ShowInterlockPropertiesCommand = new RelayCommand(ShowInterlockProperties, () => SelectedInterlock != null);
+            ShowConditionPropertiesCommand = new RelayCommand(ShowConditionProperties, () => SelectedCondition != null);
+            ShowIOPropertiesCommand = new RelayCommand(ShowIOProperties, () => SelectedIO != null);
 
             _ = LoadCylindersAsync();
             _ = LoadConditionTypesAsync();
@@ -601,16 +604,25 @@ namespace KdxDesigner.ViewModels
                 else
                 {
                     var ios = await _supabaseRepository.GetInterlockIOsByCylinderIdAsync(SelectedCondition.CylinderId);
+
+                    // 選択された条件のInterlockSortIdとConditionNumberでフィルタリング
+                    var filteredIOs = ios.Where(io =>
+                        io.InterlockSortId == SelectedCondition.InterlockSortId &&
+                        io.ConditionNumber == SelectedCondition.ConditionNumber
+                    ).ToList();
+
                     ioViewModels = new List<InterlockIOViewModel>();
 
-                    foreach (var io in ios)
+                    // IONameを一括で取得（パフォーマンス改善）
+                    var allIOs = await _accessRepository.GetIoListAsync();
+
+                    foreach (var io in filteredIOs)
                     {
                         var ioViewModel = new InterlockIOViewModel(io, false); // 既存データ
 
                         // PlcIdとIOAddressに対応するIONameを取得
                         if (!string.IsNullOrEmpty(io.IOAddress))
                         {
-                            var allIOs = await _accessRepository.GetIoListAsync();
                             var ioData = allIOs.FirstOrDefault(i => i.Address == io.IOAddress && i.PlcId == io.PlcId);
                             if (ioData != null)
                             {
@@ -656,6 +668,118 @@ namespace KdxDesigner.ViewModels
             catch (Exception ex)
             {
                 ErrorDialog.Show($"シリンダープロパティの表示に失敗しました: {ex.Message}", "エラー", _window);
+            }
+        }
+
+        /// <summary>
+        /// インターロックプロパティウィンドウを表示
+        /// </summary>
+        private void ShowInterlockProperties()
+        {
+            if (SelectedInterlock == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var interlock = SelectedInterlock.GetInterlock();
+                var allCylinders = _allCylinders.Select(c => c.GetCylinder()).ToList();
+                var window = new Views.Interlock.InterlockPropertiesWindow(_supabaseRepository, interlock, allCylinders);
+                window.Owner = _window;
+
+                if (window.ShowDialog() == true)
+                {
+                    // 更新を反映
+                    var updatedInterlock = window.GetUpdatedInterlock();
+
+                    // ViewModelのプロパティを更新
+                    SelectedInterlock.ConditionCylinderId = updatedInterlock.ConditionCylinderId;
+                    SelectedInterlock.PreConditionID1 = updatedInterlock.PreConditionID1;
+                    SelectedInterlock.PreConditionID2 = updatedInterlock.PreConditionID2;
+                    SelectedInterlock.GoOrBack = updatedInterlock.GoOrBack;
+
+                    // 表示用の名前を更新
+                    var conditionCylinder = _allCylinders.FirstOrDefault(c => c.Id == updatedInterlock.ConditionCylinderId);
+                    SelectedInterlock.ConditionCylinderNum = conditionCylinder?.CYNum;
+
+                    if (updatedInterlock.PreConditionID1.HasValue && _preCondition1Dict.TryGetValue(updatedInterlock.PreConditionID1.Value, out var preCondition1Name))
+                    {
+                        SelectedInterlock.PreCondition1Name = preCondition1Name;
+                    }
+                    else
+                    {
+                        SelectedInterlock.PreCondition1Name = null;
+                    }
+
+                    if (updatedInterlock.PreConditionID2.HasValue && _preCondition2Dict.TryGetValue(updatedInterlock.PreConditionID2.Value, out var preCondition2Name))
+                    {
+                        SelectedInterlock.PreCondition2Name = preCondition2Name;
+                    }
+                    else
+                    {
+                        SelectedInterlock.PreCondition2Name = null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorDialog.Show($"インターロックプロパティの表示に失敗しました: {ex.Message}", "エラー", _window);
+            }
+        }
+
+        /// <summary>
+        /// インターロック条件プロパティウィンドウを表示
+        /// </summary>
+        private void ShowConditionProperties()
+        {
+            if (SelectedCondition == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var window = new Views.Interlock.InterlockConditionPropertiesWindow(_supabaseRepository, SelectedCondition, ConditionTypes);
+                window.Owner = _window;
+
+                if (window.ShowDialog() == true)
+                {
+                    // プロパティ変更通知で自動的にUIが更新される
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorDialog.Show($"インターロック条件プロパティの表示に失敗しました: {ex.Message}", "エラー", _window);
+            }
+        }
+
+        /// <summary>
+        /// インターロックIOプロパティウィンドウを表示
+        /// </summary>
+        private void ShowIOProperties()
+        {
+            if (SelectedIO == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var interlockIO = SelectedIO.GetInterlockIO();
+                var window = new Views.Interlock.InterlockIOPropertiesWindow(_supabaseRepository, interlockIO, SelectedIO.IOName);
+                window.Owner = _window;
+
+                if (window.ShowDialog() == true)
+                {
+                    // 更新を反映
+                    var updatedIO = window.GetUpdatedInterlockIO();
+                    SelectedIO.IsOnCondition = updatedIO.IsOnCondition;
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorDialog.Show($"インターロックIOプロパティの表示に失敗しました: {ex.Message}", "エラー", _window);
             }
         }
 

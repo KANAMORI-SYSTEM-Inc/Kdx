@@ -150,6 +150,13 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         /// <param name="id">削除するサイクルID。</param>
         Task DeleteCycleAsync(int id);
 
+        /// <summary>
+        /// 指定されたPLC IDに紐づくサイクル情報を取得します。
+        /// </summary>
+        /// <param name="plcId">PLC ID。</param>
+        /// <returns>サイクル情報のリスト。</returns>
+        Task<List<Cycle>> GetCyclesByPlcIdAsync(int plcId);
+
         #endregion
 
         #region CylinderCycle
@@ -622,6 +629,13 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         /// </summary>
         /// <param name="id">削除する工程詳細ID。</param>
         Task DeleteProcessDetailAsync(int id);
+
+        /// <summary>
+        /// 指定されたサイクルIDに紐づく工程詳細情報を取得します。
+        /// </summary>
+        /// <param name="cycleId">サイクルID。</param>
+        /// <returns>工程詳細情報のリスト。</returns>
+        Task<List<ProcessDetail>> GetProcessDetailsByCycleIdAsync(int cycleId);
 
         #endregion
 
@@ -1337,6 +1351,12 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         /// <param name="interlocks">削除するインターロック情報のリスト。</param>
         Task DeleteInterlocksAsync(List<Interlock> interlocks);
 
+        /// <summary>
+        /// インターロック情報を更新します。
+        /// </summary>
+        /// <param name="interlock">更新するインターロック情報。</param>
+        Task UpdateInterlockAsync(Interlock interlock);
+
         #endregion
 
         #region InterlockCondition
@@ -1371,6 +1391,12 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         /// </summary>
         /// <param name="interlockConditions">削除するインターロック条件のリスト。</param>
         Task DeleteInterlockConditionsAsync(List<InterlockConditionDTO> interlockConditions);
+
+        /// <summary>
+        /// インターロック条件を更新します。
+        /// </summary>
+        /// <param name="interlockCondition">更新するインターロック条件。</param>
+        Task UpdateInterlockConditionAsync(InterlockConditionDTO interlockCondition);
 
         /// <summary>
         /// 指定されたPLC IDに紐づくインターロック条件ビュー情報を取得します。
@@ -1409,6 +1435,12 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         /// </summary>
         /// <param name="interlockIO">削除するインターロックIO情報。</param>
         Task DeleteInterlockIOAsync(InterlockIO interlockIO);
+
+        /// <summary>
+        /// インターロックIO情報を更新します。
+        /// </summary>
+        /// <param name="interlockIO">更新するインターロックIO情報。</param>
+        Task UpdateInterlockIOAsync(InterlockIO interlockIO);
 
         #endregion
 

@@ -1,0 +1,44 @@
+MIT License
+
+Copyright (c) 2025 KANAMORI SYSTEM Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+DISCLAIMER / 免責事項
+
+This software is provided for educational and reference purposes only.
+The authors and contributors are not responsible for any damages, losses,
+or issues that may arise from using this software in any environment,
+including but not limited to production systems, industrial equipment,
+or PLC (Programmable Logic Controller) applications.
+
+Use of this software is entirely at your own risk. Users are responsible
+for ensuring the software meets their specific requirements and for
+conducting appropriate testing before deployment.
+
+本ソフトウェアは、教育および参考目的でのみ提供されています。
+作者および貢献者は、本番システム、産業機器、PLC（プログラマブルロジック
+コントローラ）アプリケーションを含むいかなる環境での使用によって生じる
+損害、損失、または問題について一切の責任を負いません。
+
+本ソフトウェアの使用は完全に自己責任となります。ユーザーは、ソフトウェアが
+特定の要件を満たしていることを確認し、展開前に適切なテストを実施する
+責任があります。

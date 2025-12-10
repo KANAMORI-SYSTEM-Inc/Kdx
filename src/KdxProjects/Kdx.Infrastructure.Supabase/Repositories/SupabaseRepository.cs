@@ -101,6 +101,15 @@ namespace Kdx.Infrastructure.Supabase.Repositories
             return response.Models.Select(e => e.ToDto()).ToList();
         }
 
+        public async Task<List<Cycle>> GetCyclesByPlcIdAsync(int plcId)
+        {
+            var response = await _supabaseClient
+                .From<CycleEntity>()
+                .Where(c => c.PlcId == plcId)
+                .Get();
+            return response.Models.Select(e => e.ToDto()).ToList();
+        }
+
         public async Task<List<CylinderCycle>> GetCylinderCyclesByPlcIdAsync(int plcId)
         {
             var response = await _supabaseClient
@@ -597,6 +606,15 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 .From<ProcessDetailEntity>()
                 .Where(p => p.Id == id)
                 .Delete();
+        }
+
+        public async Task<List<ProcessDetail>> GetProcessDetailsByCycleIdAsync(int cycleId)
+        {
+            var response = await _supabaseClient
+                .From<ProcessDetailEntity>()
+                .Where(p => p.CycleId == cycleId)
+                .Get();
+            return response.Models.Select(e => e.ToDto()).ToList();
         }
 
         public async Task DeleteOperationAsync(int id)
@@ -2191,6 +2209,40 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 Debug.WriteLine($"[DeleteInterlockIOAsync] エラー: {ex.Message}");
                 throw;
             }
+        }
+
+        public async Task UpdateInterlockAsync(Interlock interlock)
+        {
+            var entity = InterlockEntity.FromDto(interlock);
+            await _supabaseClient
+                .From<InterlockEntity>()
+                .Where(e => e.CylinderId == interlock.CylinderId)
+                .Where(e => e.SortId == interlock.SortId)
+                .Update(entity);
+        }
+
+        public async Task UpdateInterlockConditionAsync(InterlockConditionDTO interlockCondition)
+        {
+            var entity = InterlockConditionDTOEntity.FromDto(interlockCondition);
+            await _supabaseClient
+                .From<InterlockConditionDTOEntity>()
+                .Where(e => e.CylinderId == interlockCondition.CylinderId)
+                .Where(e => e.InterlockSortId == interlockCondition.InterlockSortId)
+                .Where(e => e.ConditionNumber == interlockCondition.ConditionNumber)
+                .Update(entity);
+        }
+
+        public async Task UpdateInterlockIOAsync(InterlockIO interlockIO)
+        {
+            var entity = InterlockIOEntity.FromDto(interlockIO);
+            await _supabaseClient
+                .From<InterlockIOEntity>()
+                .Where(e => e.CylinderId == interlockIO.CylinderId)
+                .Where(e => e.PlcId == interlockIO.PlcId)
+                .Where(e => e.IOAddress == interlockIO.IOAddress)
+                .Where(e => e.InterlockSortId == interlockIO.InterlockSortId)
+                .Where(e => e.ConditionNumber == interlockIO.ConditionNumber)
+                .Update(entity);
         }
 
         public async Task<List<InterlockConditionType>> GetInterlockConditionTypesAsync()

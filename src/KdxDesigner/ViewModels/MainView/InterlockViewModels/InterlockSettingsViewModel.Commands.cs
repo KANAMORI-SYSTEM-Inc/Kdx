@@ -365,11 +365,21 @@ namespace KdxDesigner.ViewModels
                 // Interlocksを保存（複合キー対応）
                 await _supabaseRepository.UpsertInterlocksAsync(interlocksToSave);
 
+                // 保存されたInterlocksのキーセットを作成
+                var savedInterlockKeys = new HashSet<(int cylinderId, int sortId)>(
+                    interlocksToSave.Select(i => (i.CylinderId, i.SortId))
+                );
+
                 // キャッシュから全てのInterlockConditionsを収集して保存
+                // ただし、実際に保存されたInterlocksに対応するもののみ
                 var allConditionsToSave = new List<InterlockConditionDTO>();
                 foreach (var kvp in _allConditionsByInterlockKey)
                 {
-                    allConditionsToSave.AddRange(kvp.Value);
+                    // InterlockConditionのキーがsavedInterlockKeysに存在するか確認
+                    if (savedInterlockKeys.Contains(kvp.Key))
+                    {
+                        allConditionsToSave.AddRange(kvp.Value);
+                    }
                 }
 
                 if (allConditionsToSave.Any())
@@ -434,6 +444,7 @@ namespace KdxDesigner.ViewModels
             var preConditionViewModel = new InterlockPreConditionViewModel(
                 _supabaseRepository,
                 SelectedInterlock.GetInterlock(),
+                _plcId,
                 preConditionWindow);
             preConditionWindow.DataContext = preConditionViewModel;
             preConditionWindow.Owner = _window;

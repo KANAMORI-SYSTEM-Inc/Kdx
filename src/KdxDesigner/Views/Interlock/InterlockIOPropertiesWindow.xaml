@@ -1,0 +1,152 @@
+<Window x:Class="KdxDesigner.Views.Interlock.InterlockIOPropertiesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="インターロックIOプロパティ" Height="550" Width="500"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="インターロックIOプロパティ" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- 紐づくインターロック情報 -->
+                <Border Background="#E8F4FD" BorderBrush="#0078D4" BorderThickness="1" Padding="10" Margin="0,0,0,10" CornerRadius="3">
+                    <StackPanel>
+                        <TextBlock Text="紐づくインターロック (複合キー)" FontWeight="Bold" Margin="0,0,0,5"/>
+                        <Grid Margin="0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Interlock.CylinderId:"/>
+                            <TextBlock Grid.Column="1" Text="{Binding CylinderId}" FontWeight="Bold"/>
+                        </Grid>
+                        <Grid Margin="0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Interlock.SortId:"/>
+                            <TextBlock Grid.Column="1" Text="{Binding InterlockSortId}" FontWeight="Bold"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 紐づくインターロック条件情報 -->
+                <Border Background="#FFF8E1" BorderBrush="#FFA000" BorderThickness="1" Padding="10" Margin="0,0,0,10" CornerRadius="3">
+                    <StackPanel>
+                        <TextBlock Text="紐づくインターロック条件 (複合キー)" FontWeight="Bold" Margin="0,0,0,5"/>
+                        <Grid Margin="0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Condition.CylinderId:"/>
+                            <TextBlock Grid.Column="1" Text="{Binding CylinderId}" FontWeight="Bold"/>
+                        </Grid>
+                        <Grid Margin="0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Condition.SortId:"/>
+                            <TextBlock Grid.Column="1" Text="{Binding InterlockSortId}" FontWeight="Bold"/>
+                        </Grid>
+                        <Grid Margin="0,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Condition.ConditionNo:"/>
+                            <TextBlock Grid.Column="1" Text="{Binding ConditionNumber}" FontWeight="Bold"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- シリンダーID (読み取り専用) -->
+                <Grid Margin="0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="シリンダーID:"/>
+                    <TextBox Grid.Column="1" Text="{Binding CylinderId}" IsReadOnly="True" Background="#F0F0F0"/>
+                </Grid>
+
+                <!-- インターロックソートID (読み取り専用) -->
+                <Grid Margin="0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="インターロックソートID:"/>
+                    <TextBox Grid.Column="1" Text="{Binding InterlockSortId}" IsReadOnly="True" Background="#F0F0F0"/>
+                </Grid>
+
+                <!-- 条件番号 (読み取り専用) -->
+                <Grid Margin="0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="条件番号:"/>
+                    <TextBox Grid.Column="1" Text="{Binding ConditionNumber}" IsReadOnly="True" Background="#F0F0F0"/>
+                </Grid>
+
+                <!-- PLC ID (読み取り専用) -->
+                <Grid Margin="0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="PLC ID:"/>
+                    <TextBox Grid.Column="1" Text="{Binding PlcId}" IsReadOnly="True" Background="#F0F0F0"/>
+                </Grid>
+
+                <!-- IOアドレス (読み取り専用) -->
+                <Grid Margin="0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="IOアドレス:"/>
+                    <TextBox Grid.Column="1" Text="{Binding IoAddress}" IsReadOnly="True" Background="#F0F0F0"/>
+                </Grid>
+
+                <!-- IO名称 (読み取り専用) -->
+                <Grid Margin="0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="IO名称:"/>
+                    <TextBox Grid.Column="1" Text="{Binding IoName}" IsReadOnly="True" Background="#F0F0F0"/>
+                </Grid>
+
+                <!-- ON条件 -->
+                <Grid Margin="0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="ON条件:"/>
+                    <CheckBox Grid.Column="1" IsChecked="{Binding IsOnCondition}" VerticalAlignment="Center"/>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ボタン -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="保存" Width="80" Margin="5" Command="{Binding SaveCommand}"/>
+            <Button Content="キャンセル" Width="80" Margin="5" Command="{Binding CancelCommand}"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -419,6 +419,43 @@ namespace KdxDesigner.ViewModels
             view.ShowDialog();
         }
 
+        // TODO: MemoryProfileManagerViewを作成後、コメントを解除
+        // [RelayCommand]
+        // private void OpenMemoryProfileManager()
+        // {
+        //     if (_repository == null)
+        //     {
+        //         MessageBox.Show("システムの初期化が不完全なため、処理を実行できません。", "エラー");
+        //         return;
+        //     }
+        //
+        //     var view = new ViewsMemory.MemoryProfileManagerView(_repository);
+        //     var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
+        //     if (mainWindow != null)
+        //     {
+        //         view.Owner = mainWindow;
+        //     }
+        //     view.ShowDialog();
+        // }
+
+        [RelayCommand]
+        private void OpenAuditLogView()
+        {
+            if (_repository == null)
+            {
+                MessageBox.Show("システムの初期化が不完全なため、処理を実行できません。", "エラー");
+                return;
+            }
+
+            var view = new AuditLogView(_repository);
+            var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
+            if (mainWindow != null)
+            {
+                view.Owner = mainWindow;
+            }
+            view.ShowDialog();
+        }
+
         // Authentication
         #region Authentication Commands
 

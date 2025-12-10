@@ -125,5 +125,10 @@ namespace KdxDesigner.ViewModels
 
         // シリンダープロパティ表示コマンド
         public ICommand ShowCylinderPropertiesCommand { get; set; }
+
+        // プロパティウィンドウ表示コマンド
+        public ICommand ShowInterlockPropertiesCommand { get; set; }
+        public ICommand ShowConditionPropertiesCommand { get; set; }
+        public ICommand ShowIOPropertiesCommand { get; set; }
     }
 }

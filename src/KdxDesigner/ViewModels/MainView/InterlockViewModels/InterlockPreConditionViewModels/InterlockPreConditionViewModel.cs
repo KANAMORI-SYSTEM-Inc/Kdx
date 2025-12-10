@@ -5,28 +5,55 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Input;
 
 namespace KdxDesigner.ViewModels
 {
     public partial class InterlockPreConditionViewModel : INotifyPropertyChanged
     {
-        public InterlockPreConditionViewModel(SupabaseRepository supabaseRepository, Interlock interlock, Window window)
+        public InterlockPreConditionViewModel(SupabaseRepository supabaseRepository, Interlock interlock, int plcId, Window window)
         {
             _supabaseRepository = supabaseRepository;
             _interlock = interlock;
+            _plcId = plcId;
             _window = window;
 
             PreCondition1List = new ObservableCollection<InterlockPrecondition1>();
             PreCondition2List = new ObservableCollection<InterlockPrecondition2>();
+            ProcessDetails = new ObservableCollection<ProcessDetail>();
 
             AddPreCondition1Command = new RelayCommand(() => AddPreCondition1(null));
             DeletePreCondition1Command = new RelayCommand(() => DeletePreCondition1(null), () => CanDeletePreCondition1(null));
             AddPreCondition2Command = new RelayCommand(() => AddPreCondition2(null));
             DeletePreCondition2Command = new RelayCommand(() => DeletePreCondition2(null), () => CanDeletePreCondition2(null));
+            ClearStartDetailCommand = new RelayCommand(ClearStartDetail, () => SelectedStartProcessDetail != null);
+            ClearEndDetailCommand = new RelayCommand(ClearEndDetail, () => SelectedEndProcessDetail != null);
             SaveCommand = new RelayCommand(async () => await SaveAsync());
             CancelCommand = new RelayCommand(() => Cancel(null));
 
             _ = LoadDataAsync();
+        }
+
+        // クリアコマンド
+        public ICommand ClearStartDetailCommand { get; }
+        public ICommand ClearEndDetailCommand { get; }
+
+        private void ClearStartDetail()
+        {
+            SelectedStartProcessDetail = null;
+            if (SelectedPreCondition2 != null)
+            {
+                SelectedPreCondition2.StartDetailId = null;
+            }
+        }
+
+        private void ClearEndDetail()
+        {
+            SelectedEndProcessDetail = null;
+            if (SelectedPreCondition2 != null)
+            {
+                SelectedPreCondition2.EndDetailId = null;
+            }
         }
 
         private async Task LoadDataAsync()
@@ -49,6 +76,9 @@ namespace KdxDesigner.ViewModels
                     PreCondition2List.Add(item);
                 }
 
+                // ProcessDetailsを読み込み（PlcIdに紐づくCycleから取得）
+                await LoadProcessDetailsAsync();
+
                 // 現在のInterlockに設定されているPreConditionを選択
                 if (_interlock.PreConditionID1.HasValue)
                 {
@@ -65,6 +95,31 @@ namespace KdxDesigner.ViewModels
             catch (Exception ex)
             {
                 MessageBox.Show($"データの読み込みに失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task LoadProcessDetailsAsync()
+        {
+            try
+            {
+                ProcessDetails.Clear();
+
+                // PlcIdに紐づくCycleを取得
+                var cycles = await _supabaseRepository.GetCyclesByPlcIdAsync(_plcId);
+
+                // 各CycleのProcessDetailを取得
+                foreach (var cycle in cycles)
+                {
+                    var processDetails = await _supabaseRepository.GetProcessDetailsByCycleIdAsync(cycle.Id);
+                    foreach (var pd in processDetails)
+                    {
+                        ProcessDetails.Add(pd);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"ProcessDetailsの読み込みに失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

@@ -1,6 +1,7 @@
 using Kdx.Contracts.DTOs;
 using Kdx.Infrastructure.Supabase.Entities;
 using Supabase;
+using static global::Supabase.Postgrest.Constants;
 
 namespace Kdx.Infrastructure.Supabase.Repositories
 {
@@ -418,6 +419,51 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 .Where(io => io.PlcId == id)
                 .Get();
             return response.Models.FirstOrDefault()?.ToDto();
+        }
+
+        #endregion
+
+        #region AuditLog Methods
+
+        public async Task<List<AuditLog>> GetAuditLogsAsync(int limit = 100, int offset = 0)
+        {
+            var response = await _supabaseClient
+                .From<AuditLogWithUserEntity>()
+                .Order("changed_at", Ordering.Descending)
+                .Range(offset, offset + limit - 1)
+                .Get();
+            return response.Models.Select(e => e.ToDto()).ToList();
+        }
+
+        public async Task<List<AuditLog>> GetAuditLogsByTableAsync(string tableName, int limit = 100)
+        {
+            var response = await _supabaseClient
+                .From<AuditLogWithUserEntity>()
+                .Where(a => a.TableName == tableName)
+                .Order("changed_at", Ordering.Descending)
+                .Limit(limit)
+                .Get();
+            return response.Models.Select(e => e.ToDto()).ToList();
+        }
+
+        public async Task<List<AuditLog>> GetAuditLogsByDateRangeAsync(DateTime from, DateTime to, int limit = 100)
+        {
+            var response = await _supabaseClient
+                .From<AuditLogWithUserEntity>()
+                .Filter("changed_at", Operator.GreaterThanOrEqual, from.ToString("yyyy-MM-ddTHH:mm:ss"))
+                .Filter("changed_at", Operator.LessThanOrEqual, to.ToString("yyyy-MM-ddTHH:mm:ss"))
+                .Order("changed_at", Ordering.Descending)
+                .Limit(limit)
+                .Get();
+            return response.Models.Select(e => e.ToDto()).ToList();
+        }
+
+        public async Task<int> GetAuditLogCountAsync()
+        {
+            var count = await _supabaseClient
+                .From<AuditLogWithUserEntity>()
+                .Count(CountType.Exact);
+            return count;
         }
 
         #endregion
