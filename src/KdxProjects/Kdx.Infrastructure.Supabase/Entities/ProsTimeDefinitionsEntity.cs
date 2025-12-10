@@ -1,6 +1,6 @@
 using Kdx.Contracts.DTOs;
-using Postgrest.Attributes;
-using Postgrest.Models;
+using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
 
 namespace Kdx.Infrastructure.Supabase.Entities
 {

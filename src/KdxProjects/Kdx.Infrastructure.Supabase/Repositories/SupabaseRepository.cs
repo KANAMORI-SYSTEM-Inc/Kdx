@@ -3,6 +3,7 @@ using Kdx.Infrastructure.Supabase.Entities;
 using Supabase;
 using System.Diagnostics;
 using Timer = Kdx.Contracts.DTOs.Timer;
+using static global::Supabase.Postgrest.Constants;
 
 namespace Kdx.Infrastructure.Supabase.Repositories
 {
@@ -721,7 +722,7 @@ namespace Kdx.Infrastructure.Supabase.Repositories
             // Supabase requires a WHERE clause for DELETE. To delete all records, we use a condition that's always true
             await _supabaseClient
                 .From<MnemonicTimerDeviceEntity>()
-                .Filter("PlcId", Postgrest.Constants.Operator.GreaterThanOrEqual, "0")
+                .Filter("PlcId", Operator.GreaterThanOrEqual, "0")
                 .Delete();
         }
 
@@ -1446,7 +1447,7 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         {
             await _supabaseClient
                 .From<ProcessErrorEntity>()
-                .Filter("PlcId", Postgrest.Constants.Operator.GreaterThanOrEqual, "0") // 蜈ｨ蜑企勁縺ｮ縺溘ａ縺ｮ譚｡莉ｶ
+                .Filter("PlcId", Operator.GreaterThanOrEqual, "0") // 蜈ｨ蜑企勁縺ｮ縺溘ａ縺ｮ譚｡莉ｶ
                 .Delete();
         }
 
@@ -1552,7 +1553,7 @@ namespace Kdx.Infrastructure.Supabase.Repositories
             // Supabase requires a WHERE clause for DELETE. To delete all records, we use a condition that's always true
             await _supabaseClient
                 .From<MnemonicDeviceEntity>()
-                .Filter("PlcId", Postgrest.Constants.Operator.GreaterThanOrEqual, "0")
+                .Filter("PlcId", Operator.GreaterThanOrEqual, "0")
                 .Delete();
         }
 
@@ -1583,7 +1584,7 @@ namespace Kdx.Infrastructure.Supabase.Repositories
             // Supabase requires a WHERE clause for DELETE. To delete all records, we use a condition that's always true
             await _supabaseClient
                 .From<MnemonicSpeedDeviceEntity>()
-                .Filter("ID", Postgrest.Constants.Operator.GreaterThanOrEqual, "0")
+                .Filter("ID", Operator.GreaterThanOrEqual, "0")
                 .Delete();
         }
 
@@ -1636,7 +1637,7 @@ namespace Kdx.Infrastructure.Supabase.Repositories
             // Supabase requires a WHERE clause for DELETE. To delete all records, we use a condition that's always true
             await _supabaseClient
                 .From<ProsTimeEntity>()
-                .Filter("SortId", Postgrest.Constants.Operator.GreaterThanOrEqual, "0")
+                .Filter("SortId", Operator.GreaterThanOrEqual, "0")
                 .Delete();
         }
 
@@ -1863,8 +1864,8 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 // 削除前に対象レコードが存在するか確認
                 var existingRecords = await _supabaseClient
                     .From<InterlockEntity>()
-                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlock.CylinderId.ToString())
-                    .Filter("SortId", Postgrest.Constants.Operator.Equals, interlock.SortId.ToString())
+                    .Filter("CylinderId", Operator.Equals, interlock.CylinderId.ToString())
+                    .Filter("SortId", Operator.Equals, interlock.SortId.ToString())
                     .Get();
 
                 Debug.WriteLine($"  削除前のレコード数: {existingRecords?.Models?.Count ?? 0}");
@@ -1872,8 +1873,8 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 // 削除実行 - Filterを使用
                 await _supabaseClient
                     .From<InterlockEntity>()
-                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlock.CylinderId.ToString())
-                    .Filter("SortId", Postgrest.Constants.Operator.Equals, interlock.SortId.ToString())
+                    .Filter("CylinderId", Operator.Equals, interlock.CylinderId.ToString())
+                    .Filter("SortId", Operator.Equals, interlock.SortId.ToString())
                     .Delete();
 
                 Debug.WriteLine($"  削除完了");
@@ -1881,8 +1882,8 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 // 削除後に確認
                 var afterRecords = await _supabaseClient
                     .From<InterlockEntity>()
-                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlock.CylinderId.ToString())
-                    .Filter("SortId", Postgrest.Constants.Operator.Equals, interlock.SortId.ToString())
+                    .Filter("CylinderId", Operator.Equals, interlock.CylinderId.ToString())
+                    .Filter("SortId", Operator.Equals, interlock.SortId.ToString())
                     .Get();
 
                 Debug.WriteLine($"  削除後のレコード数: {afterRecords?.Models?.Count ?? 0}");
@@ -1905,8 +1906,8 @@ namespace Kdx.Infrastructure.Supabase.Repositories
             {
                 await _supabaseClient
                     .From<InterlockEntity>()
-                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlock.CylinderId.ToString())
-                    .Filter("SortId", Postgrest.Constants.Operator.Equals, interlock.SortId.ToString())
+                    .Filter("CylinderId", Operator.Equals, interlock.CylinderId.ToString())
+                    .Filter("SortId", Operator.Equals, interlock.SortId.ToString())
                     .Delete();
             }
         }
@@ -2037,9 +2038,9 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 // 削除前に対象レコードが存在するか確認
                 var existingRecords = await _supabaseClient
                     .From<InterlockConditionEntity>()
-                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlockCondition.CylinderId.ToString())
-                    .Filter("ConditionNumber", Postgrest.Constants.Operator.Equals, interlockCondition.ConditionNumber.ToString())
-                    .Filter("InterlockSortId", Postgrest.Constants.Operator.Equals, interlockCondition.InterlockSortId.ToString())
+                    .Filter("CylinderId", Operator.Equals, interlockCondition.CylinderId.ToString())
+                    .Filter("ConditionNumber", Operator.Equals, interlockCondition.ConditionNumber.ToString())
+                    .Filter("InterlockSortId", Operator.Equals, interlockCondition.InterlockSortId.ToString())
                     .Get();
 
                 Debug.WriteLine($"  削除前のレコード数: {existingRecords?.Models?.Count ?? 0}");
@@ -2055,9 +2056,9 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 // 削除実行 - Filterを使用
                 await _supabaseClient
                     .From<InterlockConditionEntity>()
-                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlockCondition.CylinderId.ToString())
-                    .Filter("ConditionNumber", Postgrest.Constants.Operator.Equals, interlockCondition.ConditionNumber.ToString())
-                    .Filter("InterlockSortId", Postgrest.Constants.Operator.Equals, interlockCondition.InterlockSortId.ToString())
+                    .Filter("CylinderId", Operator.Equals, interlockCondition.CylinderId.ToString())
+                    .Filter("ConditionNumber", Operator.Equals, interlockCondition.ConditionNumber.ToString())
+                    .Filter("InterlockSortId", Operator.Equals, interlockCondition.InterlockSortId.ToString())
                     .Delete();
 
                 Debug.WriteLine($"  削除完了");
@@ -2065,9 +2066,9 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 // 削除後に確認
                 var afterRecords = await _supabaseClient
                     .From<InterlockConditionEntity>()
-                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlockCondition.CylinderId.ToString())
-                    .Filter("ConditionNumber", Postgrest.Constants.Operator.Equals, interlockCondition.ConditionNumber.ToString())
-                    .Filter("InterlockSortId", Postgrest.Constants.Operator.Equals, interlockCondition.InterlockSortId.ToString())
+                    .Filter("CylinderId", Operator.Equals, interlockCondition.CylinderId.ToString())
+                    .Filter("ConditionNumber", Operator.Equals, interlockCondition.ConditionNumber.ToString())
+                    .Filter("InterlockSortId", Operator.Equals, interlockCondition.InterlockSortId.ToString())
                     .Get();
 
                 Debug.WriteLine($"  削除後のレコード数: {afterRecords?.Models?.Count ?? 0}");
@@ -2091,9 +2092,9 @@ namespace Kdx.Infrastructure.Supabase.Repositories
             {
                 await _supabaseClient
                     .From<InterlockConditionEntity>()
-                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, condition.CylinderId.ToString())
-                    .Filter("ConditionNumber", Postgrest.Constants.Operator.Equals, condition.ConditionNumber.ToString())
-                    .Filter("InterlockSortId", Postgrest.Constants.Operator.Equals, condition.InterlockSortId.ToString())
+                    .Filter("CylinderId", Operator.Equals, condition.CylinderId.ToString())
+                    .Filter("ConditionNumber", Operator.Equals, condition.ConditionNumber.ToString())
+                    .Filter("InterlockSortId", Operator.Equals, condition.InterlockSortId.ToString())
                     .Delete();
             }
         }
@@ -2147,11 +2148,11 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 // 削除前に対象レコードが存在するか確認
                 var existingRecords = await _supabaseClient
                     .From<InterlockIOEntity>()
-                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlockIO.CylinderId.ToString())
-                    .Filter("PlcId", Postgrest.Constants.Operator.Equals, interlockIO.PlcId.ToString())
-                    .Filter("IOAddress", Postgrest.Constants.Operator.Equals, interlockIO.IOAddress)
-                    .Filter("InterlockSortId", Postgrest.Constants.Operator.Equals, interlockIO.InterlockSortId.ToString())
-                    .Filter("ConditionNumber", Postgrest.Constants.Operator.Equals, interlockIO.ConditionNumber.ToString())
+                    .Filter("CylinderId", Operator.Equals, interlockIO.CylinderId.ToString())
+                    .Filter("PlcId", Operator.Equals, interlockIO.PlcId.ToString())
+                    .Filter("IOAddress", Operator.Equals, interlockIO.IOAddress)
+                    .Filter("InterlockSortId", Operator.Equals, interlockIO.InterlockSortId.ToString())
+                    .Filter("ConditionNumber", Operator.Equals, interlockIO.ConditionNumber.ToString())
                     .Get();
 
                 Debug.WriteLine($"  削除前のレコード数: {existingRecords?.Models?.Count ?? 0}");
@@ -2159,11 +2160,11 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 // 削除実行 - Filterを使用
                 await _supabaseClient
                     .From<InterlockIOEntity>()
-                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlockIO.CylinderId.ToString())
-                    .Filter("PlcId", Postgrest.Constants.Operator.Equals, interlockIO.PlcId.ToString())
-                    .Filter("IOAddress", Postgrest.Constants.Operator.Equals, interlockIO.IOAddress)
-                    .Filter("InterlockSortId", Postgrest.Constants.Operator.Equals, interlockIO.InterlockSortId.ToString())
-                    .Filter("ConditionNumber", Postgrest.Constants.Operator.Equals, interlockIO.ConditionNumber.ToString())
+                    .Filter("CylinderId", Operator.Equals, interlockIO.CylinderId.ToString())
+                    .Filter("PlcId", Operator.Equals, interlockIO.PlcId.ToString())
+                    .Filter("IOAddress", Operator.Equals, interlockIO.IOAddress)
+                    .Filter("InterlockSortId", Operator.Equals, interlockIO.InterlockSortId.ToString())
+                    .Filter("ConditionNumber", Operator.Equals, interlockIO.ConditionNumber.ToString())
                     .Delete();
 
                 Debug.WriteLine($"  削除完了");
@@ -2171,11 +2172,11 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 // 削除後に確認
                 var afterRecords = await _supabaseClient
                     .From<InterlockIOEntity>()
-                    .Filter("CylinderId", Postgrest.Constants.Operator.Equals, interlockIO.CylinderId.ToString())
-                    .Filter("PlcId", Postgrest.Constants.Operator.Equals, interlockIO.PlcId.ToString())
-                    .Filter("IOAddress", Postgrest.Constants.Operator.Equals, interlockIO.IOAddress)
-                    .Filter("InterlockSortId", Postgrest.Constants.Operator.Equals, interlockIO.InterlockSortId.ToString())
-                    .Filter("ConditionNumber", Postgrest.Constants.Operator.Equals, interlockIO.ConditionNumber.ToString())
+                    .Filter("CylinderId", Operator.Equals, interlockIO.CylinderId.ToString())
+                    .Filter("PlcId", Operator.Equals, interlockIO.PlcId.ToString())
+                    .Filter("IOAddress", Operator.Equals, interlockIO.IOAddress)
+                    .Filter("InterlockSortId", Operator.Equals, interlockIO.InterlockSortId.ToString())
+                    .Filter("ConditionNumber", Operator.Equals, interlockIO.ConditionNumber.ToString())
                     .Get();
 
                 Debug.WriteLine($"  削除後のレコード数: {afterRecords?.Models?.Count ?? 0}");
