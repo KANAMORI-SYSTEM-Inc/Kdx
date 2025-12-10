@@ -1,0 +1,153 @@
+<Window x:Class="KdxDesigner.Views.ProjectInfo.ProjectInfoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="プロジェクト情報管理" Height="700" Width="1000"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="プロジェクト情報管理" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+
+        <TabControl Grid.Row="1">
+            <!-- Company タブ -->
+            <TabItem Header="会社 (Company)">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="追加" Width="80" Margin="0,0,5,0" Command="{Binding AddCompanyCommand}"/>
+                        <Button Content="編集" Width="80" Margin="0,0,5,0" Command="{Binding EditCompanyCommand}"/>
+                        <Button Content="削除" Width="80" Command="{Binding DeleteCompanyCommand}"/>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding Companies}"
+                              SelectedItem="{Binding SelectedCompany}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              SelectionMode="Single"
+                              CanUserAddRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
+                            <DataGridTextColumn Header="会社名" Binding="{Binding CompanyName}" Width="200"/>
+                            <DataGridTextColumn Header="住所" Binding="{Binding Address}" Width="*"/>
+                            <DataGridTextColumn Header="作成日時" Binding="{Binding CreatedAt}" Width="150"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- Model タブ -->
+            <TabItem Header="機種 (Model)">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="追加" Width="80" Margin="0,0,5,0" Command="{Binding AddModelCommand}"/>
+                        <Button Content="編集" Width="80" Margin="0,0,5,0" Command="{Binding EditModelCommand}"/>
+                        <Button Content="削除" Width="80" Command="{Binding DeleteModelCommand}"/>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding Models}"
+                              SelectedItem="{Binding SelectedModel}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              SelectionMode="Single"
+                              CanUserAddRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
+                            <DataGridTextColumn Header="機種名" Binding="{Binding ModelName}" Width="200"/>
+                            <DataGridTextColumn Header="会社ID" Binding="{Binding CompanyId}" Width="80"/>
+                            <DataGridTextColumn Header="会社名" Binding="{Binding CompanyName}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- PLC タブ -->
+            <TabItem Header="PLC">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="追加" Width="80" Margin="0,0,5,0" Command="{Binding AddPLCCommand}"/>
+                        <Button Content="編集" Width="80" Margin="0,0,5,0" Command="{Binding EditPLCCommand}"/>
+                        <Button Content="削除" Width="80" Command="{Binding DeletePLCCommand}"/>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding PLCs}"
+                              SelectedItem="{Binding SelectedPLC}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              SelectionMode="Single"
+                              CanUserAddRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
+                            <DataGridTextColumn Header="PLC名" Binding="{Binding PlcName}" Width="200"/>
+                            <DataGridTextColumn Header="メーカー" Binding="{Binding Maker}" Width="150"/>
+                            <DataGridTextColumn Header="機種ID" Binding="{Binding ModelId}" Width="80"/>
+                            <DataGridTextColumn Header="機種名" Binding="{Binding ModelName}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- Cycle タブ -->
+            <TabItem Header="サイクル (Cycle)">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="追加" Width="80" Margin="0,0,5,0" Command="{Binding AddCycleCommand}"/>
+                        <Button Content="編集" Width="80" Margin="0,0,5,0" Command="{Binding EditCycleCommand}"/>
+                        <Button Content="削除" Width="80" Command="{Binding DeleteCycleCommand}"/>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding Cycles}"
+                              SelectedItem="{Binding SelectedCycle}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              SelectionMode="Single"
+                              CanUserAddRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
+                            <DataGridTextColumn Header="サイクル名" Binding="{Binding CycleName}" Width="200"/>
+                            <DataGridTextColumn Header="PLC ID" Binding="{Binding PlcId}" Width="80"/>
+                            <DataGridTextColumn Header="PLC名" Binding="{Binding PlcName}" Width="150"/>
+                            <DataGridTextColumn Header="スタートデバイス" Binding="{Binding StartDevice}" Width="120"/>
+                            <DataGridTextColumn Header="リセットデバイス" Binding="{Binding ResetDevice}" Width="120"/>
+                            <DataGridTextColumn Header="ポーズデバイス" Binding="{Binding PauseDevice}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- 閉じるボタン -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="閉じる" Width="100" Command="{Binding CloseCommand}"/>
+        </StackPanel>
+    </Grid>
+</Window>

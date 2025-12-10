@@ -1480,6 +1480,38 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         /// <param name="preconditions">挿入または更新するインターロック事前条件2のリスト。</param>
         Task UpsertInterlockPrecondition2ListAsync(List<InterlockPrecondition2> preconditions);
 
+        /// <summary>
+        /// 全てのインターロック事前条件3を取得します。
+        /// 特定IOまたは特定デバイスがONしている場合にインターロックが有効になる条件
+        /// </summary>
+        /// <returns>インターロック事前条件3のリスト。</returns>
+        Task<List<InterlockPrecondition3>> GetInterlockPrecondition3ListAsync();
+
+        /// <summary>
+        /// インターロック事前条件3をバッチで挿入または更新します。
+        /// </summary>
+        /// <param name="preconditions">挿入または更新するインターロック事前条件3のリスト。</param>
+        Task UpsertInterlockPrecondition3ListAsync(List<InterlockPrecondition3> preconditions);
+
+        /// <summary>
+        /// インターロック事前条件3を追加します。
+        /// </summary>
+        /// <param name="precondition">追加するインターロック事前条件3。</param>
+        /// <returns>追加されたインターロック事前条件3（IDが設定されたもの）。</returns>
+        Task<InterlockPrecondition3> AddInterlockPrecondition3Async(InterlockPrecondition3 precondition);
+
+        /// <summary>
+        /// インターロック事前条件3を更新します。
+        /// </summary>
+        /// <param name="precondition">更新するインターロック事前条件3。</param>
+        Task UpdateInterlockPrecondition3Async(InterlockPrecondition3 precondition);
+
+        /// <summary>
+        /// インターロック事前条件3を削除します。
+        /// </summary>
+        /// <param name="id">削除するインターロック事前条件3のID。</param>
+        Task DeleteInterlockPrecondition3Async(int id);
+
         #endregion
 
         #region MemoryProfile

@@ -50,7 +50,8 @@
       "Bash(echo $SUPABASE_ACCESS_TOKEN)",
       "Bash(supabase link:*)",
       "Bash(supabase db execute:*)",
-      "Bash(supabase db:*)"
+      "Bash(supabase db:*)",
+      "Bash(Select-Object -First 50)"
     ],
     "deny": [],
     "ask": []

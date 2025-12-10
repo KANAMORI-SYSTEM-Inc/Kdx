@@ -27,6 +27,9 @@ namespace Kdx.Infrastructure.Supabase.Entities
         [Column("PreConditionID2")]
         public int? PreConditionID2 { get; set; }
 
+        [Column("PreConditionID3")]
+        public int? PreConditionID3 { get; set; }
+
         [Column("GoOrBack")]
         public int GoOrBack { get; set; }
 
@@ -38,6 +41,7 @@ namespace Kdx.Infrastructure.Supabase.Entities
             ConditionCylinderId = dto.ConditionCylinderId,
             PreConditionID1 = dto.PreConditionID1,
             PreConditionID2 = dto.PreConditionID2,
+            PreConditionID3 = dto.PreConditionID3,
             GoOrBack = dto.GoOrBack
         };
 
@@ -49,6 +53,7 @@ namespace Kdx.Infrastructure.Supabase.Entities
             ConditionCylinderId = this.ConditionCylinderId,
             PreConditionID1 = this.PreConditionID1,
             PreConditionID2 = this.PreConditionID2,
+            PreConditionID3 = this.PreConditionID3,
             GoOrBack = this.GoOrBack
         };
     }

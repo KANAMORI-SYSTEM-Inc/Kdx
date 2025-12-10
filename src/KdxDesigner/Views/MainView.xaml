@@ -1,42 +1,46 @@
-<Window x:Class="KdxDesigner.Views.MainView"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:KdxDesigner.ViewModels"
-        xmlns:utils="clr-namespace:KdxDesigner.Utils"
-        xmlns:controls="clr-namespace:KdxDesigner.Controls"
-        mc:Ignorable="d"
-        Title="KDX Designer - ラダープログラム自動生成システム" Height="1000" Width="1920"
-        WindowStartupLocation="CenterScreen">
+<Window
+    x:Class="KdxDesigner.Views.MainView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:KdxDesigner.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:utils="clr-namespace:KdxDesigner.Utils"
+    xmlns:vm="clr-namespace:KdxDesigner.ViewModels"
+    Title="KDX Designer - ラダープログラム自動生成システム"
+    Width="1920"
+    Height="1000"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
 
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_ファイル">
-                <MenuItem Header="設定を開く" Command="{Binding OpenSettingsCommand}" />
+                <MenuItem Command="{Binding OpenSettingsCommand}" Header="設定を開く" />
+                <MenuItem Command="{Binding OpenProjectInfoCommand}" Header="プロジェクト情報管理" />
                 <Separator />
-                <MenuItem Header="ログアウト" Command="{Binding SignOutCommand}" />
-                <MenuItem Header="終了" Command="{Binding ExitCommand}" />
+                <MenuItem Command="{Binding SignOutCommand}" Header="ログアウト" />
+                <MenuItem Command="{Binding ExitCommand}" Header="終了" />
             </MenuItem>
             <MenuItem Header="_ツール">
-                <MenuItem Header="IOテーブル管理" Command="{Binding OpenIoEditorCommand}" />
-                <MenuItem Header="IO割付表変換" Command="{Binding OpenIOConversionWindowCommand}" />
-                <MenuItem Header="リンクデバイス管理" Command="{Binding OpenLinkDeviceManagerCommand}" />
-                <MenuItem Header="タイマー設定" Command="{Binding OpenTimerEditorCommand}" />
-                <!-- TODO: MemoryProfileManagerViewを作成後、コメントを解除 -->
+                <MenuItem Command="{Binding OpenIoEditorCommand}" Header="IOテーブル管理" />
+                <MenuItem Command="{Binding OpenIOConversionWindowCommand}" Header="IO割付表変換" />
+                <MenuItem Command="{Binding OpenLinkDeviceManagerCommand}" Header="リンクデバイス管理" />
+                <MenuItem Command="{Binding OpenTimerEditorCommand}" Header="タイマー設定" />
+                <!--  TODO: MemoryProfileManagerViewを作成後、コメントを解除  -->
                 <!-- <MenuItem Header="メモリプロファイル管理" Command="{Binding OpenMemoryProfileManagerCommand}" /> -->
-                <MenuItem Header="操作盤選択" Command="{Binding OpenControllBoxViewCommand}" />
-                <MenuItem Header="シリンダー管理" Command="{Binding OpenCylinderManagementCommand}" />
-                <Separator/>
-                <MenuItem Header="工程フロー詳細" Command="{Binding OpenProcessFlowDetailCommand}" />
-                <MenuItem Header="全ての工程フロー詳細を閉じる" Command="{Binding CloseAllProcessFlowWindowsCommand}" />
-                <Separator/>
-                <MenuItem Header="変更履歴" Command="{Binding OpenAuditLogViewCommand}" />
+                <MenuItem Command="{Binding OpenControllBoxViewCommand}" Header="操作盤選択" />
+                <MenuItem Command="{Binding OpenCylinderManagementCommand}" Header="シリンダー管理" />
+                <Separator />
+                <MenuItem Command="{Binding OpenProcessFlowDetailCommand}" Header="工程フロー詳細" />
+                <MenuItem Command="{Binding CloseAllProcessFlowWindowsCommand}" Header="全ての工程フロー詳細を閉じる" />
+                <Separator />
+                <MenuItem Command="{Binding OpenAuditLogViewCommand}" Header="変更履歴" />
             </MenuItem>
             <MenuItem Header="_アカウント">
                 <MenuItem Header="{Binding CurrentUserEmail}" IsEnabled="False" />
                 <Separator />
-                <MenuItem Header="ログアウト" Command="{Binding SignOutCommand}" />
+                <MenuItem Command="{Binding SignOutCommand}" Header="ログアウト" />
             </MenuItem>
         </Menu>
 
@@ -46,126 +50,239 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <GroupBox Header="プロジェクト選択" Grid.Row="0" Margin="0,0,0,5" Padding="5">
-                <Grid Margin="2" ShowGridLines="True">
+            <GroupBox
+                Grid.Row="0"
+                Margin="0,0,0,5"
+                Padding="5"
+                Header="プロジェクト選択">
+                <Grid Margin="2" ShowGridLines="False">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical">
+                    <StackPanel
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Orientation="Vertical">
                         <StackPanel HorizontalAlignment="Left">
-                            <TextBlock VerticalAlignment="Center" FontWeight="Bold"><Run Text="Compan"/><Run Language="ja-jp" Text="y"/></TextBlock>
-                            <ComboBox ItemsSource="{Binding Companies}" SelectedItem="{Binding SelectedCompany}" DisplayMemberPath="CompanyName" Width="200" Margin="0,5,0,0"/>
+                            <TextBlock VerticalAlignment="Center" FontWeight="Bold"><Run Text="Compan" /><Run Language="ja-jp" Text="y" /></TextBlock>
+                            <ComboBox
+                                Width="200"
+                                Margin="0,5,0,0"
+                                DisplayMemberPath="CompanyName"
+                                ItemsSource="{Binding Companies}"
+                                SelectedItem="{Binding SelectedCompany}" />
                         </StackPanel>
 
                         <StackPanel HorizontalAlignment="Left">
-                            <TextBlock Text="Model" VerticalAlignment="Center" FontWeight="Bold" Margin="0,5,0,0"/>
-                            <ComboBox ItemsSource="{Binding Models}" SelectedItem="{Binding SelectedModel}" DisplayMemberPath="ModelName" Width="200" Margin="0,5,0,0"/>
+                            <TextBlock
+                                Margin="0,5,0,0"
+                                VerticalAlignment="Center"
+                                FontWeight="Bold"
+                                Text="Model" />
+                            <ComboBox
+                                Width="200"
+                                Margin="0,5,0,0"
+                                DisplayMemberPath="ModelName"
+                                ItemsSource="{Binding Models}"
+                                SelectedItem="{Binding SelectedModel}" />
                         </StackPanel>
 
                         <StackPanel HorizontalAlignment="Left">
-                            <TextBlock Text="PLC" VerticalAlignment="Center" FontWeight="Bold" Margin="0,5,0,0"/>
-                            <ComboBox ItemsSource="{Binding Plcs}" SelectedItem="{Binding SelectedPlc}" DisplayMemberPath="PlcName" Width="200" Margin="0,5,0,0"/>
+                            <TextBlock
+                                Margin="0,5,0,0"
+                                VerticalAlignment="Center"
+                                FontWeight="Bold"
+                                Text="PLC" />
+                            <ComboBox
+                                Width="200"
+                                Margin="0,5,0,0"
+                                DisplayMemberPath="PlcName"
+                                ItemsSource="{Binding Plcs}"
+                                SelectedItem="{Binding SelectedPlc}" />
                         </StackPanel>
 
                         <StackPanel HorizontalAlignment="Left">
-                            <TextBlock Text="Cycle" VerticalAlignment="Center" FontWeight="Bold" Margin="0,5,0,0"/>
-                            <ComboBox ItemsSource="{Binding Cycles}" SelectedItem="{Binding SelectedCycle}" DisplayMemberPath="CycleName" Width="200" Margin="0,0,0,0"/>
+                            <TextBlock
+                                Margin="0,5,0,0"
+                                VerticalAlignment="Center"
+                                FontWeight="Bold"
+                                Text="Cycle" />
+                            <ComboBox
+                                Width="200"
+                                Margin="0,0,0,0"
+                                DisplayMemberPath="CycleName"
+                                ItemsSource="{Binding Cycles}"
+                                SelectedItem="{Binding SelectedCycle}" />
                         </StackPanel>
 
                     </StackPanel>
 
-                    <StackPanel Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Orientation="Vertical" Margin="15,20,0,0" Grid.RowSpan="2">
-                        <Button Content="メモリ編集" Command="{Binding OpenMemoryEditorCommand}" Width="100"/>
-                        <Button Content="メモリ設定" Command="{Binding MemorySettingCommand}" Width="100" VerticalAlignment="Center" Margin="0,10,0,0">
+                    <StackPanel
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        Grid.Column="1"
+                        Margin="15,20,0,0"
+                        HorizontalAlignment="Left"
+                        Orientation="Vertical">
+                        <Button
+                            Width="100"
+                            Command="{Binding OpenMemoryEditorCommand}"
+                            Content="メモリ編集" />
+                        <Button
+                            Width="100"
+                            Margin="0,10,0,0"
+                            VerticalAlignment="Center"
+                            Command="{Binding MemorySettingCommand}"
+                            Content="メモリ設定">
                             <Button.Style>
                                 <Style TargetType="{x:Type Button}">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsMemoryConfigured}" Value="True">
-                                            <Setter Property="Background" Value="#90EE90"/>
+                                            <Setter Property="Background" Value="#90EE90" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </Button.Style>
                         </Button>
-                        <Button Content="工程出力" Command="{Binding ProcessOutputCommand}"  Width="100" VerticalAlignment="Center" Margin="0,10,0,0" IsEnabled="{Binding IsMemoryConfigured}"/>
-                        <Button Content="工程フロー詳細" Command="{Binding OpenProcessFlowDetailCommand}"  Width="100" VerticalAlignment="Center" Margin="0,10,0,0"/>
-                        <Button Content="インターロック設定" Command="{Binding OpenInterlockSettingsCommand}"  Width="100" VerticalAlignment="Center" Margin="0,10,0,0"/>
-                        <CheckBox Content="デバッグモード" IsChecked="{Binding IsDebug, Mode=TwoWay}" Margin="0,10,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                        <Button
+                            Width="100"
+                            Margin="0,10,0,0"
+                            VerticalAlignment="Center"
+                            Command="{Binding ProcessOutputCommand}"
+                            Content="工程出力"
+                            IsEnabled="{Binding IsMemoryConfigured}" />
+                        <Button
+                            Width="100"
+                            Margin="0,10,0,0"
+                            VerticalAlignment="Center"
+                            Command="{Binding OpenProcessFlowDetailCommand}"
+                            Content="工程フロー詳細" />
+                        <Button
+                            Width="100"
+                            Margin="0,10,0,0"
+                            VerticalAlignment="Center"
+                            Command="{Binding OpenInterlockSettingsCommand}"
+                            Content="インターロック設定" />
+                        <CheckBox
+                            Margin="0,10,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Content="デバッグモード"
+                            IsChecked="{Binding IsDebug, Mode=TwoWay}" />
                     </StackPanel>
                 </Grid>
             </GroupBox>
 
-            <GroupBox Header="工程一覧" Grid.Row="1">
+            <GroupBox Grid.Row="1" Header="工程一覧">
                 <DockPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <!-- 追加ボタンヘッダー -->
-                        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="5,0,5,5">
-                            <Button Content="🗔 ウィンドウ表示" Command="{Binding OpenProcessListWindowCommand}"
-                                    Width="120" Height="25" Margin="0,0,5,0"
-                                    Background="#FF9800" Foreground="White" FontWeight="Bold"/>
+                        <!--  追加ボタンヘッダー  -->
+                        <StackPanel
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Margin="5,0,5,5"
+                            Orientation="Horizontal">
+                            <Button
+                                Width="120"
+                                Height="25"
+                                Margin="0,0,5,0"
+                                Background="#FF9800"
+                                Command="{Binding OpenProcessListWindowCommand}"
+                                Content="🗔 ウィンドウ表示"
+                                FontWeight="Bold"
+                                Foreground="White" />
                         </StackPanel>
 
-                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="5,0,5,5">
-                            <Button Content="🗔 ウィンドウ表示" Command="{Binding OpenProcessDetailListWindowCommand}"
-                                    Width="120" Height="25" Margin="0,0,5,0"
-                                    Background="#FF9800" Foreground="White" FontWeight="Bold"/>
+                        <StackPanel
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Margin="5,0,5,5"
+                            Orientation="Horizontal">
+                            <Button
+                                Width="120"
+                                Height="25"
+                                Margin="0,0,5,0"
+                                Background="#FF9800"
+                                Command="{Binding OpenProcessDetailListWindowCommand}"
+                                Content="🗔 ウィンドウ表示"
+                                FontWeight="Bold"
+                                Foreground="White" />
                         </StackPanel>
 
-                        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Margin="5,0,5,5">
-                            <Button Content="🗔 ウィンドウ表示" Command="{Binding OpenOperationListWindowCommand}"
-                                    Width="120" Height="25" Margin="0,0,5,0"
-                                    Background="#FF9800" Foreground="White" FontWeight="Bold"/>
+                        <StackPanel
+                            Grid.Row="0"
+                            Grid.Column="2"
+                            Margin="5,0,5,5"
+                            Orientation="Horizontal">
+                            <Button
+                                Width="120"
+                                Height="25"
+                                Margin="0,0,5,0"
+                                Background="#FF9800"
+                                Command="{Binding OpenOperationListWindowCommand}"
+                                Content="🗔 ウィンドウ表示"
+                                FontWeight="Bold"
+                                Foreground="White" />
                         </StackPanel>
 
-                        <!-- 工程一覧（共通コンポーネント） -->
-                        <controls:ProcessListControl Grid.Row="1" Grid.Column="0" Margin="5"
+                        <!--  工程一覧（共通コンポーネント）  -->
+                        <controls:ProcessListControl
                             x:Name="ProcessListControl"
-                            Repository="{Binding Repository}"
-                            Processes="{Binding Processes, Mode=TwoWay}"
-                            SelectedProcess="{Binding SelectedProcess, Mode=TwoWay}"
-                            ProcessCategories="{Binding ProcessCategories}"
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Margin="5"
                             CycleId="{Binding SelectedCycle.Id}"
+                            OpenProcessFlowDetailRequested="ProcessListControl_OpenProcessFlowDetailRequested"
                             PlcId="{Binding SelectedPlc.Id}"
+                            ProcessCategories="{Binding ProcessCategories}"
                             ProcessSelectionChanged="ProcessListControl_ProcessSelectionChanged"
-                            OpenProcessFlowDetailRequested="ProcessListControl_OpenProcessFlowDetailRequested"/>
-
-                        <!-- 工程詳細一覧（共通コンポーネント） -->
-                        <controls:ProcessDetailListControl Grid.Row="1" Grid.Column="1" Margin="5"
-                            x:Name="ProcessDetailListControl"
+                            Processes="{Binding Processes, Mode=TwoWay}"
                             Repository="{Binding Repository}"
-                            ProcessDetails="{Binding ProcessDetails, Mode=TwoWay}"
-                            SelectedProcessDetail="{Binding SelectedProcessDetail, Mode=TwoWay}"
+                            SelectedProcess="{Binding SelectedProcess, Mode=TwoWay}" />
+
+                        <!--  工程詳細一覧（共通コンポーネント）  -->
+                        <controls:ProcessDetailListControl
+                            x:Name="ProcessDetailListControl"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Margin="5"
+                            CycleId="{Binding SelectedCycle.Id}"
                             Operations="{Binding SelectedOperations}"
                             ProcessDetailCategories="{Binding ProcessDetailCategories}"
+                            ProcessDetailSelectionChanged="ProcessDetailListControl_SelectionChanged"
+                            ProcessDetails="{Binding ProcessDetails, Mode=TwoWay}"
                             ProcessId="{Binding SelectedProcess.Id}"
-                            CycleId="{Binding SelectedCycle.Id}"
-                            ProcessDetailSelectionChanged="ProcessDetailListControl_SelectionChanged"/>
-
-                        <!-- 操作一覧（共通コンポーネント） -->
-                        <controls:OperationListControl Grid.Row="1" Grid.Column="2" Margin="5"
-                            x:Name="OperationListControl"
                             Repository="{Binding Repository}"
-                            Operations="{Binding SelectedOperations, Mode=TwoWay}"
-                            SelectedOperation="{Binding SelectedOperation, Mode=TwoWay}"
-                            OperationCategories="{Binding OperationCategories}"
+                            SelectedProcessDetail="{Binding SelectedProcessDetail, Mode=TwoWay}" />
+
+                        <!--  操作一覧（共通コンポーネント）  -->
+                        <controls:OperationListControl
+                            x:Name="OperationListControl"
+                            Grid.Row="1"
+                            Grid.Column="2"
+                            Margin="5"
                             CycleId="{Binding SelectedCycle.Id}"
-                            PlcId="{Binding SelectedPlc.Id}"/>
+                            OperationCategories="{Binding OperationCategories}"
+                            Operations="{Binding SelectedOperations, Mode=TwoWay}"
+                            PlcId="{Binding SelectedPlc.Id}"
+                            Repository="{Binding Repository}"
+                            SelectedOperation="{Binding SelectedOperation, Mode=TwoWay}" />
                     </Grid>
                 </DockPanel>
             </GroupBox>

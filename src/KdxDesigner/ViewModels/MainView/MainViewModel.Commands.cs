@@ -14,6 +14,8 @@ using ViewsSettings = KdxDesigner.Views.Settings;
 using ViewsProcessFlow = KdxDesigner.Views.ProcessFlow;
 using ViewsInterlock = KdxDesigner.Views.Interlock;
 using ViewsToolsTimer = KdxDesigner.Views.Tools.Timer;
+using ViewsProjectInfo = KdxDesigner.Views.ProjectInfo;
+using KdxDesigner.ViewModels.ProjectInfo;
 
 namespace KdxDesigner.ViewModels
 {
@@ -486,6 +488,73 @@ namespace KdxDesigner.ViewModels
             catch (Exception ex)
             {
                 MessageBox.Show($"サインアウトに失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        #endregion
+
+        #region Project Info Commands
+
+        /// <summary>
+        /// プロジェクト情報管理ウィンドウを開く
+        /// </summary>
+        [RelayCommand]
+        private void OpenProjectInfo()
+        {
+            if (_repository == null)
+            {
+                MessageBox.Show("システムの初期化が不完全なため、処理を実行できません。", "エラー");
+                return;
+            }
+
+            var viewModel = new ProjectInfoViewModel(_repository);
+            var window = new ViewsProjectInfo.ProjectInfoWindow(viewModel);
+            var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
+            if (mainWindow != null)
+            {
+                window.Owner = mainWindow;
+            }
+            window.ShowDialog();
+
+            // ウィンドウが閉じた後、MainViewModelのデータを再読み込み
+            _ = RefreshProjectDataAsync();
+        }
+
+        /// <summary>
+        /// プロジェクト情報の変更後にデータを再読み込み
+        /// </summary>
+        private async Task RefreshProjectDataAsync()
+        {
+            if (_repository == null) return;
+
+            try
+            {
+                // Company, Model, PLC, Cycleのデータを再取得
+                var companies = await _repository.GetCompaniesAsync();
+                Companies = new ObservableCollection<Company>(companies);
+
+                // 選択状態に応じてModel, PLC, Cycleも更新
+                if (SelectedCompany != null)
+                {
+                    var models = await _repository.GetModelsAsync();
+                    Models = new ObservableCollection<Model>(models.Where(m => m.CompanyId == SelectedCompany.Id));
+                }
+
+                if (SelectedModel != null)
+                {
+                    var plcs = await _repository.GetPLCsAsync();
+                    Plcs = new ObservableCollection<PLC>(plcs.Where(p => p.ModelId == SelectedModel.Id));
+                }
+
+                if (SelectedPlc != null)
+                {
+                    var cycles = await _repository.GetCyclesByPlcIdAsync(SelectedPlc.Id);
+                    Cycles = new ObservableCollection<Cycle>(cycles);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"RefreshProjectDataAsync error: {ex.Message}");
             }
         }
 

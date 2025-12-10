@@ -1,4 +1,6 @@
 using Kdx.Contracts.DTOs;
+using KdxDesigner.ViewModels.IOEditor;
+using KdxDesigner.Views.Common;
 using System.Windows;
 using System.Windows.Input;
 
@@ -10,6 +12,9 @@ namespace KdxDesigner.ViewModels
         public ICommand DeletePreCondition1Command { get; }
         public ICommand AddPreCondition2Command { get; }
         public ICommand DeletePreCondition2Command { get; }
+        public ICommand AddPreCondition3Command { get; }
+        public ICommand DeletePreCondition3Command { get; }
+        public ICommand SearchIOCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
 
@@ -71,6 +76,69 @@ namespace KdxDesigner.ViewModels
             }
         }
 
+        private void AddPreCondition3(object? parameter)
+        {
+            var newCondition = new InterlockPrecondition3
+            {
+                ConditionType = "IO",
+                IOAddress = "",
+                DeviceAddress = "",
+                IsOnCondition = true,
+                Description = "新規IO/デバイス条件"
+            };
+            PreCondition3List.Add(newCondition);
+            SelectedPreCondition3 = newCondition;
+        }
+
+        private bool CanDeletePreCondition3(object? parameter) => SelectedPreCondition3 != null;
+
+        private void DeletePreCondition3(object? parameter)
+        {
+            if (SelectedPreCondition3 == null)
+            {
+                return;
+            }
+
+            var result = MessageBox.Show("選択した前提条件3を削除しますか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                PreCondition3List.Remove(SelectedPreCondition3);
+                SelectedPreCondition3 = null;
+                IsPreCondition3Selected = false;
+            }
+        }
+
+        /// <summary>
+        /// IO検索ウィンドウを開いてIOアドレスを選択
+        /// </summary>
+        private async Task SearchIOAsync()
+        {
+            if (SelectedPreCondition3 == null)
+            {
+                MessageBox.Show("先に前提条件3を選択してください。", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var viewModel = new IOSearchViewModel(_supabaseRepository, _plcId, SelectedPreCondition3.IOAddress);
+            var window = new IOSearchWindow
+            {
+                DataContext = viewModel,
+                Owner = _window
+            };
+
+            if (window.ShowDialog() == true && viewModel.SelectedIO != null)
+            {
+                SelectedPreCondition3.IOAddress = viewModel.SelectedIO.Address;
+                SelectedPreCondition3.ConditionType = "IO";
+                // 説明も更新（IO名があれば）
+                if (!string.IsNullOrEmpty(viewModel.SelectedIO.IOName))
+                {
+                    SelectedPreCondition3.Description = viewModel.SelectedIO.IOName;
+                }
+                OnPropertyChanged(nameof(SelectedPreCondition3));
+            }
+        }
+
         private async Task SaveAsync()
         {
             try
@@ -85,6 +153,12 @@ namespace KdxDesigner.ViewModels
                 if (PreCondition2List.Any())
                 {
                     await _supabaseRepository.UpsertInterlockPrecondition2ListAsync(PreCondition2List.ToList());
+                }
+
+                // PreCondition3の保存/更新
+                if (PreCondition3List.Any())
+                {
+                    await _supabaseRepository.UpsertInterlockPrecondition3ListAsync(PreCondition3List.ToList());
                 }
 
                 // InterlockのPreConditionIDを更新
@@ -104,6 +178,15 @@ namespace KdxDesigner.ViewModels
                 else
                 {
                     _interlock.PreConditionID2 = null;
+                }
+
+                if (IsPreCondition3Selected && SelectedPreCondition3 != null)
+                {
+                    _interlock.PreConditionID3 = SelectedPreCondition3.Id;
+                }
+                else
+                {
+                    _interlock.PreConditionID3 = null;
                 }
 
                 // Interlockをデータベースに保存

@@ -98,6 +98,33 @@
                               DisplayMemberPath="InterlockMode"/>
                 </Grid>
 
+                <!-- 前提条件3 (IO/デバイスON条件) -->
+                <Grid Margin="0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="前提条件3:"/>
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding PreConditions3}"
+                              SelectedValue="{Binding PreConditionID3}"
+                              SelectedValuePath="Id">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding ConditionType}"/>
+                                    <Run Text=": " Foreground="Gray"/>
+                                    <Run Text="{Binding IOAddress}" Foreground="Blue"/>
+                                    <Run Text="{Binding DeviceAddress}" Foreground="Green"/>
+                                    <Run Text=" (" Foreground="Gray"/>
+                                    <Run Text="{Binding Description}" Foreground="Gray"/>
+                                    <Run Text=")" Foreground="Gray"/>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </Grid>
+
                 <!-- 行きor帰り -->
                 <Grid Margin="0,5">
                     <Grid.ColumnDefinitions>

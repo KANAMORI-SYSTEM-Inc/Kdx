@@ -4,12 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="インターロック前提条件設定" Height="800" Width="1200">
+        Title="インターロック前提条件設定" Height="950" Width="1200">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -236,8 +237,99 @@
             </Grid>
         </GroupBox>
 
+        <!-- PreCondition3 Section (IO/デバイスON条件) -->
+        <GroupBox Grid.Row="3" Header="前提条件3 (InterlockPrecondition3) - IO/デバイスON条件" Margin="10,0,10,10" Height="150">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- PreCondition3 List -->
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <ToolBar Grid.Row="0">
+                        <Button Content="新規" Command="{Binding AddPreCondition3Command}"/>
+                        <Button Content="削除" Command="{Binding DeletePreCondition3Command}"/>
+                    </ToolBar>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding PreCondition3List}"
+                              SelectedItem="{Binding SelectedPreCondition3}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="40" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="タイプ" Binding="{Binding ConditionType}" Width="50"/>
+                            <DataGridTextColumn Header="IOアドレス" Binding="{Binding IOAddress}" Width="80"/>
+                            <DataGridTextColumn Header="説明" Binding="{Binding Description}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+
+                <!-- PreCondition3 Details -->
+                <Grid Grid.Column="1" Margin="10,0,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="条件タイプ:" VerticalAlignment="Center"/>
+                        <ComboBox Grid.Column="1" SelectedItem="{Binding SelectedPreCondition3.ConditionType}" Margin="5,2">
+                            <ComboBoxItem Content="IO"/>
+                            <ComboBoxItem Content="Device"/>
+                        </ComboBox>
+                        <CheckBox Grid.Column="2" Content="ON条件" Margin="15,0,0,0"
+                                  IsChecked="{Binding SelectedPreCondition3.IsOnCondition}"
+                                  VerticalAlignment="Center"/>
+                        <CheckBox Grid.Column="4" Content="この条件を選択"
+                                  IsChecked="{Binding IsPreCondition3Selected}"
+                                  Margin="10,0,0,0" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <Grid Grid.Row="1" Margin="0,5,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="IOアドレス:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1" Text="{Binding SelectedPreCondition3.IOAddress}" Margin="5,2"/>
+                        <Button Grid.Column="2" Content="IO検索" Command="{Binding SearchIOCommand}"
+                                Margin="5,2" Padding="10,2"/>
+                        <TextBlock Grid.Column="3" Text="デバイス:" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        <TextBox Grid.Column="4" Text="{Binding SelectedPreCondition3.DeviceAddress}" Margin="5,2"/>
+                    </Grid>
+
+                    <Grid Grid.Row="2" Margin="0,5,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="説明:" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1" Text="{Binding SelectedPreCondition3.Description}" Margin="5,2"/>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </GroupBox>
+
         <!-- Bottom Buttons -->
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
             <Button Content="保存" Width="100" Height="30" Margin="5" Command="{Binding SaveCommand}"/>
             <Button Content="キャンセル" Width="100" Height="30" Margin="5" Command="{Binding CancelCommand}"/>
         </StackPanel>

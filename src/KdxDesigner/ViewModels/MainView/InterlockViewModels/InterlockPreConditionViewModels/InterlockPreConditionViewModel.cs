@@ -20,12 +20,16 @@ namespace KdxDesigner.ViewModels
 
             PreCondition1List = new ObservableCollection<InterlockPrecondition1>();
             PreCondition2List = new ObservableCollection<InterlockPrecondition2>();
+            PreCondition3List = new ObservableCollection<InterlockPrecondition3>();
             ProcessDetails = new ObservableCollection<ProcessDetail>();
 
             AddPreCondition1Command = new RelayCommand(() => AddPreCondition1(null));
             DeletePreCondition1Command = new RelayCommand(() => DeletePreCondition1(null), () => CanDeletePreCondition1(null));
             AddPreCondition2Command = new RelayCommand(() => AddPreCondition2(null));
             DeletePreCondition2Command = new RelayCommand(() => DeletePreCondition2(null), () => CanDeletePreCondition2(null));
+            AddPreCondition3Command = new RelayCommand(() => AddPreCondition3(null));
+            DeletePreCondition3Command = new RelayCommand(() => DeletePreCondition3(null), () => CanDeletePreCondition3(null));
+            SearchIOCommand = new RelayCommand(async () => await SearchIOAsync());
             ClearStartDetailCommand = new RelayCommand(ClearStartDetail, () => SelectedStartProcessDetail != null);
             ClearEndDetailCommand = new RelayCommand(ClearEndDetail, () => SelectedEndProcessDetail != null);
             SaveCommand = new RelayCommand(async () => await SaveAsync());
@@ -76,6 +80,14 @@ namespace KdxDesigner.ViewModels
                     PreCondition2List.Add(item);
                 }
 
+                // PreCondition3のリストを取得
+                var preCondition3List = await _supabaseRepository.GetInterlockPrecondition3ListAsync();
+                PreCondition3List.Clear();
+                foreach (var item in preCondition3List)
+                {
+                    PreCondition3List.Add(item);
+                }
+
                 // ProcessDetailsを読み込み（PlcIdに紐づくCycleから取得）
                 await LoadProcessDetailsAsync();
 
@@ -90,6 +102,12 @@ namespace KdxDesigner.ViewModels
                 {
                     SelectedPreCondition2 = PreCondition2List.FirstOrDefault(p => p.Id == _interlock.PreConditionID2.Value);
                     IsPreCondition2Selected = SelectedPreCondition2 != null;
+                }
+
+                if (_interlock.PreConditionID3.HasValue)
+                {
+                    SelectedPreCondition3 = PreCondition3List.FirstOrDefault(p => p.Id == _interlock.PreConditionID3.Value);
+                    IsPreCondition3Selected = SelectedPreCondition3 != null;
                 }
             }
             catch (Exception ex)

@@ -24,12 +24,14 @@ namespace KdxDesigner.ViewModels
         [ObservableProperty] private int _conditionCylinderId;
         [ObservableProperty] private int? _preConditionID1;
         [ObservableProperty] private int? _preConditionID2;
+        [ObservableProperty] private int? _preConditionID3;
         [ObservableProperty] private int _goOrBack;
 
         // マスターデータ
         [ObservableProperty] private ObservableCollection<Cylinder> _cylinders = new();
         [ObservableProperty] private ObservableCollection<InterlockPrecondition1> _preConditions1 = new();
         [ObservableProperty] private ObservableCollection<InterlockPrecondition2> _preConditions2 = new();
+        [ObservableProperty] private ObservableCollection<InterlockPrecondition3> _preConditions3 = new();
         [ObservableProperty] private ObservableCollection<GoOrBackOption> _goOrBackOptions = new();
 
         // 表示用
@@ -72,6 +74,10 @@ namespace KdxDesigner.ViewModels
                 // 前提条件2リスト
                 var preConditions2 = await _repository.GetInterlockPrecondition2ListAsync();
                 PreConditions2 = new ObservableCollection<InterlockPrecondition2>(preConditions2);
+
+                // 前提条件3リスト
+                var preConditions3 = await _repository.GetInterlockPrecondition3ListAsync();
+                PreConditions3 = new ObservableCollection<InterlockPrecondition3>(preConditions3);
             }
             catch (Exception ex)
             {
@@ -88,6 +94,7 @@ namespace KdxDesigner.ViewModels
             ConditionCylinderId = _interlock.ConditionCylinderId;
             PreConditionID1 = _interlock.PreConditionID1;
             PreConditionID2 = _interlock.PreConditionID2;
+            PreConditionID3 = _interlock.PreConditionID3;
             GoOrBack = _interlock.GoOrBack;
 
             // 表示用のシリンダー名を取得
@@ -105,6 +112,7 @@ namespace KdxDesigner.ViewModels
                 _interlock.ConditionCylinderId = ConditionCylinderId;
                 _interlock.PreConditionID1 = PreConditionID1;
                 _interlock.PreConditionID2 = PreConditionID2;
+                _interlock.PreConditionID3 = PreConditionID3;
                 _interlock.GoOrBack = GoOrBack;
 
                 // データベースに保存

@@ -643,6 +643,73 @@ namespace Kdx.Infrastructure.Supabase.Repositories
             }
         }
 
+        /// <summary>
+        /// インターロック前提条件3一覧を取得
+        /// 特定IOまたは特定デバイスがONしている場合にインターロックが有効になる条件
+        /// </summary>
+        /// <returns>インターロック前提条件3リスト</returns>
+        public async Task<List<InterlockPrecondition3>> GetInterlockPrecondition3ListAsync()
+        {
+            var response = await _supabaseClient
+                .From<InterlockPrecondition3Entity>()
+                .Get();
+            return response.Models.Select(e => e.ToDto()).ToList();
+        }
+
+        /// <summary>
+        /// インターロック前提条件3を一括で追加または更新
+        /// </summary>
+        /// <param name="preconditions">前提条件3リスト</param>
+        public async Task UpsertInterlockPrecondition3ListAsync(List<InterlockPrecondition3> preconditions)
+        {
+            foreach (var precondition in preconditions)
+            {
+                var entity = InterlockPrecondition3Entity.FromDto(precondition);
+                await _supabaseClient
+                    .From<InterlockPrecondition3Entity>()
+                    .Upsert(entity);
+            }
+        }
+
+        /// <summary>
+        /// インターロック前提条件3を追加
+        /// </summary>
+        /// <param name="precondition">追加する前提条件3</param>
+        /// <returns>追加された前提条件3（IDが設定されたもの）</returns>
+        public async Task<InterlockPrecondition3> AddInterlockPrecondition3Async(InterlockPrecondition3 precondition)
+        {
+            var entity = InterlockPrecondition3Entity.FromDto(precondition);
+            var response = await _supabaseClient
+                .From<InterlockPrecondition3Entity>()
+                .Insert(entity);
+            return response.Models.First().ToDto();
+        }
+
+        /// <summary>
+        /// インターロック前提条件3を更新
+        /// </summary>
+        /// <param name="precondition">更新する前提条件3</param>
+        public async Task UpdateInterlockPrecondition3Async(InterlockPrecondition3 precondition)
+        {
+            var entity = InterlockPrecondition3Entity.FromDto(precondition);
+            await _supabaseClient
+                .From<InterlockPrecondition3Entity>()
+                .Where(e => e.Id == precondition.Id)
+                .Update(entity);
+        }
+
+        /// <summary>
+        /// インターロック前提条件3を削除
+        /// </summary>
+        /// <param name="id">削除する前提条件3のID</param>
+        public async Task DeleteInterlockPrecondition3Async(int id)
+        {
+            await _supabaseClient
+                .From<InterlockPrecondition3Entity>()
+                .Where(e => e.Id == id)
+                .Delete();
+        }
+
         #endregion
     }
 }
