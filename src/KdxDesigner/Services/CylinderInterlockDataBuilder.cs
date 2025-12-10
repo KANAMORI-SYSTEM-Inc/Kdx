@@ -183,7 +183,8 @@ namespace KdxDesigner.Services
                     Name = dto.Name,
                     Device = dto.Device,
                     IsOnCondition = dto.IsOnCondition,
-                    Comment = dto.Comment
+                    Comment1 = dto.Comment1,
+                    Comment2 = dto.Comment2
                 })
                 .ToList();
 

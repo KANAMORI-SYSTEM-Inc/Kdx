@@ -24,7 +24,8 @@ namespace KdxDesigner.ViewModels
         [ObservableProperty] private string? _name;
         [ObservableProperty] private string? _device;
         [ObservableProperty] private bool? _isOnCondition;
-        [ObservableProperty] private string? _comment;
+        [ObservableProperty] private string? _comment1;
+        [ObservableProperty] private string? _comment2;
 
         // マスターデータ
         [ObservableProperty] private ObservableCollection<InterlockConditionType> _conditionTypes = new();
@@ -52,7 +53,8 @@ namespace KdxDesigner.ViewModels
             Name = _condition.Name;
             Device = _condition.Device;
             IsOnCondition = _condition.IsOnCondition;
-            Comment = _condition.Comment;
+            Comment1 = _condition.Comment1;
+            Comment2 = _condition.Comment2;
         }
 
         [RelayCommand]
@@ -65,7 +67,8 @@ namespace KdxDesigner.ViewModels
                 _condition.Name = Name;
                 _condition.Device = Device;
                 _condition.IsOnCondition = IsOnCondition;
-                _condition.Comment = Comment;
+                _condition.Comment1 = Comment1;
+                _condition.Comment2 = Comment2;
 
                 // ConditionTypeナビゲーションプロパティを更新
                 _condition.ConditionType = ConditionTypes.FirstOrDefault(ct => ct.Id == ConditionTypeId);

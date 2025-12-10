@@ -31,8 +31,11 @@ namespace Kdx.Infrastructure.Supabase.Entities
         [Column("IsOnCondition")]
         public bool? IsOnCondition { get; set; }
 
-        [Column("Comment")]
-        public string? Comment { get; set; }
+        [Column("Comment1")]
+        public string? Comment1 { get; set; }
+
+        [Column("Comment2")]
+        public string? Comment2 { get; set; }
 
         public static InterlockConditionDTOEntity FromDto(InterlockConditionDTO dto) => new()
         {
@@ -43,7 +46,8 @@ namespace Kdx.Infrastructure.Supabase.Entities
             Name = dto.Name,
             Device = dto.Device,
             IsOnCondition = dto.IsOnCondition,
-            Comment = dto.Comment
+            Comment1 = dto.Comment1,
+            Comment2 = dto.Comment2
         };
 
         public InterlockConditionDTO ToDto() => new()
@@ -55,7 +59,8 @@ namespace Kdx.Infrastructure.Supabase.Entities
             Name = this.Name,
             Device = this.Device,
             IsOnCondition = this.IsOnCondition,
-            Comment = this.Comment
+            Comment1 = this.Comment1,
+            Comment2 = this.Comment2
         };
     }
 }

@@ -82,7 +82,7 @@ namespace KdxDesigner.Services.InterlockDevice
                             Row_1 = BuildRow1(cylinderData, interlockData),
                             Row_2 = BuildRow2(conditionData),
                             Row_3 = conditionData.Condition.Name ?? "",
-                            Row_4 = conditionData.Condition.Comment ?? "",
+                            Row_4 = conditionData.Condition.Comment1 ?? "",
                             Direct_Input = "",
                             Confirm = "",
                             Note = "",

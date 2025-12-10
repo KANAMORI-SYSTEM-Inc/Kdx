@@ -86,14 +86,24 @@ namespace Kdx.Contracts.DTOs
             }
         }
 
-        private string? _comment;
-
-        public string? Comment
+        private string? _comment1;
+        public string? Comment1
         {
-            get => _comment;
+            get => _comment1;
             set
             {
-                _comment = value;
+                _comment1 = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string? _comment2;
+        public string? Comment2
+        {
+            get => _comment2;
+            set
+            {
+                _comment2 = value;
                 OnPropertyChanged();
             }
         }
