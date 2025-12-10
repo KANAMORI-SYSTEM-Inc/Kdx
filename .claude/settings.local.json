@@ -35,7 +35,10 @@
       "Bash(popd:*)",
       "Bash(Remove-Item -Recurse -Force obj -ErrorAction SilentlyContinue)",
       "Bash(Remove-Item -Recurse -Force bin -ErrorAction SilentlyContinue)",
-      "Bash(powershell -Command \"cd ''c:\\Users\\amdet\\source\\repos\\KANAMORI-SYSTEM-Inc\\Kdx\\src\\KdxDesigner''; Remove-Item -Recurse -Force obj -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force bin -ErrorAction SilentlyContinue; Write-Host ''Cleaned obj and bin folders''\")"
+      "Bash(powershell -Command \"cd ''c:\\Users\\amdet\\source\\repos\\KANAMORI-SYSTEM-Inc\\Kdx\\src\\KdxDesigner''; Remove-Item -Recurse -Force obj -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force bin -ErrorAction SilentlyContinue; Write-Host ''Cleaned obj and bin folders''\")",
+      "Bash(Get-ChildItem -Path \"c:\\Users\\amdet\\source\\repos\\KANAMORI-SYSTEM-Inc\\Kdx\\src\\KdxDesigner\" -Directory)",
+      "Bash(ls:*)",
+      "Bash(xargs:*)"
     ],
     "deny": [],
     "ask": []
