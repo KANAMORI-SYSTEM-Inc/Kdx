@@ -298,6 +298,36 @@ namespace KdxDesigner.Controls
             }
         }
 
+        /// <summary>
+        /// 変更を保存
+        /// </summary>
+        private async void SaveProcesses_Click(object sender, RoutedEventArgs e)
+        {
+            if (Processes == null || Repository == null)
+            {
+                MessageBox.Show("保存するデータがありません。", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                // 編集をコミット
+                ProcessGrid.CommitEdit(DataGridEditingUnit.Row, true);
+
+                // 全ての工程を保存
+                foreach (var process in Processes)
+                {
+                    await Repository.UpdateProcessAsync(process);
+                }
+
+                MessageBox.Show("変更を保存しました。", "保存完了", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"保存中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         #endregion
 
         #region Context Menu Handlers

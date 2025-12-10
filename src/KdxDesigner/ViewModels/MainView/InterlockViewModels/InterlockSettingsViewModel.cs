@@ -25,6 +25,7 @@ namespace KdxDesigner.ViewModels
     {
         private readonly Cylinder _cylinder;
         private string? _machineNameFullName;
+        private string? _driveSubName;
 
         public CylinderViewModel(Cylinder cylinder)
         {
@@ -40,6 +41,8 @@ namespace KdxDesigner.ViewModels
         public string? Back => _cylinder.Back;
         public string? OilNum => _cylinder.OilNum;
         public int? MachineNameId => _cylinder.MachineNameId;
+        public int? DriveSubId => _cylinder.DriveSubId;
+        public int? SortNumber => _cylinder.SortNumber;
 
         // MachineNameのFullNameを保持（表示用）
         public string? MachineNameFullName
@@ -48,6 +51,17 @@ namespace KdxDesigner.ViewModels
             set
             {
                 _machineNameFullName = value;
+                OnPropertyChanged();
+            }
+        }
+
+        // DriveSubNameを保持（表示用）
+        public string? DriveSubName
+        {
+            get => _driveSubName;
+            set
+            {
+                _driveSubName = value;
                 OnPropertyChanged();
             }
         }

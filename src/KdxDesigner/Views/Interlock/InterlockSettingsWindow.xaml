@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:KdxDesigner.Utils.Converters"
+        xmlns:controls="clr-namespace:KdxDesigner.Controls"
         mc:Ignorable="d"
         Title="インターロック設定" Height="700" Width="1200">
 
@@ -35,55 +36,16 @@
             </StackPanel>
         </Border>
 
-        <!-- Cylinder Selection -->
+        <!-- Cylinder Selection (共通コンポーネント) -->
         <GroupBox Grid.Row="1" Header="シリンダー選択" Margin="10,5">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <!-- Search Box -->
-                <Grid Grid.Row="0" Margin="5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="200"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Grid.Column="0" Text="検索:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBox Grid.Column="1" Name="CylinderSearchTextBox"
-                             Text="{Binding CylinderSearchText, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,10,0"/>
-                    <Button Grid.Column="2" Content="クリア" Width="60" Margin="0,0,10,0"
-                            Command="{Binding ClearCylinderSearchCommand}"/>
-                </Grid>
-
-                <!-- Cylinder List -->
-                <DataGrid Grid.Row="1"
-                          ItemsSource="{Binding FilteredCylinders}"
-                          SelectedItem="{Binding SelectedCylinder}"
-                          AutoGenerateColumns="False"
-                          SelectionMode="Single"
-                          CanUserAddRows="False"
-                          IsReadOnly="True"
-                          Margin="5">
-                    <DataGrid.InputBindings>
-                        <MouseBinding MouseAction="LeftDoubleClick"
-                                      Command="{Binding ShowCylinderPropertiesCommand}"/>
-                    </DataGrid.InputBindings>
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
-                        <DataGridTextColumn Header="CYNum" Binding="{Binding CYNum}" Width="100"/>
-                        <DataGridTextColumn Header="機械名" Binding="{Binding MachineNameFullName}" Width="150"/>
-                        <DataGridTextColumn Header="PUCO" Binding="{Binding PUCO}" Width="100"/>
-                        <DataGridTextColumn Header="Go" Binding="{Binding Go}" Width="100"/>
-                        <DataGridTextColumn Header="Back" Binding="{Binding Back}" Width="100"/>
-                        <DataGridTextColumn Header="OilNum" Binding="{Binding OilNum}" Width="*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
+            <controls:CylinderListControl
+                ItemsSource="{Binding FilteredCylinders}"
+                SelectedItem="{Binding SelectedCylinder, Mode=TwoWay}"
+                SearchText="{Binding CylinderSearchText, Mode=TwoWay}"
+                ClearSearchCommand="{Binding ClearCylinderSearchCommand}"
+                DoubleClickCommand="{Binding ShowCylinderPropertiesCommand}"
+                ShowToolbar="False"
+                ShowSearchBox="True"/>
         </GroupBox>
 
         <!-- Main Content -->

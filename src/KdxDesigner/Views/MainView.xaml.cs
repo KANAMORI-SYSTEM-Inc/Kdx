@@ -2,11 +2,6 @@ using Kdx.Contracts.DTOs;
 using KdxDesigner.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-
-// Views名前空間エイリアス
-using ViewsProcessFlow = KdxDesigner.Views.ProcessFlow;
 
 namespace KdxDesigner.Views
 {
@@ -15,56 +10,39 @@ namespace KdxDesigner.Views
         public MainView()
         {
             InitializeComponent();
-            DataContext = App.Services!.GetRequiredService<MainViewModel>(); // 修正: 'App.Services' を型名でアクセス  
+            DataContext = App.Services!.GetRequiredService<MainViewModel>();
         }
 
-        private void ProcessGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        /// <summary>
+        /// ProcessListControlの選択変更イベントハンドラ
+        /// </summary>
+        private void ProcessListControl_ProcessSelectionChanged(object? sender, Process? selectedProcess)
         {
-            if (DataContext is MainViewModel vm)
+            if (DataContext is MainViewModel vm && selectedProcess != null)
             {
-                var selected = ProcessGrid.SelectedItems.Cast<Process>().ToList();
-                vm.UpdateSelectedProcesses(selected);
-
-                // 単一選択用のSelectedProcessもセット
-                if (ProcessGrid.SelectedItem is Process selectedProcess)
-                {
-                    vm.SelectedProcess = selectedProcess;
-                }
+                vm.UpdateSelectedProcesses(new List<Process> { selectedProcess });
             }
         }
 
-        private void DetailGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        /// <summary>
+        /// ProcessListControlからの工程フロー詳細を開くリクエストハンドラ
+        /// </summary>
+        private void ProcessListControl_OpenProcessFlowDetailRequested(object? sender, EventArgs e)
         {
-            if (DataContext is MainViewModel vm)
+            if (DataContext is MainViewModel vm && vm.OpenProcessFlowDetailCommand.CanExecute(null))
             {
-                var selected = (sender as DataGrid)?.SelectedItem as ProcessDetail;
-                if (selected != null)
-                {
-                    vm.OnProcessDetailSelected(selected);
-                }
+                vm.OpenProcessFlowDetailCommand.Execute(null);
             }
         }
 
-
-        private async void OperationGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        /// <summary>
+        /// ProcessDetailListControlの選択変更イベントハンドラ
+        /// </summary>
+        private void ProcessDetailListControl_SelectionChanged(object? sender, ProcessDetail? selectedProcessDetail)
         {
-            if (DataContext is MainViewModel vm)
+            if (DataContext is MainViewModel vm && selectedProcessDetail != null)
             {
-                // ヘッダーやスクロールバーをダブルクリックした場合は無視
-                var dataGrid = sender as DataGrid;
-                if (dataGrid?.SelectedItem is Operation selectedOperation)
-                {
-                    var plcId = vm.SelectedPlc?.Id;
-                    var window = new ViewsProcessFlow.OperationPropertiesWindow(vm.Repository!, selectedOperation, plcId)
-                    {
-                        Owner = this
-                    };
-                    if (window.ShowDialog() == true)
-                    {
-                        // 更新後にOperationリストを再読み込み
-                        await vm.ReloadOperationsAsync();
-                    }
-                }
+                vm.OnProcessDetailSelected(selectedProcessDetail);
             }
         }
     }

@@ -297,6 +297,36 @@ namespace KdxDesigner.Controls
             }
         }
 
+        /// <summary>
+        /// 変更を保存
+        /// </summary>
+        private async void SaveOperations_Click(object sender, RoutedEventArgs e)
+        {
+            if (Operations == null || Repository == null)
+            {
+                MessageBox.Show("保存するデータがありません。", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                // 編集をコミット
+                OperationGrid.CommitEdit(DataGridEditingUnit.Row, true);
+
+                // 全ての操作を保存
+                foreach (var operation in Operations)
+                {
+                    await Repository.UpdateOperationAsync(operation);
+                }
+
+                MessageBox.Show("変更を保存しました。", "保存完了", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"保存中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         #endregion
 
         #region Context Menu Handlers

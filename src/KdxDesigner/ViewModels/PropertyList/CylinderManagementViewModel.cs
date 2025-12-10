@@ -4,24 +4,16 @@ using Kdx.Contracts.DTOs;
 using Kdx.Infrastructure.Supabase.Repositories;
 using KdxDesigner.Views;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Data;
 
 // Views名前空間エイリアス
 using ViewsToolsCylinderManagement = KdxDesigner.Views.Tools.CylinderManagement;
 
 namespace KdxDesigner.ViewModels
 {
-    /// <summary>
-    /// シリンダー表示用のラッパークラス
-    /// </summary>
-    public class CylinderDisplayModel
-    {
-        public Cylinder Cylinder { get; set; } = new();
-        public string MachineName { get; set; } = "";
-        public string DriveSubName { get; set; } = "";
-    }
-
     /// <summary>
     /// シリンダー管理ウィンドウのViewModel
     /// </summary>
@@ -31,20 +23,54 @@ namespace KdxDesigner.ViewModels
         private readonly int _plcId;
         private Dictionary<int, string> _machineNameMap = new();
         private Dictionary<int, string> _driveSubMap = new();
+        private string? _cylinderSearchText;
+
+        private readonly ObservableCollection<CylinderViewModel> _allCylinders;
+        private readonly ICollectionView _filteredCylinders;
+
+        public ICollectionView FilteredCylinders => _filteredCylinders;
 
         [ObservableProperty]
-        private ObservableCollection<CylinderDisplayModel> _cylinders = new();
+        private CylinderViewModel? _selectedCylinder;
 
-        [ObservableProperty]
-        private CylinderDisplayModel? _selectedCylinder;
+        public string? CylinderSearchText
+        {
+            get => _cylinderSearchText;
+            set
+            {
+                _cylinderSearchText = value;
+                OnPropertyChanged();
+                _filteredCylinders.Refresh();
+            }
+        }
 
         public CylinderManagementViewModel(ISupabaseRepository repository, int plcId)
         {
             _repository = repository;
             _plcId = plcId;
 
+            // Initialize cylinder list and filtering
+            _allCylinders = new ObservableCollection<CylinderViewModel>();
+            _filteredCylinders = CollectionViewSource.GetDefaultView(_allCylinders);
+            _filteredCylinders.Filter = FilterCylinder;
+
             // シリンダーのリストを読み込み
             LoadCylinders();
+        }
+
+        private bool FilterCylinder(object obj)
+        {
+            if (obj is not CylinderViewModel cylinderVm) { return false; }
+            if (string.IsNullOrWhiteSpace(CylinderSearchText)) { return true; }
+
+            var searchLower = CylinderSearchText.ToLower();
+            return (cylinderVm.CYNum?.ToLower().Contains(searchLower) ?? false) ||
+                   (cylinderVm.PUCO?.ToLower().Contains(searchLower) ?? false) ||
+                   (cylinderVm.Go?.ToLower().Contains(searchLower) ?? false) ||
+                   (cylinderVm.Back?.ToLower().Contains(searchLower) ?? false) ||
+                   (cylinderVm.OilNum?.ToLower().Contains(searchLower) ?? false) ||
+                   (cylinderVm.MachineNameFullName?.ToLower().Contains(searchLower) ?? false) ||
+                   cylinderVm.Id.ToString().Contains(searchLower);
         }
 
         /// <summary>
@@ -66,19 +92,22 @@ namespace KdxDesigner.ViewModels
                 var filteredCylinders = cylinders
                     .Where(c => c.PlcId == _plcId)
                     .OrderBy(c => c.SortNumber)
-                    .Select(c => new CylinderDisplayModel
-                    {
-                        Cylinder = c,
-                        MachineName = c.MachineNameId.HasValue && _machineNameMap.ContainsKey(c.MachineNameId.Value)
-                            ? _machineNameMap[c.MachineNameId.Value]
-                            : "",
-                        DriveSubName = c.DriveSubId.HasValue && _driveSubMap.ContainsKey(c.DriveSubId.Value)
-                            ? _driveSubMap[c.DriveSubId.Value]
-                            : ""
-                    })
                     .ToList();
 
-                Cylinders = new ObservableCollection<CylinderDisplayModel>(filteredCylinders);
+                _allCylinders.Clear();
+                foreach (var cylinder in filteredCylinders)
+                {
+                    var cylinderViewModel = new CylinderViewModel(cylinder);
+                    if (cylinder.MachineNameId.HasValue && _machineNameMap.TryGetValue(cylinder.MachineNameId.Value, out var machineName))
+                    {
+                        cylinderViewModel.MachineNameFullName = machineName;
+                    }
+                    if (cylinder.DriveSubId.HasValue && _driveSubMap.TryGetValue(cylinder.DriveSubId.Value, out var driveSubName))
+                    {
+                        cylinderViewModel.DriveSubName = driveSubName;
+                    }
+                    _allCylinders.Add(cylinderViewModel);
+                }
             }
             catch (Exception ex)
             {
@@ -95,7 +124,7 @@ namespace KdxDesigner.ViewModels
             try
             {
                 // 既存のシリンダー数を取得してSortNumberを設定
-                int nextSortNumber = Cylinders.Count > 0 ? Cylinders.Max(c => c.Cylinder.SortNumber ?? 0) + 1 : 1;
+                int nextSortNumber = _allCylinders.Count > 0 ? _allCylinders.Max(c => c.SortNumber ?? 0) + 1 : 1;
 
                 // 新しいCylinderオブジェクトを作成
                 var newCylinder = new Cylinder
@@ -136,31 +165,32 @@ namespace KdxDesigner.ViewModels
             try
             {
                 // 既存のシリンダー数を取得してSortNumberを設定
-                int nextSortNumber = Cylinders.Count > 0 ? Cylinders.Max(c => c.Cylinder.SortNumber ?? 0) + 1 : 1;
+                int nextSortNumber = _allCylinders.Count > 0 ? _allCylinders.Max(c => c.SortNumber ?? 0) + 1 : 1;
 
                 // 選択されたシリンダーをコピー
+                var sourceCylinder = SelectedCylinder.GetCylinder();
                 var copiedCylinder = new Cylinder
                 {
                     PlcId = _plcId,
-                    CYNum = SelectedCylinder.Cylinder.CYNum + " (コピー)",
-                    PUCO = SelectedCylinder.Cylinder.PUCO,
-                    Go = SelectedCylinder.Cylinder.Go,
-                    Back = SelectedCylinder.Cylinder.Back,
-                    OilNum = SelectedCylinder.Cylinder.OilNum,
-                    MachineNameId = SelectedCylinder.Cylinder.MachineNameId,
-                    DriveSubId = SelectedCylinder.Cylinder.DriveSubId,
-                    PlaceId = SelectedCylinder.Cylinder.PlaceId,
-                    CYNameSub = SelectedCylinder.Cylinder.CYNameSub,
-                    SensorId = SelectedCylinder.Cylinder.SensorId,
-                    FlowType = SelectedCylinder.Cylinder.FlowType,
-                    GoSensorCount = SelectedCylinder.Cylinder.GoSensorCount,
-                    BackSensorCount = SelectedCylinder.Cylinder.BackSensorCount,
-                    RetentionSensorGo = SelectedCylinder.Cylinder.RetentionSensorGo,
-                    RetentionSensorBack = SelectedCylinder.Cylinder.RetentionSensorBack,
+                    CYNum = sourceCylinder.CYNum + " (コピー)",
+                    PUCO = sourceCylinder.PUCO,
+                    Go = sourceCylinder.Go,
+                    Back = sourceCylinder.Back,
+                    OilNum = sourceCylinder.OilNum,
+                    MachineNameId = sourceCylinder.MachineNameId,
+                    DriveSubId = sourceCylinder.DriveSubId,
+                    PlaceId = sourceCylinder.PlaceId,
+                    CYNameSub = sourceCylinder.CYNameSub,
+                    SensorId = sourceCylinder.SensorId,
+                    FlowType = sourceCylinder.FlowType,
+                    GoSensorCount = sourceCylinder.GoSensorCount,
+                    BackSensorCount = sourceCylinder.BackSensorCount,
+                    RetentionSensorGo = sourceCylinder.RetentionSensorGo,
+                    RetentionSensorBack = sourceCylinder.RetentionSensorBack,
                     SortNumber = nextSortNumber,
-                    FlowCount = SelectedCylinder.Cylinder.FlowCount,
-                    FlowCYGo = SelectedCylinder.Cylinder.FlowCYGo,
-                    FlowCYBack = SelectedCylinder.Cylinder.FlowCYBack
+                    FlowCount = sourceCylinder.FlowCount,
+                    FlowCYGo = sourceCylinder.FlowCYGo,
+                    FlowCYBack = sourceCylinder.FlowCYBack
                 };
 
                 // データベースに追加
@@ -192,7 +222,7 @@ namespace KdxDesigner.ViewModels
 
             try
             {
-                var window = new ViewsToolsCylinderManagement.CylinderPropertiesWindow(_repository, SelectedCylinder.Cylinder);
+                var window = new ViewsToolsCylinderManagement.CylinderPropertiesWindow(_repository, SelectedCylinder.GetCylinder());
                 var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
                 if (mainWindow != null)
                 {
@@ -224,7 +254,7 @@ namespace KdxDesigner.ViewModels
             }
 
             var result = MessageBox.Show(
-                $"シリンダー「{SelectedCylinder.Cylinder.CYNum}」を削除しますか？",
+                $"シリンダー「{SelectedCylinder.CYNum}」を削除しますか？",
                 "確認",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
@@ -233,8 +263,8 @@ namespace KdxDesigner.ViewModels
             {
                 try
                 {
-                    await _repository.DeleteCylinderAsync(SelectedCylinder.Cylinder.Id);
-                    Cylinders.Remove(SelectedCylinder);
+                    await _repository.DeleteCylinderAsync(SelectedCylinder.Id);
+                    _allCylinders.Remove(SelectedCylinder);
                     MessageBox.Show("シリンダーを削除しました。", "削除完了", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
@@ -242,6 +272,15 @@ namespace KdxDesigner.ViewModels
                     MessageBox.Show($"シリンダーの削除中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
+
+        /// <summary>
+        /// 検索クリアコマンド
+        /// </summary>
+        [RelayCommand]
+        private void ClearCylinderSearch()
+        {
+            CylinderSearchText = string.Empty;
         }
 
         /// <summary>

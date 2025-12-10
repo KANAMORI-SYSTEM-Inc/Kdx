@@ -25,8 +25,11 @@
                     Width="80" Height="25" Margin="0,0,5,0"
                     Background="#F44336" Foreground="White" FontWeight="Bold"/>
             <Button Content="🔄 再読み込み" Click="ReloadProcesses_Click"
-                    Width="110" Height="25"
+                    Width="110" Height="25" Margin="0,0,5,0"
                     Background="#4CAF50" Foreground="White" FontWeight="Bold"/>
+            <Button Content="💾 保存" Click="SaveProcesses_Click"
+                    Width="80" Height="25"
+                    Background="#607D8B" Foreground="White" FontWeight="Bold"/>
         </StackPanel>
 
         <!-- DataGrid -->
@@ -56,7 +59,7 @@
                 <DataGridComboBoxColumn Header="Category"
                                        SelectedValueBinding="{Binding ProcessCategoryId}"
                                        SelectedValuePath="Id"
-                                       DisplayMemberPath="CategoryName"
+                                       DisplayMemberPath="ProcessCategoryName"
                                        Width="120">
                     <DataGridComboBoxColumn.ElementStyle>
                         <Style TargetType="ComboBox">
