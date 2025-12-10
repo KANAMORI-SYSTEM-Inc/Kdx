@@ -4,7 +4,7 @@ namespace Kdx.Contracts.DTOs
     {
         public int Id { get; set; }
 
-        public string? Discription { get; set; }
+        public string? Description { get; set; }
 
         public string? ConditionName { get; set; }
 

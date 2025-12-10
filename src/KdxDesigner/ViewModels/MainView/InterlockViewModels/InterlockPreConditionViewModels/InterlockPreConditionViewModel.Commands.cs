@@ -18,7 +18,7 @@ namespace KdxDesigner.ViewModels
             var newCondition = new InterlockPrecondition1
             {
                 ConditionName = "新規条件",
-                Discription = ""
+                Description = ""
             };
             PreCondition1List.Add(newCondition);
             SelectedPreCondition1 = newCondition;

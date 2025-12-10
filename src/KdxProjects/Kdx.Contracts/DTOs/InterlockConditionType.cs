@@ -6,7 +6,7 @@ namespace Kdx.Contracts.DTOs
 
         public string? ConditionTypeName { get; set; }
 
-        public string? Discription { get; set; }
+        public string? Description { get; set; }
 
         public bool NeedIOSearch { get; set; } = false;
 

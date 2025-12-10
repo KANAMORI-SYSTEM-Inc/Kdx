@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Input;
 using Kdx.Contracts.DTOs;
 using Kdx.Infrastructure.Supabase.Repositories;
 using KdxDesigner.Views;
+using KdxDesigner.Views.Tools.CylinderManagement;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -10,6 +11,15 @@ using System.Windows.Data;
 
 namespace KdxDesigner.ViewModels
 {
+    /// <summary>
+    /// GoOrBack選択肢用のクラス
+    /// </summary>
+    public class GoOrBackOption
+    {
+        public int Value { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
+    }
+
     // Cylinder用のラッパークラス
     public class CylinderViewModel : INotifyPropertyChanged
     {
@@ -322,6 +332,14 @@ namespace KdxDesigner.ViewModels
             InterlockIOs = new ObservableCollection<InterlockIOViewModel>();
             ConditionTypes = new ObservableCollection<InterlockConditionType>();
 
+            // Initialize GoOrBack options
+            GoOrBackOptions = new ObservableCollection<GoOrBackOption>
+            {
+                new GoOrBackOption { Value = 0, DisplayName = "Go&Back" },
+                new GoOrBackOption { Value = 1, DisplayName = "GoOnly" },
+                new GoOrBackOption { Value = 2, DisplayName = "BackOnly" }
+            };
+
             // Initialize cylinder list and filtering
             _allCylinders = new ObservableCollection<CylinderViewModel>();
             _filteredCylinders = CollectionViewSource.GetDefaultView(_allCylinders);
@@ -358,6 +376,7 @@ namespace KdxDesigner.ViewModels
             CancelCommand = new RelayCommand(() => Cancel(null));
             ClearCylinderSearchCommand = new RelayCommand(() => CylinderSearchText = string.Empty);
             ReloadCommand = new RelayCommand(async () => await ReloadAsync());
+            ShowCylinderPropertiesCommand = new RelayCommand(ShowCylinderProperties, () => SelectedCylinder != null);
 
             _ = LoadCylindersAsync();
             _ = LoadConditionTypesAsync();
@@ -600,6 +619,29 @@ namespace KdxDesigner.ViewModels
             catch (Exception ex)
             {
                 ErrorDialog.Show($"インターロックIOの読み込みに失敗しました: {ex.Message}\n\nスタックトレース:\n{ex.StackTrace}", "エラー", _window);
+            }
+        }
+
+        /// <summary>
+        /// シリンダープロパティウィンドウを表示
+        /// </summary>
+        private void ShowCylinderProperties()
+        {
+            if (SelectedCylinder == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var cylinder = SelectedCylinder.GetCylinder();
+                var window = new CylinderPropertiesWindow(_supabaseRepository, cylinder);
+                window.Owner = _window;
+                window.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                ErrorDialog.Show($"シリンダープロパティの表示に失敗しました: {ex.Message}", "エラー", _window);
             }
         }
 

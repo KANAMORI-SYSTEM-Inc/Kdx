@@ -11,8 +11,8 @@ namespace Kdx.Infrastructure.Supabase.Entities
         [Column("Id")]
         public int Id { get; set; }
 
-        [Column("Discription")]
-        public string? Discription { get; set; }
+        [Column("Description")]
+        public string? Description { get; set; }
 
         [Column("ConditionName")]
         public string? ConditionName { get; set; }
@@ -20,14 +20,14 @@ namespace Kdx.Infrastructure.Supabase.Entities
         public static InterlockPrecondition1Entity FromDto(InterlockPrecondition1 dto) => new()
         {
             Id = dto.Id,
-            Discription = dto.Discription,
+            Description = dto.Description,
             ConditionName = dto.ConditionName
         };
 
         public InterlockPrecondition1 ToDto() => new()
         {
             Id = this.Id,
-            Discription = this.Discription,
+            Description = this.Description,
             ConditionName = this.ConditionName
         };
     }

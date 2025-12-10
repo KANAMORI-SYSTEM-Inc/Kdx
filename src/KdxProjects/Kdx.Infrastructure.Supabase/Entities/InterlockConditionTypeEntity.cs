@@ -14,8 +14,8 @@ namespace Kdx.Infrastructure.Supabase.Entities
         [Column("ConditionTypeName")]
         public string? ConditionTypeName { get; set; }
 
-        [Column("Discription")]
-        public string? Discription { get; set; }
+        [Column("Description")]
+        public string? Description { get; set; }
 
         [Column("NeedIOSearch")]
         public bool NeedIOSearch { get; set; }
@@ -24,7 +24,7 @@ namespace Kdx.Infrastructure.Supabase.Entities
         {
             Id = dto.Id,
             ConditionTypeName = dto.ConditionTypeName,
-            Discription = dto.Discription,
+            Description = dto.Description,
             NeedIOSearch = dto.NeedIOSearch
         };
 
@@ -32,7 +32,7 @@ namespace Kdx.Infrastructure.Supabase.Entities
         {
             Id = this.Id,
             ConditionTypeName = this.ConditionTypeName,
-            Discription = this.Discription,
+            Description = this.Description,
             NeedIOSearch = this.NeedIOSearch
         };
     }

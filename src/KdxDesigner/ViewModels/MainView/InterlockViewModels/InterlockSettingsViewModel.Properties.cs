@@ -45,6 +45,7 @@ namespace KdxDesigner.ViewModels
         public ObservableCollection<InterlockConditionDTO> InterlockConditions { get; set; }
         public ObservableCollection<InterlockIOViewModel> InterlockIOs { get; set; }
         public ObservableCollection<InterlockConditionType> ConditionTypes { get; set; }
+        public ObservableCollection<GoOrBackOption> GoOrBackOptions { get; set; }
 
         public ICollectionView FilteredCylinders => _filteredCylinders;
 
@@ -68,6 +69,7 @@ namespace KdxDesigner.ViewModels
                 OnPropertyChanged();
                 // CanExecuteの状態を更新
                 (AddInterlockCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                (ShowCylinderPropertiesCommand as RelayCommand)?.NotifyCanExecuteChanged();
                 if (value != null)
                 {
                     _ = LoadInterlocksAsync();
@@ -120,5 +122,8 @@ namespace KdxDesigner.ViewModels
 
         public bool IsInterlockSelected => SelectedInterlock != null;
         public bool IsConditionSelected => SelectedCondition != null;
+
+        // シリンダープロパティ表示コマンド
+        public ICommand ShowCylinderPropertiesCommand { get; set; }
     }
 }
