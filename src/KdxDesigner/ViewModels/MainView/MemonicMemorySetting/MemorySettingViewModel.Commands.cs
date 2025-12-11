@@ -294,9 +294,13 @@ namespace KdxDesigner.ViewModels.Settings
                 var memoryStore = App.Services?.GetService<IMnemonicDeviceMemoryStore>()
                     ?? new MnemonicDeviceMemoryStore();
 
+                // SupabaseRepositoryを取得
+                var supabaseRepository = _repository as Kdx.Infrastructure.Supabase.Repositories.SupabaseRepository;
+
                 // 現在選択中のPLCとCycleを渡してウィンドウを開く
                 var window = new ViewsMemory.MemoryDeviceListWindow(
                     memoryStore,
+                    supabaseRepository,
                     SelectedPlc?.Id,
                     SelectedCycle?.Id);
 

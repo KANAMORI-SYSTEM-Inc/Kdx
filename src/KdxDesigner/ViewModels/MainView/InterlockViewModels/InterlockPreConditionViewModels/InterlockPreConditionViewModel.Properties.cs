@@ -1,4 +1,3 @@
-using CommunityToolkit.Mvvm.Input;
 using Kdx.Contracts.DTOs;
 using Kdx.Infrastructure.Supabase.Repositories;
 using System.Collections.ObjectModel;
@@ -21,8 +20,6 @@ namespace KdxDesigner.ViewModels
         private bool _isPreCondition1Selected;
         private bool _isPreCondition2Selected;
         private bool _isPreCondition3Selected;
-        private ProcessDetail? _selectedStartProcessDetail;
-        private ProcessDetail? _selectedEndProcessDetail;
 
         // Public collections
         public ObservableCollection<InterlockPrecondition1> PreCondition1List { get; set; }
@@ -42,6 +39,8 @@ namespace KdxDesigner.ViewModels
                 {
                     IsPreCondition1Selected = true;
                 }
+                // コマンドの状態を更新
+                NotifyPreCondition1CommandsCanExecuteChanged();
             }
         }
 
@@ -57,8 +56,8 @@ namespace KdxDesigner.ViewModels
                 {
                     IsPreCondition2Selected = true;
                 }
-                // ProcessDetail選択を更新
-                UpdateProcessDetailSelections();
+                // コマンドの状態を更新
+                NotifyPreCondition2CommandsCanExecuteChanged();
             }
         }
 
@@ -94,6 +93,8 @@ namespace KdxDesigner.ViewModels
                 {
                     IsPreCondition3Selected = true;
                 }
+                // コマンドの状態を更新
+                NotifyPreCondition3CommandsCanExecuteChanged();
             }
         }
 
@@ -104,64 +105,6 @@ namespace KdxDesigner.ViewModels
             {
                 _isPreCondition3Selected = value;
                 OnPropertyChanged();
-            }
-        }
-
-        public ProcessDetail? SelectedStartProcessDetail
-        {
-            get => _selectedStartProcessDetail;
-            set
-            {
-                _selectedStartProcessDetail = value;
-                OnPropertyChanged();
-                // 選択されたProcessDetailのIDをPreCondition2に設定
-                if (SelectedPreCondition2 != null && _selectedStartProcessDetail != null)
-                {
-                    SelectedPreCondition2.StartDetailId = _selectedStartProcessDetail.Id;
-                }
-            }
-        }
-
-        public ProcessDetail? SelectedEndProcessDetail
-        {
-            get => _selectedEndProcessDetail;
-            set
-            {
-                _selectedEndProcessDetail = value;
-                OnPropertyChanged();
-                // 選択されたProcessDetailのIDをPreCondition2に設定
-                if (SelectedPreCondition2 != null && _selectedEndProcessDetail != null)
-                {
-                    SelectedPreCondition2.EndDetailId = _selectedEndProcessDetail.Id;
-                }
-            }
-        }
-
-        private void UpdateProcessDetailSelections()
-        {
-            if (SelectedPreCondition2 == null)
-            {
-                SelectedStartProcessDetail = null;
-                SelectedEndProcessDetail = null;
-                return;
-            }
-
-            if (SelectedPreCondition2.StartDetailId.HasValue)
-            {
-                SelectedStartProcessDetail = ProcessDetails.FirstOrDefault(pd => pd.Id == SelectedPreCondition2.StartDetailId.Value);
-            }
-            else
-            {
-                SelectedStartProcessDetail = null;
-            }
-
-            if (SelectedPreCondition2.EndDetailId.HasValue)
-            {
-                SelectedEndProcessDetail = ProcessDetails.FirstOrDefault(pd => pd.Id == SelectedPreCondition2.EndDetailId.Value);
-            }
-            else
-            {
-                SelectedEndProcessDetail = null;
             }
         }
     }

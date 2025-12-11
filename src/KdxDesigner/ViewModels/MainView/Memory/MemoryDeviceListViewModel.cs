@@ -1,14 +1,16 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Kdx.Contracts.DTOs;
+using Kdx.Contracts.Enums;
+using Kdx.Infrastructure.Supabase.Repositories;
 using KdxDesigner.Models;
 using KdxDesigner.Services.MnemonicDevice;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
-using Kdx.Contracts.DTOs;
-using Kdx.Contracts.Enums;
 using MnemonicDevice = Kdx.Contracts.DTOs.MnemonicDevice;
 using MnemonicSpeedDevice = Kdx.Contracts.DTOs.MnemonicSpeedDevice;
 
@@ -20,24 +22,27 @@ namespace KdxDesigner.ViewModels
     public partial class MemoryDeviceListViewModel : ObservableObject
     {
         private readonly IMnemonicDeviceMemoryStore _memoryStore;
+        private readonly SupabaseRepository? _supabaseRepository;
         private readonly int? _plcId;
         private readonly int? _cycleId;
 
         [ObservableProperty] private ObservableCollection<MnemonicDevice> _mnemonicDevices = new();
         [ObservableProperty] private ObservableCollection<MnemonicTimerDevice> _timerDevices = new();
         [ObservableProperty] private ObservableCollection<MnemonicSpeedDevice> _speedDevices = new();
-        
+        [ObservableProperty] private ObservableCollection<InterlockDisplayItem> _interlocks = new();
+
         [ObservableProperty] private int _selectedTabIndex = 0;
         [ObservableProperty] private string _statusMessage = string.Empty;
-        
+
         // フィルタリング用
         [ObservableProperty] private string _filterText = string.Empty;
         [ObservableProperty] private int? _selectedMnemonicType;
-        
+
         // 統計情報
         [ObservableProperty] private int _totalMnemonicDeviceCount;
         [ObservableProperty] private int _totalTimerDeviceCount;
         [ObservableProperty] private int _totalSpeedDeviceCount;
+        [ObservableProperty] private int _totalInterlockCount;
         [ObservableProperty] private int _processCount;
         [ObservableProperty] private int _detailCount;
         [ObservableProperty] private int _operationCount;
@@ -52,12 +57,17 @@ namespace KdxDesigner.ViewModels
             new MnemonicTypeItem { Id = (int)MnemonicType.CY, Name = "シリンダ" }
         };
 
-        public MemoryDeviceListViewModel(IMnemonicDeviceMemoryStore memoryStore, int? plcId = null, int? cycleId = null)
+        public MemoryDeviceListViewModel(
+            IMnemonicDeviceMemoryStore memoryStore,
+            SupabaseRepository? supabaseRepository = null,
+            int? plcId = null,
+            int? cycleId = null)
         {
             _memoryStore = memoryStore ?? throw new ArgumentNullException(nameof(memoryStore));
+            _supabaseRepository = supabaseRepository;
             _plcId = plcId;
             _cycleId = cycleId;
-            
+
             LoadData();
         }
 
@@ -125,7 +135,10 @@ namespace KdxDesigner.ViewModels
                     SpeedDevices = new ObservableCollection<MnemonicSpeedDevice>(dtoSpeeds);
                     TotalSpeedDeviceCount = speeds.Count;
                 }
-                
+
+                // Interlock データの読み込み
+                _ = LoadInterlocksAsync();
+
                 StatusMessage = $"データ読み込み完了: {DateTime.Now:yyyy/MM/dd HH:mm:ss}";
             }
             catch (Exception ex)
@@ -239,11 +252,83 @@ namespace KdxDesigner.ViewModels
         {
             window?.Close();
         }
+
+        /// <summary>
+        /// インターロックデータを非同期で読み込み
+        /// </summary>
+        private async Task LoadInterlocksAsync()
+        {
+            if (_supabaseRepository == null || !_plcId.HasValue)
+            {
+                Interlocks = new ObservableCollection<InterlockDisplayItem>();
+                TotalInterlockCount = 0;
+                return;
+            }
+
+            try
+            {
+                // インターロック一覧を取得
+                var interlocks = await _supabaseRepository.GetInterlocksByPlcIdAsync(_plcId.Value);
+
+                // シリンダー名を取得するために全シリンダーを取得
+                var cylinders = await _supabaseRepository.GetCYsAsync();
+                var cylinderDict = cylinders.ToDictionary(c => c.Id, c => !string.IsNullOrEmpty(c.CYNum) ? c.CYNum : $"CY{c.Id}");
+
+                // 表示用アイテムに変換
+                var displayItems = interlocks.Select(i => new InterlockDisplayItem
+                {
+                    CylinderId = i.CylinderId,
+                    CylinderName = cylinderDict.TryGetValue(i.CylinderId, out var name) ? name : $"CY{i.CylinderId}",
+                    SortId = i.SortId,
+                    ConditionCylinderId = i.ConditionCylinderId,
+                    ConditionCylinderName = cylinderDict.TryGetValue(i.ConditionCylinderId, out var condName) ? condName : $"CY{i.ConditionCylinderId}",
+                    GoOrBack = i.GoOrBack,
+                    GoOrBackDisplay = i.GoOrBack switch
+                    {
+                        0 => "Go&Back",
+                        1 => "GoOnly",
+                        2 => "BackOnly",
+                        _ => $"不明({i.GoOrBack})"
+                    },
+                    PreConditionID1 = i.PreConditionID1,
+                    PreConditionID2 = i.PreConditionID2,
+                    PreConditionID3 = i.PreConditionID3,
+                    PlcId = i.PlcId
+                }).OrderBy(i => i.CylinderId).ThenBy(i => i.SortId).ToList();
+
+                Interlocks = new ObservableCollection<InterlockDisplayItem>(displayItems);
+                TotalInterlockCount = displayItems.Count;
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"インターロック読み込みエラー: {ex.Message}";
+                Interlocks = new ObservableCollection<InterlockDisplayItem>();
+                TotalInterlockCount = 0;
+            }
+        }
     }
 
     public class MnemonicTypeItem
     {
         public int? Id { get; set; }
         public string Name { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// インターロック表示用アイテム
+    /// </summary>
+    public class InterlockDisplayItem
+    {
+        public int CylinderId { get; set; }
+        public string CylinderName { get; set; } = string.Empty;
+        public int SortId { get; set; }
+        public int ConditionCylinderId { get; set; }
+        public string ConditionCylinderName { get; set; } = string.Empty;
+        public int GoOrBack { get; set; }
+        public string GoOrBackDisplay { get; set; } = string.Empty;
+        public int? PreConditionID1 { get; set; }
+        public int? PreConditionID2 { get; set; }
+        public int? PreConditionID3 { get; set; }
+        public int PlcId { get; set; }
     }
 }

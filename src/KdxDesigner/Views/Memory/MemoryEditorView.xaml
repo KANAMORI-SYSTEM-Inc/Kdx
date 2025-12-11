@@ -4,65 +4,95 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Memory Editor" Height="500" Width="1000">
+        Title="Memory Editor" Height="600" Width="1400">
 
     <DockPanel>
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10">
+        <!-- ツールバー -->
+        <ToolBar DockPanel.Dock="Top" Height="40">
+            <TextBlock Text="PLC ID: " VerticalAlignment="Center" FontWeight="Bold" Margin="5,0,5,0"/>
+            <TextBlock Text="{Binding PlcId}" VerticalAlignment="Center" Margin="0,0,10,0"/>
 
-            <!--PlcIdの表示-->
-            <!--バインディングされていない不具合がある-->
-            <TextBlock Text="PLC ID: " VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,5,0"/>
-            <TextBlock Text="{Binding PlcId}" VerticalAlignment="Center"/>
+            <Separator/>
 
-            <!--CsvImportコマンド, Csvファイルをアプリに読み込む-->
-            <Button Content="CSV Import" Command="{Binding ImportCsvCommand}" Margin="20,0,0,0"/>
+            <Button Content="CSV Import" Command="{Binding ImportCsvCommand}" Padding="10,2" Margin="5,0"/>
+            <Button Content="DB Save" Command="{Binding DBSaveCommand}" Padding="10,2" Margin="5,0"/>
+            <Button Content="DB Import" Command="{Binding DBImportCommand}" Padding="10,2" Margin="5,0"/>
+            <Button Content="Cancel" Command="{Binding CancelCommand}" Padding="10,2" Margin="5,0"/>
 
-            <!--DBSaveコマンド, Csvファイルをアプリに読み込む-->
-            <Button Content="DB Save" Command="{Binding DBSaveCommand}" Margin="10,0,0,0"/>
-            <Button Content="DB Import" Command="{Binding DBImportCommand}" Margin="10,0,0,0"/>
+            <Separator/>
 
-            
-            <Button Content="Cancel" Command="{Binding CancelCommand}" Margin="10,0,0,0"/>
-
-            <!--メモリカテゴリの表示-->
-            <TextBlock Text="メモリカテゴリ: " VerticalAlignment="Center" Margin="10,0,5,0"/>
+            <TextBlock Text="メモリカテゴリ: " VerticalAlignment="Center" Margin="5,0,5,0"/>
             <ComboBox ItemsSource="{Binding MemoryCategories}"
-              SelectedItem="{Binding SelectedMemoryCategory}"
-              DisplayMemberPath="CategoryName"
-              Width="150" />
-            
-            <!--DB反映進捗-->
-            <TextBlock Text="{Binding SaveStatusMessage}" FontWeight="Bold" Margin="10,0,5,0" />
+                      SelectedItem="{Binding SelectedMemoryCategory}"
+                      DisplayMemberPath="CategoryName"
+                      Width="120" VerticalAlignment="Center"/>
 
+            <Separator/>
 
-        </StackPanel>
+            <TextBlock Text="Category絞り込み: " VerticalAlignment="Center" Margin="5,0,5,0"/>
+            <ComboBox ItemsSource="{Binding CategoryFilterItems}"
+                      SelectedItem="{Binding SelectedCategoryFilter}"
+                      Width="150" VerticalAlignment="Center"/>
 
+            <Separator/>
+
+            <TextBlock Text="{Binding SaveStatusMessage}" FontWeight="Bold" Foreground="Blue"
+                       VerticalAlignment="Center" Margin="10,0,5,0"/>
+        </ToolBar>
+
+        <!-- 統計情報 -->
+        <Border DockPanel.Dock="Top" Background="#FFF0F0F0" BorderBrush="#FFD0D0D0" BorderThickness="0,1" Padding="10,5">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock FontWeight="Bold" Margin="0,0,20,0">
+                    <Run Text="表示件数: "/>
+                    <Run Text="{Binding Memories.Count, Mode=OneWay}" Foreground="Blue"/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- DataGrid -->
         <DataGrid x:Name="MemoryGrid"
-            ItemsSource="{Binding Memories}"
+                  ItemsSource="{Binding FilteredMemories}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="True"
                   CanUserDeleteRows="True"
                   IsReadOnly="False"
                   Margin="10"
                   ClipboardCopyMode="IncludeHeader"
-                  SelectionUnit="CellOrRowHeader">
+                  SelectionUnit="CellOrRowHeader"
+                  GridLinesVisibility="Horizontal"
+                  AlternatingRowBackground="#FFF8F8F8"
+                  RowHeight="25">
+
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#FF4A5F7F"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="Height" Value="30"/>
+                    <Setter Property="Padding" Value="5,0"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
 
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding ID}" IsReadOnly="True" />
-                <DataGridTextColumn Header="Memory Category" Binding="{Binding MemoryCategory}" />
-                <DataGridTextColumn Header="Device Number" Binding="{Binding DeviceNumber}" />
-                <DataGridTextColumn Header="Device Number1" Binding="{Binding DeviceNumber1}" />
-                <DataGridTextColumn Header="Device Number2" Binding="{Binding DeviceNumber2}" />
-                <DataGridTextColumn Header="Device" Binding="{Binding Device}" />
-                <DataGridTextColumn Header="Category" Binding="{Binding Category}" />
-                <DataGridTextColumn Header="Row_1" Binding="{Binding Row_1}" />
-                <DataGridTextColumn Header="Row_2" Binding="{Binding Row_2}" />
-                <DataGridTextColumn Header="Row_3" Binding="{Binding Row_3}" />
-                <DataGridTextColumn Header="Row_4" Binding="{Binding Row_4}" />
-                <DataGridTextColumn Header="Direct Input" Binding="{Binding Direct_Input}" />
-                <DataGridTextColumn Header="Confirm" Binding="{Binding Confirm}" />
-                <DataGridTextColumn Header="Note" Binding="{Binding Note}" />
-                <DataGridCheckBoxColumn Header="GOT" Binding="{Binding GOT}" />
+                <DataGridTextColumn Header="PlcId" Binding="{Binding PlcId}" Width="60" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Device" Binding="{Binding Device}" Width="100"/>
+                <DataGridTextColumn Header="MemoryCategory" Binding="{Binding MemoryCategory}" Width="100"/>
+                <DataGridTextColumn Header="DeviceNumber" Binding="{Binding DeviceNumber}" Width="100"/>
+                <DataGridTextColumn Header="DeviceNumber1" Binding="{Binding DeviceNumber1}" Width="100"/>
+                <DataGridTextColumn Header="DeviceNumber2" Binding="{Binding DeviceNumber2}" Width="100"/>
+                <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="120"/>
+                <DataGridTextColumn Header="Row_1" Binding="{Binding Row_1}" Width="100"/>
+                <DataGridTextColumn Header="Row_2" Binding="{Binding Row_2}" Width="100"/>
+                <DataGridTextColumn Header="Row_3" Binding="{Binding Row_3}" Width="100"/>
+                <DataGridTextColumn Header="Row_4" Binding="{Binding Row_4}" Width="100"/>
+                <DataGridTextColumn Header="Direct_Input" Binding="{Binding Direct_Input}" Width="100"/>
+                <DataGridTextColumn Header="Confirm" Binding="{Binding Confirm}" Width="80"/>
+                <DataGridTextColumn Header="Note" Binding="{Binding Note}" Width="150"/>
+                <DataGridTextColumn Header="GOT" Binding="{Binding GOT}" Width="60"/>
+                <DataGridTextColumn Header="MnemonicId" Binding="{Binding MnemonicId}" Width="90"/>
+                <DataGridTextColumn Header="RecordId" Binding="{Binding RecordId}" Width="80"/>
+                <DataGridTextColumn Header="OutcoilNumber" Binding="{Binding OutcoilNumber}" Width="100"/>
             </DataGrid.Columns>
         </DataGrid>
 

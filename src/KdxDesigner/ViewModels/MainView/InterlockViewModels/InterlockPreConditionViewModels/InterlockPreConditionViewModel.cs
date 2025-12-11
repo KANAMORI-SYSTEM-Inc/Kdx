@@ -24,41 +24,14 @@ namespace KdxDesigner.ViewModels
             ProcessDetails = new ObservableCollection<ProcessDetail>();
 
             AddPreCondition1Command = new RelayCommand(() => AddPreCondition1(null));
-            DeletePreCondition1Command = new RelayCommand(() => DeletePreCondition1(null), () => CanDeletePreCondition1(null));
-            AddPreCondition2Command = new RelayCommand(() => AddPreCondition2(null));
-            DeletePreCondition2Command = new RelayCommand(() => DeletePreCondition2(null), () => CanDeletePreCondition2(null));
-            AddPreCondition3Command = new RelayCommand(() => AddPreCondition3(null));
-            DeletePreCondition3Command = new RelayCommand(() => DeletePreCondition3(null), () => CanDeletePreCondition3(null));
-            SearchIOCommand = new RelayCommand(async () => await SearchIOAsync());
-            ClearStartDetailCommand = new RelayCommand(ClearStartDetail, () => SelectedStartProcessDetail != null);
-            ClearEndDetailCommand = new RelayCommand(ClearEndDetail, () => SelectedEndProcessDetail != null);
+            AddPreCondition2Command = new RelayCommand(OpenAddPreCondition2Window);
+            AddPreCondition3Command = new RelayCommand(OpenAddPreCondition3Window);
             SaveCommand = new RelayCommand(async () => await SaveAsync());
             CancelCommand = new RelayCommand(() => Cancel(null));
 
             _ = LoadDataAsync();
         }
 
-        // クリアコマンド
-        public ICommand ClearStartDetailCommand { get; }
-        public ICommand ClearEndDetailCommand { get; }
-
-        private void ClearStartDetail()
-        {
-            SelectedStartProcessDetail = null;
-            if (SelectedPreCondition2 != null)
-            {
-                SelectedPreCondition2.StartDetailId = null;
-            }
-        }
-
-        private void ClearEndDetail()
-        {
-            SelectedEndProcessDetail = null;
-            if (SelectedPreCondition2 != null)
-            {
-                SelectedPreCondition2.EndDetailId = null;
-            }
-        }
 
         private async Task LoadDataAsync()
         {

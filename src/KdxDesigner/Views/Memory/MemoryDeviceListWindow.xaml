@@ -110,6 +110,13 @@
                     <Run Text="速度: "/>
                     <Run Text="{Binding TotalSpeedDeviceCount}" Foreground="DarkOrange"/>
                 </TextBlock>
+
+                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="10,0"/>
+
+                <TextBlock Margin="10,0">
+                    <Run Text="インターロック: "/>
+                    <Run Text="{Binding TotalInterlockCount}" Foreground="DarkRed"/>
+                </TextBlock>
             </StackPanel>
         </Border>
         
@@ -178,6 +185,24 @@
                         <DataGridTextColumn Header="シリンダID" Binding="{Binding CylinderId}" Width="100"/>
                         <DataGridTextColumn Header="デバイス" Binding="{Binding Device}" Width="150"/>
                         <DataGridTextColumn Header="PLC ID" Binding="{Binding PlcId}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+
+            <!-- Interlock タブ -->
+            <TabItem Header="インターロック">
+                <DataGrid ItemsSource="{Binding Interlocks}" Margin="5">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="シリンダID" Binding="{Binding CylinderId}" Width="80"/>
+                        <DataGridTextColumn Header="シリンダ名" Binding="{Binding CylinderName}" Width="150"/>
+                        <DataGridTextColumn Header="Sort" Binding="{Binding SortId}" Width="50"/>
+                        <DataGridTextColumn Header="条件シリンダID" Binding="{Binding ConditionCylinderId}" Width="100"/>
+                        <DataGridTextColumn Header="条件シリンダ名" Binding="{Binding ConditionCylinderName}" Width="150"/>
+                        <DataGridTextColumn Header="Go/Back" Binding="{Binding GoOrBackDisplay}" Width="80"/>
+                        <DataGridTextColumn Header="前提条件1" Binding="{Binding PreConditionID1}" Width="80"/>
+                        <DataGridTextColumn Header="前提条件2" Binding="{Binding PreConditionID2}" Width="80"/>
+                        <DataGridTextColumn Header="前提条件3" Binding="{Binding PreConditionID3}" Width="80"/>
+                        <DataGridTextColumn Header="PLC ID" Binding="{Binding PlcId}" Width="70"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>

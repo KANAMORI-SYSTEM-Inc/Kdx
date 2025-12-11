@@ -1,3 +1,4 @@
+using Kdx.Infrastructure.Supabase.Repositories;
 using KdxDesigner.Services.MnemonicDevice;
 using KdxDesigner.ViewModels;
 using System.Windows;
@@ -9,10 +10,14 @@ namespace KdxDesigner.Views.Memory
     /// </summary>
     public partial class MemoryDeviceListWindow : Window
     {
-        public MemoryDeviceListWindow(IMnemonicDeviceMemoryStore memoryStore, int? plcId = null, int? cycleId = null)
+        public MemoryDeviceListWindow(
+            IMnemonicDeviceMemoryStore memoryStore,
+            SupabaseRepository? supabaseRepository = null,
+            int? plcId = null,
+            int? cycleId = null)
         {
             InitializeComponent();
-            DataContext = new MemoryDeviceListViewModel(memoryStore, plcId, cycleId);
+            DataContext = new MemoryDeviceListViewModel(memoryStore, supabaseRepository, plcId, cycleId);
         }
     }
 }

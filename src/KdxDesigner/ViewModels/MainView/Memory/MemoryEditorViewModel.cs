@@ -12,9 +12,11 @@ using Microsoft.Win32;
 using Microsoft.Extensions.DependencyInjection;
 
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Data;
 
 namespace KdxDesigner.ViewModels
 {
@@ -26,6 +28,8 @@ namespace KdxDesigner.ViewModels
         public MemoryEditorViewModel(ISupabaseRepository repository)
         {
             _repository = repository;
+            FilteredMemories = CollectionViewSource.GetDefaultView(Memories);
+            FilteredMemories.Filter = FilterByCategory;
         }
 
         // アプリ側でのデバイス一覧変数を一次保存する
@@ -44,17 +48,89 @@ namespace KdxDesigner.ViewModels
         [ObservableProperty]
         private string _saveStatusMessage = string.Empty;
 
+        // Category絞り込み用
+        [ObservableProperty]
+        private ObservableCollection<string> _categoryFilterItems = new() { "(すべて)" };
+
+        [ObservableProperty]
+        private string _selectedCategoryFilter = "(すべて)";
+
+        // フィルタ用CollectionView
+        public ICollectionView FilteredMemories { get; private set; }
+
         // 初期化メソッド
         public MemoryEditorViewModel(int plcId, ISupabaseRepository repository)
         {
             _plcId = plcId;
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            
+
             // メモリカテゴリドロップダウンのリスト取得
-            var memoryService = App.Services?.GetService<IMemoryService>() 
+            var memoryService = App.Services?.GetService<IMemoryService>()
                 ?? new Kdx.Infrastructure.Services.MemoryService(_repository);
             MemoryCategories = new ObservableCollection<MemoryCategory>(memoryService.GetMemoryCategories());
             Memories = new ObservableCollection<Memory>();
+
+            // フィルタ用CollectionViewの初期化
+            FilteredMemories = CollectionViewSource.GetDefaultView(Memories);
+            FilteredMemories.Filter = FilterByCategory;
+        }
+
+        /// <summary>
+        /// Categoryフィルタ条件
+        /// </summary>
+        private bool FilterByCategory(object obj)
+        {
+            if (string.IsNullOrEmpty(SelectedCategoryFilter) || SelectedCategoryFilter == "(すべて)")
+                return true;
+
+            if (obj is Memory memory)
+            {
+                return memory.Category == SelectedCategoryFilter;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Category絞り込み選択変更時にフィルタを更新
+        /// </summary>
+        partial void OnSelectedCategoryFilterChanged(string value)
+        {
+            FilteredMemories.Refresh();
+        }
+
+        /// <summary>
+        /// Memoriesが更新されたときにCategoryFilterItemsを更新
+        /// </summary>
+        partial void OnMemoriesChanged(ObservableCollection<Memory> value)
+        {
+            UpdateCategoryFilterItems();
+            // CollectionViewを再設定
+            FilteredMemories = CollectionViewSource.GetDefaultView(value);
+            FilteredMemories.Filter = FilterByCategory;
+            OnPropertyChanged(nameof(FilteredMemories));
+        }
+
+        /// <summary>
+        /// MemoriesからユニークなCategoryを抽出してフィルタリストを更新
+        /// </summary>
+        private void UpdateCategoryFilterItems()
+        {
+            var categories = Memories
+                .Where(m => !string.IsNullOrEmpty(m.Category))
+                .Select(m => m.Category!)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToList();
+
+            CategoryFilterItems.Clear();
+            CategoryFilterItems.Add("(すべて)");
+            foreach (var category in categories)
+            {
+                CategoryFilterItems.Add(category);
+            }
+
+            // 選択をリセット
+            SelectedCategoryFilter = "(すべて)";
         }
 
 
