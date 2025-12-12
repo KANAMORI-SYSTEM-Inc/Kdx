@@ -99,14 +99,16 @@ namespace KdxDesigner.ViewModels.PropertyWindow
         private bool FilterProcessDetails(object obj)
         {
             if (string.IsNullOrWhiteSpace(SearchText))
+            {
                 return true;
+            }
 
             if (obj is ProcessDetail pd)
             {
                 var searchLower = SearchText.ToLower();
                 return (pd.DetailName?.ToLower().Contains(searchLower) ?? false) ||
                        pd.Id.ToString().Contains(searchLower) ||
-                       pd.CycleId.ToString().Contains(searchLower);
+                       (pd.CycleId?.ToString().Contains(searchLower) ?? false);
             }
             return false;
         }

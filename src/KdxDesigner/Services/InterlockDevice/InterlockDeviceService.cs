@@ -81,13 +81,13 @@ namespace KdxDesigner.Services.InterlockDevice
                             Category = "ｲﾝﾀﾛｯｸ",
                             Row_1 = BuildRow1(cylinderData, interlockData),
                             Row_2 = BuildRow2(conditionData),
-                            Row_3 = conditionData.Condition.Name ?? "",
-                            Row_4 = conditionData.Condition.Comment1 ?? "",
+                            Row_3 = conditionData.Condition.Comment1 ?? "",
+                            Row_4 = conditionData.Condition.Comment2 ?? "",
                             Direct_Input = "",
                             Confirm = "",
                             Note = "",
                             GOT = "false",
-                            MnemonicId = (int)MnemonicType.CY,
+                            MnemonicId = (int)MnemonicType.Interlock,
                             RecordId = conditionData.Condition.CylinderId,
                             OutcoilNumber = conditionData.InterlockNumber
                         };
@@ -103,9 +103,25 @@ namespace KdxDesigner.Services.InterlockDevice
         private static string BuildRow1(CylinderInterlockData cylinderData, InterlockData interlockData)
         {
             // シリンダー名とGoOrBack情報を組み合わせ
-            var cylinderName = cylinderData.Cylinder.CYNum + cylinderData.Cylinder.CYNameSub ?? "";
             var goOrBack = interlockData.GoOrBackDisplayName;
-            return $"{cylinderName}_{goOrBack}";
+
+            switch (goOrBack)
+            {
+                case "Go&Back":
+                    goOrBack = "All";
+                    break;
+                case "GoOnly":
+                    goOrBack = "Go";
+                    break;
+                case "BackOnly":
+                    goOrBack = "Back";
+                    break;
+                default:
+
+                    break;
+            }
+            var cylinderName = cylinderData.Cylinder.CYNum + cylinderData.Cylinder.CYNameSub ?? "";
+            return $"{cylinderName}{goOrBack}";
         }
 
         private static string BuildRow2(InterlockConditionData conditionData)

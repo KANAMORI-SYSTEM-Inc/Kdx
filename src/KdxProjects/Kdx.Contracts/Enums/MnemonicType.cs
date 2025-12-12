@@ -14,6 +14,10 @@ namespace Kdx.Contracts.Enums
         Operation = 3,
 
         [Description("シリンダ")]
-        CY = 4
+        CY = 4,
+        [Description("工程タイム")]
+        ProsTime = 5,
+        [Description("インターロック")]
+        Interlock = 6,
     }
 }

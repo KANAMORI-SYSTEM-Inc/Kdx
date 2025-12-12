@@ -365,6 +365,8 @@ namespace KdxDesigner.ViewModels.Settings
                     cylinderInterlockDataList,
                     SelectedPlc.Id);
 
+                // TODO: メッセージの生成
+
                 if (interlockMemories.Count > 0)
                 {
                     await _repository.SaveOrUpdateMemoriesBatchAsync(interlockMemories);
