@@ -51,7 +51,8 @@
       "Bash(supabase link:*)",
       "Bash(supabase db execute:*)",
       "Bash(supabase db:*)",
-      "Bash(Select-Object -First 50)"
+      "Bash(Select-Object -First 50)",
+      "Bash(Select-Object -First 30)"
     ],
     "deny": [],
     "ask": []

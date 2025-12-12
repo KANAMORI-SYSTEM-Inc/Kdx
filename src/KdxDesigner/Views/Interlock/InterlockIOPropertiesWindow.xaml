@@ -140,6 +140,19 @@
                     <Label Grid.Column="0" Content="ON条件:"/>
                     <CheckBox Grid.Column="1" IsChecked="{Binding IsOnCondition}" VerticalAlignment="Center"/>
                 </Grid>
+
+                <!-- IOインデックス -->
+                <Grid Margin="0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="IOインデックス:"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <TextBox Text="{Binding IoIndex, UpdateSourceTrigger=PropertyChanged}" Width="80" VerticalAlignment="Center"/>
+                        <TextBlock Text="(0から始まる順序番号)" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="Gray" FontSize="11"/>
+                    </StackPanel>
+                </Grid>
             </StackPanel>
         </ScrollViewer>
 

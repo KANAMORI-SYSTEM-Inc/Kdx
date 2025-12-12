@@ -1469,13 +1469,45 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 .Delete();
         }
 
-        public async Task<List<ErrorMessage>> GetErrorMessagesAsync(int mnemonicId)
+        public async Task<List<ErrorMessage>> GetErrorMessagesAsync(int mnemonicId, int? conditionTypeId = null)
+        {
+            var query = _supabaseClient
+                .From<ErrorMessageEntity>()
+                .Where(e => e.MnemonicId == mnemonicId);
+
+            if (conditionTypeId.HasValue)
+            {
+                query = query.Where(e => e.ConditionTypeId == conditionTypeId.Value);
+            }
+
+            var response = await query.Get();
+            return response.Models.Select(e => e.ToDto()).ToList();
+        }
+
+        public async Task<List<ErrorMessage>> GetAllErrorMessagesAsync()
         {
             var response = await _supabaseClient
                 .From<ErrorMessageEntity>()
-                .Where(e => e.MnemonicId == mnemonicId)
                 .Get();
             return response.Models.Select(e => e.ToDto()).ToList();
+        }
+
+        public async Task UpsertErrorMessageAsync(ErrorMessage errorMessage)
+        {
+            var entity = ErrorMessageEntity.FromDto(errorMessage);
+            await _supabaseClient
+                .From<ErrorMessageEntity>()
+                .Upsert(entity);
+        }
+
+        public async Task DeleteErrorMessageAsync(int mnemonicId, int conditionTypeId, int alarmId)
+        {
+            await _supabaseClient
+                .From<ErrorMessageEntity>()
+                .Where(e => e.MnemonicId == mnemonicId)
+                .Where(e => e.ConditionTypeId == conditionTypeId)
+                .Where(e => e.AlarmId == alarmId)
+                .Delete();
         }
 
         public async Task<List<ProcessError>> GetErrorsAsync(int plcId, int cycleId, int mnemonicId)

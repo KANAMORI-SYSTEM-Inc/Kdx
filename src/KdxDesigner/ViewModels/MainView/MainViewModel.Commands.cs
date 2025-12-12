@@ -560,5 +560,67 @@ namespace KdxDesigner.ViewModels
 
         #endregion
 
+        #region Error Message Generation Commands
+
+        /// <summary>
+        /// エラーメッセージ生成ウィンドウを開く
+        /// </summary>
+        [RelayCommand]
+        private void OpenErrorMessageGenerator()
+        {
+            if (_repository == null)
+            {
+                MessageBox.Show("システムの初期化が不完全なため、処理を実行できません。", "エラー");
+                return;
+            }
+
+            if (SelectedPlc == null)
+            {
+                MessageBox.Show("PLCを選択してください。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // メモリストアを取得
+            var memoryStore = _mnemonicMemoryStore;
+            if (memoryStore == null || !memoryStore.HasData(SelectedPlc.Id))
+            {
+                MessageBox.Show("メモリ設定を先に実行してください。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // エラーメッセージ生成ウィンドウを表示
+            var window = new Views.ErrorMessage.ErrorMessageGeneratorWindow(_repository, memoryStore, SelectedPlc.Id);
+            var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
+            if (mainWindow != null)
+            {
+                window.Owner = mainWindow;
+            }
+            window.ShowDialog();
+        }
+
+        /// <summary>
+        /// エラーメッセージテンプレート編集ウィンドウを開く
+        /// </summary>
+        [RelayCommand]
+        private void OpenErrorMessageEditor()
+        {
+            if (_repository == null)
+            {
+                MessageBox.Show("システムの初期化が不完全なため、処理を実行できません。", "エラー");
+                return;
+            }
+
+            // エラーメッセージテンプレート編集ウィンドウを表示
+            var window = new Views.ErrorMessage.ErrorMessageEditorWindow(_repository);
+            var mainWindow = Application.Current.Windows.OfType<MainView>().FirstOrDefault();
+            if (mainWindow != null)
+            {
+                window.Owner = mainWindow;
+            }
+            window.ShowDialog();
+        }
+
+        #endregion
+
     }
 }

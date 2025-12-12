@@ -107,13 +107,102 @@ namespace KdxDesigner.Models
         public InterlockIO IO { get; set; } = new();
 
         /// <summary>
-        /// IOの名前（IOテーブルから取得）
+        /// IOテーブルの詳細情報
         /// </summary>
-        public string? IOName { get; set; }
+        public IO? IODetail { get; set; }
+
+        /// <summary>
+        /// IOの名前（IOテーブルから取得、後方互換性のため残す）
+        /// </summary>
+        public string? IOName
+        {
+            get => IODetail?.IOName ?? _ioName;
+            set => _ioName = value;
+        }
+        private string? _ioName;
 
         /// <summary>
         /// IsOnConditionの表示名を取得
         /// </summary>
         public string IsOnConditionDisplayName => IO.IsOnCondition ? "ON" : "OFF";
+
+        /// <summary>
+        /// IOアドレス（InterlockIO.IOAddressから取得）
+        /// </summary>
+        public string IOAddress => IO.IOAddress;
+
+        /// <summary>
+        /// X/Y/Fコメント（IOテーブルから取得）
+        /// </summary>
+        public string? XComment => IODetail?.XComment;
+        public string? YComment => IODetail?.YComment;
+        public string? FComment => IODetail?.FComment;
+
+        /// <summary>
+        /// IO説明（IOテーブルから取得）
+        /// </summary>
+        public string? IOExplanation => IODetail?.IOExplanation;
+
+        /// <summary>
+        /// ユニット設置場所（IOテーブルから取得）
+        /// </summary>
+        public string? IOSpot => IODetail?.IOSpot;
+
+        /// <summary>
+        /// ユニット名称（IOテーブルから取得）
+        /// </summary>
+        public string? UnitName => IODetail?.UnitName;
+
+        /// <summary>
+        /// 系統（IOテーブルから取得）
+        /// </summary>
+        public string? System => IODetail?.System;
+
+        /// <summary>
+        /// 局番（IOテーブルから取得）
+        /// </summary>
+        public string? StationNumber => IODetail?.StationNumber;
+
+        /// <summary>
+        /// リンクデバイス（IOテーブルから取得）
+        /// </summary>
+        public string? LinkDevice => IODetail?.LinkDevice;
+
+        /// <summary>
+        /// IOタイプ（IOテーブルから取得）
+        /// </summary>
+        public int? IOType => IODetail?.IOType;
+
+        /// <summary>
+        /// 反転フラグ（IOテーブルから取得）
+        /// </summary>
+        public bool? IsInverted => IODetail?.IsInverted;
+
+        /// <summary>
+        /// 表示用のIO条件文字列を生成
+        /// </summary>
+        public string DisplayCondition
+        {
+            get
+            {
+                var name = IOName ?? IOAddress;
+                var condition = IsOnConditionDisplayName;
+                return $"{name}:{condition}";
+            }
+        }
+
+        /// <summary>
+        /// 詳細表示用のIO条件文字列を生成（説明付き）
+        /// </summary>
+        public string DetailedDisplayCondition
+        {
+            get
+            {
+                var name = IOName ?? IOAddress;
+                var condition = IsOnConditionDisplayName;
+                var explanation = !string.IsNullOrEmpty(IOExplanation) ? $"({IOExplanation})" : "";
+                return $"{name}{explanation}:{condition}";
+            }
+        }
     }
 }

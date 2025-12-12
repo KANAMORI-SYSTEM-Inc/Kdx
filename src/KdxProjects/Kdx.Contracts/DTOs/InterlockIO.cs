@@ -14,5 +14,11 @@ namespace Kdx.Contracts.DTOs
         public int ConditionNumber { get; set; }
 
         public bool IsOnCondition { get; set; } = false;
+
+        /// <summary>
+        /// IO番号/インデックス (0から始まる)
+        /// 同一InterlockCondition内での順序を示す
+        /// </summary>
+        public int IoIndex { get; set; } = 0;
     }
 }

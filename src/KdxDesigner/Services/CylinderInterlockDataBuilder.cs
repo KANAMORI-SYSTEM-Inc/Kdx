@@ -236,11 +236,12 @@ namespace KdxDesigner.Services
                 IO = io
             };
 
-            // IONameを設定
+            // IOテーブルから詳細情報を設定
             if (_ioCache != null)
             {
                 var ioInfo = _ioCache.FirstOrDefault(i => i.Address == io.IOAddress && i.PlcId == io.PlcId);
-                ioData.IOName = ioInfo?.IOName;
+                // IODetail全体を設定（IOName, IOExplanation, XComment等すべての情報が利用可能に）
+                ioData.IODetail = ioInfo;
             }
 
             return ioData;

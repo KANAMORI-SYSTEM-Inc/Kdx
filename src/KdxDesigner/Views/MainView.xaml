@@ -154,6 +154,19 @@
                             Width="100"
                             Margin="0,10,0,0"
                             VerticalAlignment="Center"
+                            Command="{Binding OpenErrorMessageGeneratorCommand}"
+                            Content="エラーメッセージ"
+                            IsEnabled="{Binding IsMemoryConfigured}" />
+                        <Button
+                            Width="100"
+                            Margin="0,10,0,0"
+                            VerticalAlignment="Center"
+                            Command="{Binding OpenErrorMessageEditorCommand}"
+                            Content="テンプレート編集" />
+                        <Button
+                            Width="100"
+                            Margin="0,10,0,0"
+                            VerticalAlignment="Center"
                             Command="{Binding ProcessOutputCommand}"
                             Content="工程出力"
                             IsEnabled="{Binding IsMemoryConfigured}" />

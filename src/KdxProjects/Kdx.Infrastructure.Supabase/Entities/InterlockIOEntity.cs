@@ -30,6 +30,13 @@ namespace Kdx.Infrastructure.Supabase.Entities
         [Column("IsOnCondition")]
         public bool IsOnCondition { get; set; }
 
+        /// <summary>
+        /// IO番号/インデックス (0から始まる)
+        /// 同一InterlockCondition内での順序を示す
+        /// </summary>
+        [Column("IoIndex")]
+        public int IoIndex { get; set; }
+
         public static InterlockIOEntity FromDto(InterlockIO dto) => new()
         {
             CylinderId = dto.CylinderId,
@@ -37,7 +44,8 @@ namespace Kdx.Infrastructure.Supabase.Entities
             IOAddress = dto.IOAddress,
             InterlockSortId = dto.InterlockSortId,
             ConditionNumber = dto.ConditionNumber,
-            IsOnCondition = dto.IsOnCondition
+            IsOnCondition = dto.IsOnCondition,
+            IoIndex = dto.IoIndex
         };
 
         public InterlockIO ToDto() => new()
@@ -47,7 +55,8 @@ namespace Kdx.Infrastructure.Supabase.Entities
             IOAddress = this.IOAddress,
             InterlockSortId = this.InterlockSortId,
             ConditionNumber = this.ConditionNumber,
-            IsOnCondition = this.IsOnCondition
+            IsOnCondition = this.IsOnCondition,
+            IoIndex = this.IoIndex
         };
     }
 }

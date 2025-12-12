@@ -11,6 +11,15 @@ namespace Kdx.Infrastructure.Supabase.Entities
         [Column("MnemonicId")]
         public int MnemonicId { get; set; }
 
+        /// <summary>
+        /// 条件タイプID (InterlockConditionType.Idに対応)
+        /// 複合キーの一部
+        /// 0 = 共通テンプレート
+        /// </summary>
+        [PrimaryKey("ConditionTypeId")]
+        [Column("ConditionTypeId")]
+        public int ConditionTypeId { get; set; }
+
         [PrimaryKey("AlarmId")]
         [Column("AlarmId")]
         public int AlarmId { get; set; }
@@ -36,6 +45,7 @@ namespace Kdx.Infrastructure.Supabase.Entities
         public static ErrorMessageEntity FromDto(ErrorMessage dto) => new()
         {
             MnemonicId = dto.MnemonicId,
+            ConditionTypeId = dto.ConditionTypeId,
             AlarmId = dto.AlarmId,
             BaseMessage = dto.BaseMessage,
             BaseAlarm = dto.BaseAlarm,
@@ -48,6 +58,7 @@ namespace Kdx.Infrastructure.Supabase.Entities
         public ErrorMessage ToDto() => new()
         {
             MnemonicId = this.MnemonicId,
+            ConditionTypeId = this.ConditionTypeId,
             AlarmId = this.AlarmId,
             BaseMessage = this.BaseMessage,
             BaseAlarm = this.BaseAlarm,

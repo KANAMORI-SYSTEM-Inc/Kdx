@@ -23,6 +23,12 @@ namespace KdxDesigner.ViewModels
         // 編集可能フィールド
         [ObservableProperty] private bool _isOnCondition;
 
+        /// <summary>
+        /// IO番号/インデックス (0から始まる)
+        /// 同一InterlockCondition内での順序を示す
+        /// </summary>
+        [ObservableProperty] private int _ioIndex;
+
         // 表示用
         [ObservableProperty] private string? _ioName;
 
@@ -46,6 +52,7 @@ namespace KdxDesigner.ViewModels
             InterlockSortId = _interlockIO.InterlockSortId;
             ConditionNumber = _interlockIO.ConditionNumber;
             IsOnCondition = _interlockIO.IsOnCondition;
+            IoIndex = _interlockIO.IoIndex;
         }
 
         [RelayCommand]
@@ -55,6 +62,7 @@ namespace KdxDesigner.ViewModels
             {
                 // プロパティを更新
                 _interlockIO.IsOnCondition = IsOnCondition;
+                _interlockIO.IoIndex = IoIndex;
 
                 // データベースに保存
                 await _repository.UpdateInterlockIOAsync(_interlockIO);

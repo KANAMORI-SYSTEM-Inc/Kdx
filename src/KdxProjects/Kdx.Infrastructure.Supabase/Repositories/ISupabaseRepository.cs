@@ -1123,11 +1123,32 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         #region Error
 
         /// <summary>
-        /// 指定されたニーモニックIDに紐づくエラーメッセージを取得します。
+        /// 指定されたニーモニックIDと条件タイプIDに紐づくエラーメッセージを取得します。
         /// </summary>
         /// <param name="mnemonicId">ニーモニックID。</param>
+        /// <param name="conditionTypeId">条件タイプID（nullの場合はニーモニックIDのみでフィルタ）。</param>
         /// <returns>エラーメッセージのリスト。</returns>
-        Task<List<ErrorMessage>> GetErrorMessagesAsync(int mnemonicId);
+        Task<List<ErrorMessage>> GetErrorMessagesAsync(int mnemonicId, int? conditionTypeId = null);
+
+        /// <summary>
+        /// 全てのエラーメッセージテンプレートを取得します。
+        /// </summary>
+        /// <returns>エラーメッセージのリスト。</returns>
+        Task<List<ErrorMessage>> GetAllErrorMessagesAsync();
+
+        /// <summary>
+        /// エラーメッセージテンプレートを挿入または更新します。
+        /// </summary>
+        /// <param name="errorMessage">挿入または更新するエラーメッセージ。</param>
+        Task UpsertErrorMessageAsync(ErrorMessage errorMessage);
+
+        /// <summary>
+        /// エラーメッセージテンプレートを削除します。
+        /// </summary>
+        /// <param name="mnemonicId">ニーモニックID。</param>
+        /// <param name="conditionTypeId">条件タイプID（0=共通テンプレート）。</param>
+        /// <param name="alarmId">アラームID。</param>
+        Task DeleteErrorMessageAsync(int mnemonicId, int conditionTypeId, int alarmId);
 
         /// <summary>
         /// 指定された条件に紐づくエラー情報を取得します。
@@ -1581,6 +1602,51 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         /// </summary>
         /// <returns>監査ログの総件数。</returns>
         Task<int> GetAuditLogCountAsync();
+
+        #endregion
+
+        #region GeneratedError
+
+        /// <summary>
+        /// 指定されたPLCの生成エラーを取得します。
+        /// </summary>
+        /// <param name="plcId">PLC ID。</param>
+        /// <returns>生成エラーのリスト。</returns>
+        Task<List<GeneratedError>> GetGeneratedErrorsByPlcIdAsync(int plcId);
+
+        /// <summary>
+        /// 指定されたPLCとMnemonicIdの生成エラーを取得します。
+        /// </summary>
+        /// <param name="plcId">PLC ID。</param>
+        /// <param name="mnemonicId">Mnemonic ID。</param>
+        /// <returns>生成エラーのリスト。</returns>
+        Task<List<GeneratedError>> GetGeneratedErrorsByPlcIdAndMnemonicIdAsync(int plcId, int mnemonicId);
+
+        /// <summary>
+        /// 生成エラーをバッチで保存します（既存データは上書き）。
+        /// </summary>
+        /// <param name="errors">保存する生成エラーのリスト。</param>
+        Task SaveGeneratedErrorsBatchAsync(List<GeneratedError> errors);
+
+        /// <summary>
+        /// 指定されたPLCの生成エラーを全て削除します。
+        /// </summary>
+        /// <param name="plcId">PLC ID。</param>
+        Task DeleteGeneratedErrorsByPlcIdAsync(int plcId);
+
+        /// <summary>
+        /// 指定されたPLCとMnemonicIdの生成エラーを削除します。
+        /// </summary>
+        /// <param name="plcId">PLC ID。</param>
+        /// <param name="mnemonicId">Mnemonic ID。</param>
+        Task DeleteGeneratedErrorsByPlcIdAndMnemonicIdAsync(int plcId, int mnemonicId);
+
+        /// <summary>
+        /// 指定されたPLCの次のエラー番号を取得します。
+        /// </summary>
+        /// <param name="plcId">PLC ID。</param>
+        /// <returns>次のエラー番号（既存のmax + 1、または1）。</returns>
+        Task<int> GetNextErrorNumForPlcAsync(int plcId);
 
         #endregion
     }
