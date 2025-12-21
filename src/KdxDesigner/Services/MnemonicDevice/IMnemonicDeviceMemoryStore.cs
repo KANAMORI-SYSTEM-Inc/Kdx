@@ -1,4 +1,5 @@
 using Kdx.Contracts.DTOs;
+using KdxDesigner.Models;
 
 namespace KdxDesigner.Services.MnemonicDevice
 {
@@ -82,17 +83,36 @@ namespace KdxDesigner.Services.MnemonicDevice
         #endregion
         
         #region Generated Memory Cache
-        
+
         /// <summary>
         /// 生成されたメモリデータをキャッシュ
         /// </summary>
         void CacheGeneratedMemories(List<Kdx.Contracts.DTOs.Memory> memories, int plcId);
-        
+
         /// <summary>
         /// キャッシュされたメモリデータを取得
         /// </summary>
         List<Kdx.Contracts.DTOs.Memory> GetCachedMemories(int plcId);
-        
+
+        #endregion
+
+        #region CylinderInterlockData Operations
+
+        /// <summary>
+        /// CylinderInterlockDataを保存
+        /// </summary>
+        void SetCylinderInterlockData(List<CylinderInterlockData> data, int plcId);
+
+        /// <summary>
+        /// CylinderInterlockDataを取得
+        /// </summary>
+        List<CylinderInterlockData> GetCylinderInterlockData(int plcId);
+
+        /// <summary>
+        /// CylinderInterlockDataをクリア
+        /// </summary>
+        void ClearCylinderInterlockData(int plcId);
+
         #endregion
         
         #region Utility Methods

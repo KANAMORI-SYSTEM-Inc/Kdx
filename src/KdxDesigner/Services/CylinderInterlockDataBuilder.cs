@@ -15,6 +15,7 @@ namespace KdxDesigner.Services
         // キャッシュ用
         private Dictionary<int, InterlockPrecondition1>? _precondition1Cache;
         private Dictionary<int, InterlockPrecondition2>? _precondition2Cache;
+        private Dictionary<int, InterlockPrecondition3>? _precondition3Cache;
         private Dictionary<int, InterlockConditionType>? _conditionTypeCache;
         private Dictionary<int, Cylinder>? _cylinderCache;
         private List<IO>? _ioCache;
@@ -129,6 +130,10 @@ namespace KdxDesigner.Services
             var precondition2List = await _supabaseRepositoryImpl.GetInterlockPrecondition2ListAsync();
             _precondition2Cache = precondition2List.ToDictionary(p => p.Id);
 
+            // Precondition3のキャッシュ
+            var precondition3List = await _supabaseRepositoryImpl.GetInterlockPrecondition3ListAsync();
+            _precondition3Cache = precondition3List.ToDictionary(p => p.Id);
+
             // ConditionTypeのキャッシュ
             var conditionTypes = await _supabaseRepositoryImpl.GetInterlockConditionTypesAsync();
             _conditionTypeCache = conditionTypes.ToDictionary(ct => ct.Id);
@@ -161,6 +166,13 @@ namespace KdxDesigner.Services
             {
                 _precondition2Cache.TryGetValue(interlock.PreConditionID2.Value, out var precondition2);
                 interlockData.Precondition2 = precondition2;
+            }
+
+            // Precondition3を設定
+            if (interlock.PreConditionID3.HasValue && _precondition3Cache != null)
+            {
+                _precondition3Cache.TryGetValue(interlock.PreConditionID3.Value, out var precondition3);
+                interlockData.Precondition3 = precondition3;
             }
 
             // 条件シリンダーを設定
@@ -212,12 +224,13 @@ namespace KdxDesigner.Services
                 conditionData.ConditionType = conditionType;
             }
 
-            // InterlockIOを取得
+            // InterlockIOを取得（IoIndexでソート）
             var ios = await _supabaseRepositoryImpl.GetInterlockIOsByCylinderIdAsync(condition.CylinderId);
             var filteredIOs = ios
                 .Where(io => io.CylinderId == condition.CylinderId
                           && io.InterlockSortId == condition.InterlockSortId
                           && io.ConditionNumber == condition.ConditionNumber)
+                .OrderBy(io => io.IoIndex)  // IoIndexでソートして順序を保持
                 .ToList();
 
             foreach (var io in filteredIOs)
@@ -254,6 +267,7 @@ namespace KdxDesigner.Services
         {
             _precondition1Cache = null;
             _precondition2Cache = null;
+            _precondition3Cache = null;
             _conditionTypeCache = null;
             _cylinderCache = null;
             _ioCache = null;

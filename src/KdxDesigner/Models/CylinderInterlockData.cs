@@ -39,6 +39,11 @@ namespace KdxDesigner.Models
         public InterlockPrecondition2? Precondition2 { get; set; }
 
         /// <summary>
+        /// 前提条件3（PreConditionID3に対応）
+        /// </summary>
+        public InterlockPrecondition3? Precondition3 { get; set; }
+
+        /// <summary>
         /// 条件シリンダー（ConditionCylinderIdに対応）
         /// </summary>
         public Cylinder? ConditionCylinder { get; set; }
@@ -130,6 +135,12 @@ namespace KdxDesigner.Models
         /// IOアドレス（InterlockIO.IOAddressから取得）
         /// </summary>
         public string IOAddress => IO.IOAddress;
+
+        /// <summary>
+        /// IO番号/インデックス（InterlockIO.IoIndexから取得）
+        /// 同一InterlockCondition内での順序を示す
+        /// </summary>
+        public int IoIndex => IO.IoIndex;
 
         /// <summary>
         /// X/Y/Fコメント（IOテーブルから取得）

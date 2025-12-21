@@ -365,6 +365,9 @@ namespace KdxDesigner.ViewModels.Settings
                     cylinderInterlockDataList,
                     SelectedPlc.Id);
 
+                // CylinderInterlockDataをメモリストアに保存（ラダー出力時に使用）
+                _mainViewModel._mnemonicMemoryStore?.SetCylinderInterlockData(cylinderInterlockDataList, SelectedPlc.Id);
+
                 // TODO: メッセージの生成
 
                 if (interlockMemories.Count > 0)

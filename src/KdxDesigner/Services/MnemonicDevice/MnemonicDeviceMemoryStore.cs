@@ -26,7 +26,10 @@ namespace KdxDesigner.Services.MnemonicDevice
         
         // 生成されたメモリデータのキャッシュ（PlcId -> List<Memory>）
         private readonly Dictionary<int, List<Kdx.Contracts.DTOs.Memory>> _generatedMemories;
-        
+
+        // CylinderInterlockDataのメモリストア（PlcId -> List<CylinderInterlockData>）
+        private readonly Dictionary<int, List<CylinderInterlockData>> _cylinderInterlockData;
+
         private long _nextDeviceId = 1;
         
         public MnemonicDeviceMemoryStore()
@@ -35,6 +38,7 @@ namespace KdxDesigner.Services.MnemonicDevice
             _timerDevices = new Dictionary<int, Dictionary<int, List<MnemonicTimerDevice>>>();
             _speedDevices = new Dictionary<int, List<Kdx.Contracts.DTOs.MnemonicSpeedDevice>>();
             _generatedMemories = new Dictionary<int, List<Kdx.Contracts.DTOs.Memory>>();
+            _cylinderInterlockData = new Dictionary<int, List<CylinderInterlockData>>();
         }
         
         #region MnemonicDevice Operations
@@ -337,9 +341,53 @@ namespace KdxDesigner.Services.MnemonicDevice
                 return new List<Kdx.Contracts.DTOs.Memory>();
             }
         }
-        
+
         #endregion
-        
+
+        #region CylinderInterlockData Operations
+
+        /// <summary>
+        /// CylinderInterlockDataを保存
+        /// </summary>
+        public void SetCylinderInterlockData(List<CylinderInterlockData> data, int plcId)
+        {
+            lock (_lock)
+            {
+                _cylinderInterlockData[plcId] = new List<CylinderInterlockData>(data);
+            }
+        }
+
+        /// <summary>
+        /// CylinderInterlockDataを取得
+        /// </summary>
+        public List<CylinderInterlockData> GetCylinderInterlockData(int plcId)
+        {
+            lock (_lock)
+            {
+                if (_cylinderInterlockData.ContainsKey(plcId))
+                {
+                    return new List<CylinderInterlockData>(_cylinderInterlockData[plcId]);
+                }
+                return new List<CylinderInterlockData>();
+            }
+        }
+
+        /// <summary>
+        /// CylinderInterlockDataをクリア
+        /// </summary>
+        public void ClearCylinderInterlockData(int plcId)
+        {
+            lock (_lock)
+            {
+                if (_cylinderInterlockData.ContainsKey(plcId))
+                {
+                    _cylinderInterlockData[plcId].Clear();
+                }
+            }
+        }
+
+        #endregion
+
         #region Utility Methods
         
         /// <summary>
@@ -353,6 +401,7 @@ namespace KdxDesigner.Services.MnemonicDevice
                 _timerDevices.Clear();
                 _speedDevices.Clear();
                 _generatedMemories.Clear();
+                _cylinderInterlockData.Clear();
                 _nextDeviceId = 1;
             }
         }
@@ -368,6 +417,7 @@ namespace KdxDesigner.Services.MnemonicDevice
                 _timerDevices.Remove(plcId);
                 _speedDevices.Remove(plcId);
                 _generatedMemories.Remove(plcId);
+                _cylinderInterlockData.Remove(plcId);
             }
         }
         

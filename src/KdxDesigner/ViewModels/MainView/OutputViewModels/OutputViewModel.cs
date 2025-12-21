@@ -5,8 +5,10 @@ using Kdx.Contracts.Enums;
 using Kdx.Core.Application;
 using KdxDesigner.Utils;
 using KdxDesigner.Utils.Cylinder;
+using KdxDesigner.Utils.Ladder;
 using KdxDesigner.Utils.Operation;
 using KdxDesigner.Utils.ProcessDetail;
+using KdxDesigner.Utils.Interlock;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -193,9 +195,22 @@ namespace KdxDesigner.ViewModels
                 allOutputRows.AddRange(cylinderRows);
                 allGeneratedErrors.AddRange(cyErrorAggregator.GetAllErrors());
 
+                // InterlockBuilder（メモリストアからCylinderInterlockDataを取得）
+                var interlockAggregator = new ErrorAggregator((int)MnemonicType.Interlock);
+                var interlockBuilder = new InterlockBuilder(
+                    _mainViewModel,
+                    interlockAggregator);
+                StatusMessage = "インターロックラダーを生成中...";
+                ProgressPercentage = 90;
+                var interlockRows = await interlockBuilder.GenerateLadder(
+                    data.JoinedCylinderList,
+                    data.IoList,
+                    _mainViewModel.SelectedPlc!.Id,
+                    data.JoinedProcessDetailList);
+
                 // --- 3. 全てのエラーをUIに反映 ---
                 StatusMessage = "エラーチェック中...";
-                ProgressPercentage = 90;
+                ProgressPercentage = 95;
                 foreach (var error in allGeneratedErrors.Distinct())
                 {
                     OutputErrors.Add(error);
@@ -210,20 +225,41 @@ namespace KdxDesigner.ViewModels
                         MessageBoxImage.Warning);
                 }
 
-                // --- 4. CSVエクスポート ---
-                if (OutputErrors.Any(e => e.IsCritical))
+                // --- 4. ニーモニックバリデーション ---
+                StatusMessage = "ニーモニックをバリデーション中...";
+                ProgressPercentage = 96;
+                var validationIssues = LadderMnemonicValidator.Validate(allOutputRows);
+                var validationErrors = validationIssues.Where(i => i.Level == "Error").ToList();
+                var validationWarnings = validationIssues.Where(i => i.Level == "Warn").ToList();
+
+                // バリデーションエラーをOutputErrorsに追加
+                foreach (var issue in validationErrors)
                 {
-                    StatusMessage = "致命的なエラーのため、処理を中止しました。";
-                    ProgressPercentage = 0;
-                    MessageBox.Show(
-                        "致命的なエラーのため、CSV出力を中止しました。",
-                        "エラー",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                    return;
+                    OutputErrors.Add(new OutputError
+                    {
+                        MnemonicId = 0,
+                        RecordId = issue.Key,
+                        RecordName = $"Key:{issue.Key} Cmd:{issue.Command}",
+                        Message = $"[バリデーションエラー] {issue.Message}",
+                        IsCritical = false  // CSV出力を止めないためfalseに
+                    });
                 }
 
+                foreach (var issue in validationWarnings)
+                {
+                    OutputErrors.Add(new OutputError
+                    {
+                        MnemonicId = 0,
+                        RecordId = issue.Key,
+                        RecordName = $"Key:{issue.Key} Cmd:{issue.Command}",
+                        Message = $"[バリデーション警告] {issue.Message}",
+                        IsCritical = false
+                    });
+                }
+
+                // --- 5. CSVエクスポート（バリデーションエラーがあっても出力する） ---
                 StatusMessage = "CSVファイルを出力中...";
+                ProgressPercentage = 98;
                 ExportLadderCsvFile(processRows, "Process.csv");
                 ExportLadderCsvFile(detailRows, "Detail.csv");
                 ExportLadderCsvFile(operationRows, "Operation.csv");
@@ -231,12 +267,32 @@ namespace KdxDesigner.ViewModels
                 ExportLadderCsvFile(allOutputRows, "KdxLadder_All.csv");
 
                 ProgressPercentage = 100;
-                StatusMessage = "出力処理が完了しました。";
-                MessageBox.Show(
-                    "出力処理が完了しました。",
-                    "完了",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+
+                // --- 6. 結果表示 ---
+                var totalErrors = validationErrors.Count;
+                var totalWarnings = validationWarnings.Count;
+
+                if (totalErrors > 0 || totalWarnings > 0)
+                {
+                    StatusMessage = $"出力完了（エラー: {totalErrors}件, 警告: {totalWarnings}件）";
+                    MessageBox.Show(
+                        $"出力処理が完了しました。\n\n" +
+                        $"バリデーションエラー: {totalErrors} 件\n" +
+                        $"バリデーション警告: {totalWarnings} 件\n\n" +
+                        $"エラーリストで詳細を確認してください。",
+                        totalErrors > 0 ? "出力完了（エラーあり）" : "出力完了（警告あり）",
+                        MessageBoxButton.OK,
+                        totalErrors > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
+                }
+                else
+                {
+                    StatusMessage = "出力処理が完了しました。";
+                    MessageBox.Show(
+                        "出力処理が完了しました。",
+                        "完了",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
             }
             catch (Exception ex)
             {
@@ -263,7 +319,6 @@ namespace KdxDesigner.ViewModels
             {
                 return;
             }
-
             try
             {
                 string csvPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
