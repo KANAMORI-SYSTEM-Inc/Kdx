@@ -16,19 +16,24 @@ namespace KdxDesigner.Utils.Interlock
     {
         private readonly MainViewModel _mainViewModel;
         private readonly IErrorAggregator _errorAggregator;
+        private readonly IIOAddressService _ioAddressService;
 
         // 各InterlockConditionType用のビルダー
         private readonly BuildInterlockON _onBuilder;
+        private readonly BuildInterlockINV _invBuilder;
 
         public InterlockLadderGenerator(
             MainViewModel mainViewModel,
-            IErrorAggregator errorAggregator)
+            IErrorAggregator errorAggregator,
+            IIOAddressService ioAddressService)
         {
             _mainViewModel = mainViewModel;
             _errorAggregator = errorAggregator;
+            _ioAddressService = ioAddressService;
 
             // モジュールの初期化
             _onBuilder = new BuildInterlockON(errorAggregator);
+            _invBuilder = new BuildInterlockINV(errorAggregator, ioAddressService);
         }
 
         /// <summary>
@@ -40,6 +45,7 @@ namespace KdxDesigner.Utils.Interlock
         /// <param name="processDetails">ProcessDetailとMnemonicDeviceの結合リスト</param>
         /// <returns>生成されたラダー行のリスト</returns>
         public List<LadderCsvRow> GenerateLadder(
+            List<IO> ioList,
             CylinderInterlockData cylinderData,
             MnemonicDeviceWithCylinder cylinder,
             List<MnemonicDeviceWithProcessDetail> processDetails)
@@ -62,6 +68,7 @@ namespace KdxDesigner.Utils.Interlock
             foreach (var interlockData in cylinderData.Interlocks)
             {
                 result.AddRange(GenerateInterlockLadder(
+                    ioList,
                     interlockData,
                     cylinder,
                     processDetails));
@@ -76,6 +83,7 @@ namespace KdxDesigner.Utils.Interlock
         /// 個別のInterlockDataからラダーを生成
         /// </summary>
         private List<LadderCsvRow> GenerateInterlockLadder(
+            List<IO> ioList,
             InterlockData interlockData,
             MnemonicDeviceWithCylinder cylinderDevice,
             List<MnemonicDeviceWithProcessDetail> processDetails)
@@ -132,7 +140,7 @@ namespace KdxDesigner.Utils.Interlock
 
                     case 12: // INV_AL
                     case 13: // INV_M
-                        result.AddRange(_onBuilder.Generate(conditionData, interlockData, ios));
+                        result.AddRange(_invBuilder.Generate(conditionData, interlockData, ioList, cylinderDevice));
                         result.AddRange(buildOutput.Generate(conditionData));
                         break;
                     case 14: // IL

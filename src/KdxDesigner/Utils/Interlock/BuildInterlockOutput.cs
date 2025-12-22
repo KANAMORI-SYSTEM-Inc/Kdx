@@ -1,6 +1,5 @@
 using Kdx.Contracts.DTOs;
 using Kdx.Contracts.DTOs.MnemonicCommon;
-using Kdx.Contracts.Enums;
 using Kdx.Contracts.Interfaces;
 using KdxDesigner.Models;
 

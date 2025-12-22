@@ -14,14 +14,17 @@ namespace KdxDesigner.Utils.Interlock
     {
         private readonly MainViewModel _mainViewModel;
         private readonly IErrorAggregator _errorAggregator;
+        private readonly IIOAddressService _ioAddressService;
         private readonly IMnemonicDeviceMemoryStore? _memoryStore;
 
         public InterlockBuilder(
             MainViewModel mainViewModel,
-            IErrorAggregator errorAggregator)
+            IErrorAggregator errorAggregator,
+            IIOAddressService ioAddressService)
         {
             _mainViewModel = mainViewModel;
             _errorAggregator = errorAggregator;
+            _ioAddressService = ioAddressService;
             _memoryStore = mainViewModel._mnemonicMemoryStore;
         }
 
@@ -57,7 +60,7 @@ namespace KdxDesigner.Utils.Interlock
             }
 
             // InterlockLadderGeneratorを使用してラダーを生成
-            var ladderGenerator = new InterlockLadderGenerator(_mainViewModel, _errorAggregator);
+            var ladderGenerator = new InterlockLadderGenerator(_mainViewModel, _errorAggregator, _ioAddressService);
 
             foreach (var cylinderInterlockData in allInterlockDataList)
             {
@@ -78,6 +81,7 @@ namespace KdxDesigner.Utils.Interlock
 
                 // InterlockConditionTypeに応じたラダー生成
                 var ladderRows = ladderGenerator.GenerateLadder(
+                    ioList,
                     cylinderInterlockData,
                     cylinderDevice,
                     processDetails);

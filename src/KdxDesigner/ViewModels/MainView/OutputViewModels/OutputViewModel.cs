@@ -197,9 +197,15 @@ namespace KdxDesigner.ViewModels
 
                 // InterlockBuilder（メモリストアからCylinderInterlockDataを取得）
                 var interlockAggregator = new ErrorAggregator((int)MnemonicType.Interlock);
+                var ilIoAddressService = new IOAddressService(
+                    interlockAggregator,
+                    _mainViewModel.Repository,
+                    _mainViewModel.SelectedPlc.Id,
+                    _mainViewModel._ioSelectorService!);
                 var interlockBuilder = new InterlockBuilder(
                     _mainViewModel,
-                    interlockAggregator);
+                    interlockAggregator,
+                    ilIoAddressService);
                 StatusMessage = "インターロックラダーを生成中...";
                 ProgressPercentage = 90;
                 var interlockRows = await interlockBuilder.GenerateLadder(
