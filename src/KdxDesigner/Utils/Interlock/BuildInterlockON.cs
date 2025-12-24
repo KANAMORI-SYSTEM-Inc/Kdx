@@ -56,7 +56,7 @@ namespace KdxDesigner.Utils.Interlock
             string comment2 = condition.Comment2 ?? "";
 
             // 条件のコメント
-            result.Add(LadderRow.AddStatement($"    Cond:{conditionData.InterlockNumber} {conditionTypeName} {comment1} {comment2}"));
+            // result.Add(LadderRow.AddStatement($"    Cond:{conditionData.InterlockNumber} {conditionTypeName} {comment1} {comment2}"));
 
             switch (condition.ConditionTypeId)
             {

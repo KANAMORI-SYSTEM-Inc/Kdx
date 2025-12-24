@@ -97,25 +97,40 @@ namespace KdxDesigner.ViewModels
                 return;
             }
 
+            // 非同期処理中にSelectedInterlockがnullにならないよう局所変数に保存
+            var interlockToDelete = SelectedInterlock;
+
             var result = MessageBox.Show("選択したインターロックを削除しますか？\n関連する条件とIOも削除されます。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
                 try
                 {
-                    var interlockKey = (SelectedInterlock.CylinderId, SelectedInterlock.SortId);
+                    var interlockKey = (interlockToDelete.CylinderId, interlockToDelete.SortId);
 
                     // 関連するIOと条件を先に削除（外部キー制約のため）
                     if (_allConditionsByInterlockKey.TryGetValue(interlockKey, out var relatedConditions))
                     {
-                        foreach (var condition in relatedConditions)
+                        // リストのコピーを作成（列挙中の変更を回避）
+                        var conditionsToDelete = relatedConditions.ToList();
+                        foreach (var condition in conditionsToDelete)
                         {
+                            if (condition == null) continue;
+
                             // IOを削除
                             var conditionKey = (condition.CylinderId, condition.InterlockSortId, condition.ConditionNumber);
                             if (_allIOsByConditionKey.TryGetValue(conditionKey, out var relatedIOs))
                             {
-                                foreach (var ioVm in relatedIOs)
+                                var iosToDelete = relatedIOs.ToList();
+                                foreach (var ioVm in iosToDelete)
                                 {
-                                    await _supabaseRepository.DeleteInterlockIOAsync(ioVm.GetInterlockIO());
+                                    if (ioVm != null)
+                                    {
+                                        var io = ioVm.GetInterlockIO();
+                                        if (io != null)
+                                        {
+                                            await _supabaseRepository.DeleteInterlockIOAsync(io);
+                                        }
+                                    }
                                 }
                                 _allIOsByConditionKey.Remove(conditionKey);
                             }
@@ -127,10 +142,14 @@ namespace KdxDesigner.ViewModels
                     }
 
                     // インターロック本体を削除
-                    await _supabaseRepository.DeleteInterlockAsync(SelectedInterlock.GetInterlock());
+                    var interlock = interlockToDelete.GetInterlock();
+                    if (interlock != null)
+                    {
+                        await _supabaseRepository.DeleteInterlockAsync(interlock);
+                    }
 
                     // UIから削除
-                    Interlocks.Remove(SelectedInterlock);
+                    Interlocks.Remove(interlockToDelete);
                     SelectedInterlock = null;
                 }
                 catch (Exception ex)
@@ -192,35 +211,57 @@ namespace KdxDesigner.ViewModels
                 return;
             }
 
+            // 非同期処理中にSelectedConditionがnullにならないよう局所変数に保存
+            var conditionToDelete = SelectedCondition;
+            var currentInterlock = SelectedInterlock;
+
             var result = MessageBox.Show("選択した条件を削除しますか？\n関連するIOも削除されます。", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
                 try
                 {
                     // 関連するIOを先に削除（外部キー制約のため）
-                    var conditionKey = (SelectedCondition.CylinderId, SelectedCondition.InterlockSortId, SelectedCondition.ConditionNumber);
+                    var conditionKey = (conditionToDelete.CylinderId, conditionToDelete.InterlockSortId, conditionToDelete.ConditionNumber);
                     if (_allIOsByConditionKey.TryGetValue(conditionKey, out var relatedIOs))
                     {
-                        foreach (var ioVm in relatedIOs)
+                        // リストのコピーを作成してから削除（列挙中の変更を回避）
+                        var iosToDelete = relatedIOs.ToList();
+                        foreach (var ioVm in iosToDelete)
                         {
-                            await _supabaseRepository.DeleteInterlockIOAsync(ioVm.GetInterlockIO());
+                            if (ioVm != null)
+                            {
+                                var io = ioVm.GetInterlockIO();
+                                if (io != null)
+                                {
+                                    await _supabaseRepository.DeleteInterlockIOAsync(io);
+                                }
+                            }
                         }
                         _allIOsByConditionKey.Remove(conditionKey);
                     }
 
                     // DBから条件を削除
-                    await _supabaseRepository.DeleteInterlockConditionAsync(SelectedCondition);
+                    await _supabaseRepository.DeleteInterlockConditionAsync(conditionToDelete);
 
                     // UIから削除
-                    InterlockConditions.Remove(SelectedCondition);
+                    InterlockConditions.Remove(conditionToDelete);
 
-                    // キャッシュからも削除
-                    if (SelectedInterlock != null)
+                    // キャッシュからも削除（複合キーで一致するアイテムを検索して削除）
+                    if (currentInterlock != null)
                     {
-                        var interlockKey = (SelectedInterlock.CylinderId, SelectedInterlock.SortId);
+                        var interlockKey = (currentInterlock.CylinderId, currentInterlock.SortId);
                         if (_allConditionsByInterlockKey.TryGetValue(interlockKey, out var conditions))
                         {
-                            conditions.Remove(SelectedCondition);
+                            var toRemove = conditions.FirstOrDefault(c =>
+                                c != null &&
+                                c.CylinderId == conditionToDelete.CylinderId &&
+                                c.ConditionNumber == conditionToDelete.ConditionNumber &&
+                                c.InterlockSortId == conditionToDelete.InterlockSortId);
+
+                            if (toRemove != null)
+                            {
+                                conditions.Remove(toRemove);
+                            }
                         }
                     }
 
@@ -319,27 +360,46 @@ namespace KdxDesigner.ViewModels
                 return;
             }
 
+            // 非同期処理中にSelectedIOがnullにならないよう局所変数に保存
+            var ioToDelete = SelectedIO;
+            var currentCondition = SelectedCondition;
+
             var result = MessageBox.Show("選択したIOを削除しますか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
                 try
                 {
                     // DBから削除（新規作成されたもの以外）
-                    if (!SelectedIO.IsNew)
+                    if (!ioToDelete.IsNew)
                     {
-                        await _supabaseRepository.DeleteInterlockIOAsync(SelectedIO.GetInterlockIO());
+                        var io = ioToDelete.GetInterlockIO();
+                        if (io != null)
+                        {
+                            await _supabaseRepository.DeleteInterlockIOAsync(io);
+                        }
                     }
 
                     // UIから削除
-                    InterlockIOs.Remove(SelectedIO);
+                    InterlockIOs.Remove(ioToDelete);
 
-                    // キャッシュからも削除
-                    if (SelectedCondition != null)
+                    // キャッシュからも削除（複合キーで一致するアイテムを検索して削除）
+                    if (currentCondition != null)
                     {
-                        var conditionKey = (SelectedCondition.CylinderId, SelectedCondition.InterlockSortId, SelectedCondition.ConditionNumber);
+                        var conditionKey = (currentCondition.CylinderId, currentCondition.InterlockSortId, currentCondition.ConditionNumber);
                         if (_allIOsByConditionKey.TryGetValue(conditionKey, out var ios))
                         {
-                            ios.Remove(SelectedIO);
+                            var toRemove = ios.FirstOrDefault(io =>
+                                io != null &&
+                                io.CylinderId == ioToDelete.CylinderId &&
+                                io.PlcId == ioToDelete.PlcId &&
+                                io.IOAddress == ioToDelete.IOAddress &&
+                                io.InterlockSortId == ioToDelete.InterlockSortId &&
+                                io.ConditionNumber == ioToDelete.ConditionNumber);
+
+                            if (toRemove != null)
+                            {
+                                ios.Remove(toRemove);
+                            }
                         }
                     }
 

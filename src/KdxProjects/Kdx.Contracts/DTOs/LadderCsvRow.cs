@@ -18,6 +18,7 @@ namespace Kdx.Contracts.DTOs
         public string Blank1 { get; set; }          // 空欄
         public string PiStatement { get; set; }     // PIステートメント
         public string Note { get; set; }            // ノート
+        public string? FileName { get; set; }       // 出力元のCSVファイル名（バリデーション用）
 
         public LadderCsvRow()
         {

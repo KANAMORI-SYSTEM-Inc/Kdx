@@ -59,7 +59,7 @@ namespace KdxDesigner.Utils.Interlock
             string comment2 = condition.Comment2 ?? "";
 
             // 条件のコメント
-            result.Add(LadderRow.AddStatement($"    Cond:{conditionData.InterlockNumber} {conditionTypeName} {comment1} {comment2}"));
+            // result.Add(LadderRow.AddStatement($"    Cond:{conditionData.InterlockNumber} {conditionTypeName} {comment1} {comment2}"));
 
             switch (condition.ConditionTypeId)
             {
@@ -120,11 +120,11 @@ namespace KdxDesigner.Utils.Interlock
         {
             List<LadderCsvRow> result = new();
 
-            string sensorKey = cylinderDevice.Cylinder.CYNum + "M";
+            string sensorKey = "CM-" + cylinderDevice.Cylinder.CYNum + "M";
             string? sensorAddress = _ioAddressService.GetSingleAddress(
                                         ioList,
                                         sensorKey,
-                                        false,
+                                        true,
                                         "IL_INV_M",
                                         (int)MnemonicType.Interlock,
                                         null);

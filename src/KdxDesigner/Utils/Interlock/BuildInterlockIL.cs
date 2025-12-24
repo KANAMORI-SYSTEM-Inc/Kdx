@@ -30,14 +30,13 @@ namespace KdxDesigner.Utils.Interlock
         public List<LadderCsvRow> Generate(
             InterlockConditionData conditionData,
             InterlockData interlockData,
-            List<InterlockIO> ios)
+            List<InterlockIOData> ios)
         {
             var result = new List<LadderCsvRow>();
             var condition = conditionData.Condition;
-            var conditionType = conditionData.ConditionType;
 
             // デバイスが割り当てられていない場合はエラー
-            if (string.IsNullOrEmpty(conditionData.Device))
+            if (string.IsNullOrEmpty(conditionData.Condition.Device))
             {
                 _errorAggregator.AddError(new OutputError
                 {
@@ -49,16 +48,8 @@ namespace KdxDesigner.Utils.Interlock
                 return result;
             }
 
-            string device = conditionData.Device;
+            string device = conditionData.Condition.Device;
             bool isOnCondition = conditionData.Condition.IsOnCondition ?? true;
-            string conditionTypeName = conditionType?.ConditionTypeName ?? "不明";
-            string comment1 = condition.Comment1 ?? "";
-            string comment2 = condition.Comment2 ?? "";
-
-
-
-            // 条件のコメント
-            result.Add(LadderRow.AddStatement($"    Cond:{conditionData.InterlockNumber} {conditionTypeName} {comment1} {comment2}"));
 
             switch (condition.ConditionTypeId)
             {
@@ -102,14 +93,21 @@ namespace KdxDesigner.Utils.Interlock
         }
 
         public List<LadderCsvRow> GenerateInterlockIO(
-            List<InterlockIO> ios,
+            List<InterlockIOData> ios,
             bool isOnCondition)
         {
             List<LadderCsvRow> result = new();
 
             string address = ios.First().IOAddress;
 
-            result.Add(LadderRow.AddANI(address!));
+            if (isOnCondition)
+            {
+                result.Add(LadderRow.AddAND(address!));
+            }
+            else
+            {
+                result.Add(LadderRow.AddANI(address!));
+            }
 
             return result;
         }

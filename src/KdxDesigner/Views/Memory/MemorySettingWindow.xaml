@@ -243,12 +243,17 @@
                                 </StackPanel>
                             </Border>
 
-                            <!-- PLC用プロファイル適用ボタン -->
-                            <Button Content="プロファイルから適用" Command="{Binding ApplyPlcProfileCommand}"
-                                    Width="150" Padding="8" Margin="0,15,0,0"
-                                    Background="#FF9800" Foreground="White" FontSize="12" FontWeight="Bold"
-                                    HorizontalAlignment="Left"
-                                    ToolTip="選択したPLC用プロファイルの設定値を上記のフィールドに適用します"/>
+                            <!-- PLC用プロファイル操作ボタン -->
+                            <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+                                <Button Content="📥 プロファイルから適用" Command="{Binding ApplyPlcProfileCommand}"
+                                        Width="180" Padding="8" Margin="0,0,10,0"
+                                        Background="#FF9800" Foreground="White" FontSize="12" FontWeight="Bold"
+                                        ToolTip="選択したPLC用プロファイルの設定値を上記のフィールドに適用します"/>
+                                <Button Content="💾 プロファイルを更新" Command="{Binding UpdatePlcProfileFromCurrentSettingsCommand}"
+                                        Width="180" Padding="8"
+                                        Background="#4CAF50" Foreground="White" FontSize="12" FontWeight="Bold"
+                                        ToolTip="上記の設定値で選択中のPLC用プロファイルを更新します"/>
+                            </StackPanel>
                         </StackPanel>
                     </Border>
 
@@ -324,12 +329,17 @@
                                        HorizontalAlignment="Center" Margin="0,20,0,0"
                                        Visibility="{Binding HasNoCycleProfileSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
-                            <!-- Cycle用プロファイル適用ボタン -->
-                            <Button Content="プロファイルから適用" Command="{Binding ApplyCycleProfileCommand}"
-                                    Width="150" Padding="8" Margin="0,15,0,0"
-                                    Background="#FF9800" Foreground="White" FontSize="12" FontWeight="Bold"
-                                    HorizontalAlignment="Left"
-                                    ToolTip="選択したCycle用プロファイルの設定値を上記のフィールドに適用します"/>
+                            <!-- Cycle用プロファイル操作ボタン -->
+                            <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
+                                <Button Content="📥 プロファイルから適用" Command="{Binding ApplyCycleProfileCommand}"
+                                        Width="180" Padding="8" Margin="0,0,10,0"
+                                        Background="#FF9800" Foreground="White" FontSize="12" FontWeight="Bold"
+                                        ToolTip="選択したCycle用プロファイル(最初の1件)の設定値を上記のフィールドに適用します"/>
+                                <Button Content="💾 プロファイルを更新" Command="{Binding UpdateCycleProfileFromCurrentSettingsCommand}"
+                                        Width="180" Padding="8"
+                                        Background="#4CAF50" Foreground="White" FontSize="12" FontWeight="Bold"
+                                        ToolTip="上記の設定値で選択中のCycle用プロファイル(最初の1件)を更新します"/>
+                            </StackPanel>
                         </StackPanel>
                     </Border>
                 </Grid>

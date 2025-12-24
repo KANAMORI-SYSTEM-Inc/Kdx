@@ -87,11 +87,6 @@ namespace KdxDesigner.Utils.Interlock
                     processDetails);
                 result.AddRange(ladderRows);
 
-                // 前進/後退インターロック出力を生成
-                var goBackOutput = ladderGenerator.GenerateGoBackInterlockOutput(
-                    cylinderInterlockData,
-                    cylinderDevice);
-                result.AddRange(goBackOutput);
             }
 
             return Task.FromResult(result);

@@ -21,6 +21,8 @@ namespace KdxDesigner.Utils.Interlock
         // 各InterlockConditionType用のビルダー
         private readonly BuildInterlockON _onBuilder;
         private readonly BuildInterlockINV _invBuilder;
+        private readonly BuildInterlockIL _ilBuilder;
+        private List<string> _outcoilDevices;
 
         public InterlockLadderGenerator(
             MainViewModel mainViewModel,
@@ -34,6 +36,8 @@ namespace KdxDesigner.Utils.Interlock
             // モジュールの初期化
             _onBuilder = new BuildInterlockON(errorAggregator);
             _invBuilder = new BuildInterlockINV(errorAggregator, ioAddressService);
+            _ilBuilder = new BuildInterlockIL(errorAggregator, ioAddressService);
+            _outcoilDevices = new List<string>();
         }
 
         /// <summary>
@@ -62,9 +66,10 @@ namespace KdxDesigner.Utils.Interlock
             string cyNumSub = cylinderData.Cylinder.CYNameSub ?? "";
             string cyName = cyNum + cyNumSub;
 
+            _outcoilDevices.Clear();
+
             // 行間ステートメント
             result.Add(LadderRow.AddStatement($"{cyName} インターロック"));
-
             foreach (var interlockData in cylinderData.Interlocks)
             {
                 result.AddRange(GenerateInterlockLadder(
@@ -72,7 +77,47 @@ namespace KdxDesigner.Utils.Interlock
                     interlockData,
                     cylinder,
                     processDetails));
+
             }
+
+            var Label = cylinder.Mnemonic.DeviceLabel; // ラベルの取得
+            var StartNum = cylinder.Mnemonic.StartNum; // ラベルの取得
+
+            // 行き手動
+            result.Add(LadderRow.AddLD($"{Label}{StartNum + 10}"));
+            foreach (var outcoil in _outcoilDevices)
+            {
+                if (outcoil == null) continue;
+                result.Add(LadderRow.AddANI(outcoil));
+            }
+            result.Add(LadderRow.AddOUT($"{Label}{StartNum + 17}"));
+
+            // 行き自動
+            result.Add(LadderRow.AddLD($"{Label}{StartNum + 12}"));
+            foreach (var outcoil in _outcoilDevices)
+            {
+                if (outcoil == null) continue;
+                result.Add(LadderRow.AddANI(outcoil));
+            }
+            result.Add(LadderRow.AddOUT($"{Label}{StartNum + 15}"));
+
+            // 帰り手動
+            result.Add(LadderRow.AddLD($"{Label}{StartNum + 11}"));
+            foreach (var outcoil in _outcoilDevices)
+            {
+                if (outcoil == null) continue;
+                result.Add(LadderRow.AddANI(outcoil));
+            }
+            result.Add(LadderRow.AddOUT($"{Label}{StartNum + 18}"));
+
+            // 帰り自動
+            result.Add(LadderRow.AddLD($"{Label}{StartNum + 13}"));
+            foreach (var outcoil in _outcoilDevices)
+            {
+                if (outcoil == null) continue;
+                result.Add(LadderRow.AddANI(outcoil));
+            }
+            result.Add(LadderRow.AddOUT($"{Label}{StartNum + 16}"));
 
             result.Add(LadderRow.AddNOP());
 
@@ -123,6 +168,7 @@ namespace KdxDesigner.Utils.Interlock
                     case 6: // LIMIT
                         result.AddRange(_onBuilder.Generate(conditionData, interlockData, ios));
                         result.AddRange(buildOutput.Generate(conditionData));
+                        _outcoilDevices.Add("M" + conditionData.DeviceNumber);
                         break;
                     case 7:     // DEV
                     case 8:     // RANGE
@@ -142,12 +188,14 @@ namespace KdxDesigner.Utils.Interlock
                     case 13: // INV_M
                         result.AddRange(_invBuilder.Generate(conditionData, interlockData, ioList, cylinderDevice));
                         result.AddRange(buildOutput.Generate(conditionData));
+                        _outcoilDevices.Add("M" + conditionData.DeviceNumber);
                         break;
                     case 14: // IL
                     case 15: // ANY
                     case 16: // IL_IO
-                        result.AddRange(_onBuilder.Generate(conditionData, interlockData, ios));
+                        result.AddRange(_ilBuilder.Generate(conditionData, interlockData, ios));
                         result.AddRange(buildOutput.Generate(conditionData));
+                        _outcoilDevices.Add("M" + conditionData.DeviceNumber);
                         break;
                     default:
                         _errorAggregator.AddError(new OutputError
@@ -160,87 +208,6 @@ namespace KdxDesigner.Utils.Interlock
                         break;
                 }
             }
-            return result;
-        }
-
-        /// <summary>
-        /// 前進/後退インターロック出力を生成
-        /// </summary>
-        public List<LadderCsvRow> GenerateGoBackInterlockOutput(
-            CylinderInterlockData cylinderData,
-            MnemonicDeviceWithCylinder cylinder)
-        {
-            var result = new List<LadderCsvRow>();
-            var cylinderLabel = cylinder.Mnemonic.DeviceLabel;
-            var cylinderStartNum = cylinder.Mnemonic.StartNum;
-
-            // Go方向（前進）のインターロック出力
-            var goInterlocks = cylinderData.Interlocks
-                .Where(i => i.Interlock.GoOrBack == 0 || i.Interlock.GoOrBack == 1) // Go&Back or GoOnly
-                .SelectMany(i => i.Conditions)
-                .ToList();
-
-            if (goInterlocks.Count > 0)
-            {
-                result.Add(LadderRow.AddStatement($"  前進インターロック出力"));
-                result.AddRange(GenerateInterlockORCondition(goInterlocks, cylinderLabel, cylinderStartNum, "Go"));
-            }
-
-            // Back方向（後退）のインターロック出力
-            var backInterlocks = cylinderData.Interlocks
-                .Where(i => i.Interlock.GoOrBack == 0 || i.Interlock.GoOrBack == 2) // Go&Back or BackOnly
-                .SelectMany(i => i.Conditions)
-                .ToList();
-
-            if (backInterlocks.Count > 0)
-            {
-                result.Add(LadderRow.AddStatement($"  後退インターロック出力"));
-                result.AddRange(GenerateInterlockORCondition(backInterlocks, cylinderLabel, cylinderStartNum, "Back"));
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// インターロック条件のOR出力を生成
-        /// </summary>
-        private List<LadderCsvRow> GenerateInterlockORCondition(
-            List<InterlockConditionData> conditions,
-            string? cylinderLabel,
-            int cylinderStartNum,
-            string direction)
-        {
-            var result = new List<LadderCsvRow>();
-
-            if (conditions.Count == 0)
-            {
-                return result;
-            }
-
-            // インターロック出力先（例: M30000 + offset）
-            // 実際のオフセットは設計に応じて調整
-            int outputOffset = direction == "Go" ? 50 : 51;
-            string outputDevice = $"{cylinderLabel}{cylinderStartNum + outputOffset}";
-
-            // 最初の条件はLD
-            var firstCondition = conditions[0];
-            if (!string.IsNullOrEmpty(firstCondition.Device))
-            {
-                result.Add(LadderRow.AddLD(firstCondition.Device));
-
-                // 2番目以降の条件はOR
-                for (int i = 1; i < conditions.Count; i++)
-                {
-                    var condition = conditions[i];
-                    if (!string.IsNullOrEmpty(condition.Device))
-                    {
-                        result.Add(LadderRow.AddOR(condition.Device));
-                    }
-                }
-
-                result.Add(LadderRow.AddOUT(outputDevice));
-            }
-
             return result;
         }
     }

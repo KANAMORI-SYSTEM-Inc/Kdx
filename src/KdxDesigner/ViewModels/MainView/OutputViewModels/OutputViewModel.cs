@@ -111,6 +111,8 @@ namespace KdxDesigner.ViewModels
                     data.JoinedProcessDetailList,
                     data.IoList,
                     _mainViewModel.Repository!);
+                // ファイル名を設定
+                foreach (var row in processRows) { row.FileName = "Process.csv"; }
                 allOutputRows.AddRange(processRows);
                 allGeneratedErrors.AddRange(pErrorAggregator.GetAllErrors());
 
@@ -136,6 +138,8 @@ namespace KdxDesigner.ViewModels
                     data.JoinedCylinderList,
                     data.IoList,
                     data.JoinedProcessDetailWithTimerList);
+                // ファイル名を設定
+                foreach (var row in detailRows) { row.FileName = "Detail.csv"; }
                 allOutputRows.AddRange(detailRows);
                 allGeneratedErrors.AddRange(pdErrorAggregator.GetAllErrors());
 
@@ -165,6 +169,8 @@ namespace KdxDesigner.ViewModels
                     data.MnemonicErrors,
                     data.ProsTime,
                     data.IoList);
+                // ファイル名を設定
+                foreach (var row in operationRows) { row.FileName = "Operation.csv"; }
                 allOutputRows.AddRange(operationRows);
                 allGeneratedErrors.AddRange(opErrorAggregator.GetAllErrors());
 
@@ -192,6 +198,8 @@ namespace KdxDesigner.ViewModels
                     data.MnemonicErrors,
                     data.ProsTime,
                     data.IoList);
+                // ファイル名を設定
+                foreach (var row in cylinderRows) { row.FileName = "Cylinder.csv"; }
                 allOutputRows.AddRange(cylinderRows);
                 allGeneratedErrors.AddRange(cyErrorAggregator.GetAllErrors());
 
@@ -213,6 +221,10 @@ namespace KdxDesigner.ViewModels
                     data.IoList,
                     _mainViewModel.SelectedPlc!.Id,
                     data.JoinedProcessDetailList);
+                // ファイル名を設定
+                foreach (var row in interlockRows) { row.FileName = "Interlock.csv"; }
+                allOutputRows.AddRange(interlockRows);
+                allGeneratedErrors.AddRange(interlockAggregator.GetAllErrors());
 
                 // --- 3. 全てのエラーをUIに反映 ---
                 StatusMessage = "エラーチェック中...";
@@ -241,11 +253,12 @@ namespace KdxDesigner.ViewModels
                 // バリデーションエラーをOutputErrorsに追加
                 foreach (var issue in validationErrors)
                 {
+                    var fileName = string.IsNullOrEmpty(issue.FileName) ? "" : $"[{issue.FileName}] ";
                     OutputErrors.Add(new OutputError
                     {
                         MnemonicId = 0,
                         RecordId = issue.Key,
-                        RecordName = $"Key:{issue.Key} Cmd:{issue.Command}",
+                        RecordName = $"{fileName}Key:{issue.Key} Cmd:{issue.Command}",
                         Message = $"[バリデーションエラー] {issue.Message}",
                         IsCritical = false  // CSV出力を止めないためfalseに
                     });
@@ -253,11 +266,12 @@ namespace KdxDesigner.ViewModels
 
                 foreach (var issue in validationWarnings)
                 {
+                    var fileName = string.IsNullOrEmpty(issue.FileName) ? "" : $"[{issue.FileName}] ";
                     OutputErrors.Add(new OutputError
                     {
                         MnemonicId = 0,
                         RecordId = issue.Key,
-                        RecordName = $"Key:{issue.Key} Cmd:{issue.Command}",
+                        RecordName = $"{fileName}Key:{issue.Key} Cmd:{issue.Command}",
                         Message = $"[バリデーション警告] {issue.Message}",
                         IsCritical = false
                     });
@@ -270,6 +284,7 @@ namespace KdxDesigner.ViewModels
                 ExportLadderCsvFile(detailRows, "Detail.csv");
                 ExportLadderCsvFile(operationRows, "Operation.csv");
                 ExportLadderCsvFile(cylinderRows, "Cylinder.csv");
+                ExportLadderCsvFile(interlockRows, "Interlock.csv");
                 ExportLadderCsvFile(allOutputRows, "KdxLadder_All.csv");
 
                 ProgressPercentage = 100;

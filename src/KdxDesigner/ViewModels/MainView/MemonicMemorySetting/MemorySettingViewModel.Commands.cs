@@ -504,5 +504,92 @@ namespace KdxDesigner.ViewModels.Settings
             }
         }
 
+        /// <summary>
+        /// PLC用プロファイルを現在のUI設定値で更新
+        /// </summary>
+        [RelayCommand]
+        private void UpdatePlcProfileFromCurrentSettings()
+        {
+            if (SelectedPlcProfile == null)
+            {
+                MessageBox.Show("更新するプロファイルを選択してください。", "エラー",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 確認ダイアログ
+            var result = MessageBox.Show(
+                $"プロファイル '{SelectedPlcProfile.Name}' を現在の設定で更新しますか？",
+                "更新確認",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                // UIの現在値でプロファイルを更新
+                SelectedPlcProfile.CylinderDeviceStartM = CylinderDeviceStartM;
+                SelectedPlcProfile.CylinderDeviceStartD = CylinderDeviceStartD;
+                SelectedPlcProfile.ErrorDeviceStartM = ErrorDeviceStartM;
+                SelectedPlcProfile.ErrorDeviceStartT = ErrorDeviceStartT;
+                SelectedPlcProfile.ErrorStartNum = ErrorStartNum;
+                SelectedPlcProfile.DeviceStartT = DeviceStartT;
+                SelectedPlcProfile.TimerStartZR = TimerStartZR;
+                SelectedPlcProfile.ProsTimeStartZR = ProsTimeStartZR;
+                SelectedPlcProfile.ProsTimePreviousStartZR = ProsTimePreviousStartZR;
+                SelectedPlcProfile.CyTimeStartZR = CyTimeStartZR;
+                SelectedPlcProfile.InterlockDeviceStartM = InterlockDeviceStartM;
+                SelectedPlcProfile.InterlockStartNum = InterlockStartNum;
+
+                // プロファイルを保存
+                _plcProfileManager.SaveProfile(SelectedPlcProfile);
+
+                // プロファイル一覧を再読み込み
+                LoadPlcProfiles();
+
+                MessageBox.Show($"プロファイル '{SelectedPlcProfile.Name}' を現在の設定で更新しました。", "更新完了",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        /// <summary>
+        /// Cycle用プロファイルを現在のUI設定値で更新
+        /// </summary>
+        [RelayCommand]
+        private void UpdateCycleProfileFromCurrentSettings()
+        {
+            // 複数選択の場合、最初の選択項目を更新対象とする
+            var profileToUpdate = SelectedCycleProfiles?.FirstOrDefault();
+            if (profileToUpdate == null)
+            {
+                MessageBox.Show("更新するプロファイルを選択してください。", "エラー",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 確認ダイアログ
+            var result = MessageBox.Show(
+                $"プロファイル '{profileToUpdate.Name}' を現在の設定で更新しますか？",
+                "更新確認",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                // UIの現在値でプロファイルを更新
+                profileToUpdate.ProcessDeviceStartL = ProcessDeviceStartL;
+                profileToUpdate.DetailDeviceStartL = DetailDeviceStartL;
+                profileToUpdate.OperationDeviceStartM = OperationDeviceStartM;
+
+                // プロファイルを保存
+                _cycleProfileManager.SaveProfile(profileToUpdate);
+
+                // プロファイル一覧を再読み込み
+                LoadCycleProfiles();
+
+                MessageBox.Show($"プロファイル '{profileToUpdate.Name}' を現在の設定で更新しました。", "更新完了",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
     }
 }
