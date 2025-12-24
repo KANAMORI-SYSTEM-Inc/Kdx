@@ -20,7 +20,7 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         private readonly ISupabaseRepository _repository;
         private readonly IMnemonicDeviceMemoryStore? _memoryStore;
         private readonly IErrorMessageGenerator _errorMessageGenerator;
-        private readonly List<CylinderInterlockData>? _cylinderInterlockDataList;
+        private List<CylinderInterlockData> _cylinderInterlockDataList = new();
 
         [ObservableProperty]
         private int _plcId;
@@ -53,6 +53,12 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         private bool _canSave;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsNotInitialized))]
+        private bool _isInitialized;
+
+        public bool IsNotInitialized => !IsInitialized;
+
+        [ObservableProperty]
         private string _dataSourceInfo = "";
 
         private List<InterlockErrorInput> _interlockInputs = new();
@@ -68,12 +74,30 @@ namespace KdxDesigner.ViewModels.ErrorMessage
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _memoryStore = memoryStore ?? throw new ArgumentNullException(nameof(memoryStore));
             _errorMessageGenerator = new ErrorMessageGenerator(repository);
-            _cylinderInterlockDataList = null;
             PlcId = plcId;
             DataSourceInfo = "メモリストアからデータを取得";
 
             // 初期化時にメモリストアからデータをロードし、次のエラー番号を取得
-            _ = InitializeAsync();
+            // エラーハンドリング付きで実行
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await InitializeAsync();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"初期化エラー (メモリストアから): {ex}");
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show(
+                            $"データの初期化に失敗しました:\n{ex.Message}\n\nメモリ設定を実行してInterlockデバイスを生成してください。",
+                            "初期化エラー",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    });
+                }
+            });
         }
 
         /// <summary>
@@ -88,12 +112,31 @@ namespace KdxDesigner.ViewModels.ErrorMessage
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _memoryStore = null;
             _errorMessageGenerator = new ErrorMessageGenerator(repository);
-            _cylinderInterlockDataList = cylinderInterlockDataList ?? throw new ArgumentNullException(nameof(cylinderInterlockDataList));
+            _cylinderInterlockDataList = cylinderInterlockDataList ?? new List<CylinderInterlockData>();
             PlcId = plcId;
-            DataSourceInfo = "CylinderInterlockDataから直接取得（詳細情報付き）";
+            DataSourceInfo = $"CylinderInterlockDataから直接取得（{_cylinderInterlockDataList.Count}件）";
 
             // 初期化時にCylinderInterlockDataからデータをロードし、次のエラー番号を取得
-            _ = InitializeFromCylinderDataAsync();
+            // エラーハンドリング付きで実行
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await InitializeFromCylinderDataAsync();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"初期化エラー (CylinderInterlockDataから): {ex}");
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show(
+                            $"データの初期化に失敗しました:\n{ex.Message}",
+                            "初期化エラー",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    });
+                }
+            });
         }
 
         /// <summary>
@@ -103,6 +146,7 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         {
             await LoadMemoryDataAsync();
             await LoadNextErrorNumAsync();
+            IsInitialized = true;
         }
 
         /// <summary>
@@ -112,6 +156,7 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         {
             LoadFromCylinderData();
             await LoadNextErrorNumAsync();
+            IsInitialized = true;
         }
 
         /// <summary>
@@ -119,8 +164,9 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         /// </summary>
         private void LoadFromCylinderData()
         {
-            if (_cylinderInterlockDataList == null)
+            if (_cylinderInterlockDataList == null || _cylinderInterlockDataList.Count == 0)
             {
+                InterlockInputCount = 0;
                 return;
             }
 
@@ -148,7 +194,7 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         }
 
         /// <summary>
-        /// メモリストアからデータをロード
+        /// メモリストアからデータをロード（InterlockBuilder.csと同じ方法）
         /// </summary>
         private async Task LoadMemoryDataAsync()
         {
@@ -159,27 +205,21 @@ namespace KdxDesigner.ViewModels.ErrorMessage
 
             try
             {
-                // キャッシュされたメモリデータを取得
-                var memories = _memoryStore.GetCachedMemories(PlcId);
+                // メモリストアからCylinderInterlockDataを取得（メモリ保存時に構築済み）
+                _cylinderInterlockDataList = _memoryStore.GetCylinderInterlockData(PlcId)
+                    ?? new List<CylinderInterlockData>();
 
-                // Interlock関連のメモリを取得
-                var interlockMemories = memories
-                    .Where(m => m.MnemonicId == (int)MnemonicType.Interlock)
-                    .ToList();
+                if (_cylinderInterlockDataList.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("CylinderInterlockDataが見つかりません。メモリ設定を実行してください。");
+                    InterlockInputCount = 0;
+                    return;
+                }
 
-                // シリンダー、インターロック情報を取得
-                var cylinders = await _repository.GetCYsAsync();
-                var interlocks = await _repository.GetInterlocksByPlcIdAsync(PlcId);
-                var conditionTypes = await _repository.GetInterlockConditionTypesAsync();
-
-                // InterlockErrorInputを構築
-                // Note: InterlockConditionsはメモリ情報から解析するため、空リストを渡す
-                _interlockInputs = _errorMessageGenerator.BuildInterlockErrorInputs(
-                    interlockMemories,
-                    cylinders,
-                    interlocks,
-                    new List<InterlockCondition>(),
-                    conditionTypes);
+                // CylinderInterlockDataからInterlockErrorInputを構築
+                _interlockInputs = _errorMessageGenerator.BuildInterlockErrorInputsFromCylinderData(
+                    _cylinderInterlockDataList,
+                    PlcId);
 
                 InterlockInputCount = _interlockInputs.Count;
             }
@@ -198,6 +238,25 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         {
             try
             {
+                // 初期化チェック
+                if (!IsInitialized)
+                {
+                    MessageBox.Show("データの初期化中です。しばらくお待ちください。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // データ存在チェック
+                if (GenerateInterlock && _interlockInputs.Count == 0)
+                {
+                    MessageBox.Show(
+                        "Interlockデータが見つかりません。\n" +
+                        "メモリ設定を実行してInterlockデバイスを生成してください。",
+                        "情報",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                    return;
+                }
+
                 var allErrors = new List<GeneratedError>();
 
                 if (GenerateInterlock && _interlockInputs.Count > 0)
@@ -216,11 +275,16 @@ namespace KdxDesigner.ViewModels.ErrorMessage
                 PreviewErrors = new ObservableCollection<GeneratedError>(allErrors);
                 GeneratedErrorCount = allErrors.Count;
                 CanSave = allErrors.Count > 0;
+
+                if (allErrors.Count == 0)
+                {
+                    MessageBox.Show("生成対象のエラーメッセージがありません。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"GeneratePreviewAsync error: {ex.Message}");
-                MessageBox.Show($"プレビュー生成に失敗しました: {ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"プレビュー生成に失敗しました: {ex.Message}\n\nスタックトレース:\n{ex.StackTrace}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

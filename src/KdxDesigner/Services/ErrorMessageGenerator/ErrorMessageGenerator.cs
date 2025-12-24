@@ -13,6 +13,15 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
     {
         private readonly ISupabaseRepository _repository;
 
+        // UI表示用の装飾記号（選択状態を示す●○マーク）
+        // これらはエラーメッセージには不要なため置換時に削除
+        private const string FILLED_CIRCLE = "●";
+        private const string HOLLOW_CIRCLE = "○";
+
+        // 全角・半角空白（エラーメッセージの整形用）
+        private const string HALF_WIDTH_SPACE = " ";
+        private const string FULL_WIDTH_SPACE = "　";
+
         public ErrorMessageGenerator(ISupabaseRepository repository)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
@@ -119,19 +128,19 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
                     var error = new GeneratedError
                     {
                         PlcId = input.PlcId,
-                        ErrorNum = errorNum,
+                        ErrorNum = input.DeviceNumber,
                         MnemonicId = (int)MnemonicType.Interlock,
-                        AlarmId = msg.AlarmId,
-                        RecordId = input.CylinderId,
-                        DeviceM = $"M{deviceStartM + errorNum}",
-                        DeviceT = $"T{deviceStartT + errorNum}",
+                        AlarmId = input.DeviceNumber,
+                        RecordId = input.InterlockConditionId,
+                        DeviceM = input.Device,
+                        DeviceT = string.Empty, // インターロックはTデバイスを使用しない
                         Comment1 = ReplacePlaceholders(msg.Category1, replacements),
                         Comment2 = ReplacePlaceholders(msg.Category2, replacements),
                         Comment3 = ReplacePlaceholders(msg.Category3, replacements),
                         Comment4 = "",
                         AlarmComment = ReplacePlaceholders(msg.BaseAlarm, replacements),
                         MessageComment = ReplacePlaceholders(msg.BaseMessage, replacements),
-                        ErrorTime = msg.DefaultCountTime,
+                        ErrorTime = 0,  // インターロックはタイマーが無い、即時エラー発生
                         CycleId = null
                     };
 
@@ -175,7 +184,10 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
                 foreach (var alarmId in alarmIds)
                 {
                     var msg = messages.FirstOrDefault(m => m.AlarmId == alarmId);
-                    if (msg == null) continue;
+                    if (msg == null)
+                    {
+                        continue;
+                    }
 
                     var error = new GeneratedError
                     {
@@ -205,74 +217,13 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
         }
 
         /// <summary>
-        /// メモリストアからInterlock入力データを生成
-        /// </summary>
-        public List<InterlockErrorInput> BuildInterlockErrorInputs(
-            List<Memory> memories,
-            List<Cylinder> cylinders,
-            List<Interlock> interlocks,
-            List<InterlockCondition> interlockConditions,
-            List<InterlockConditionType> conditionTypes)
-        {
-            var inputs = new List<InterlockErrorInput>();
-            var cylinderDict = cylinders.ToDictionary(c => c.Id, c => c);
-            var conditionTypeDict = conditionTypes.ToDictionary(ct => ct.Id, ct => ct);
-
-            // Interlockに関連するメモリを取得
-            var interlockMemories = memories
-                .Where(m => m.MnemonicId == (int)MnemonicType.Interlock)
-                .ToList();
-
-            foreach (var memory in interlockMemories)
-            {
-                // RecordIdはConditionのCylinderIdを指す
-                var conditionCylinderId = memory.RecordId ?? 0;
-
-                // Row_1からシリンダー名とGoOrBackを解析
-                var (cylinderName, goOrBackDisplay) = ParseRow1(memory.Row_1);
-
-                // 元のシリンダーを特定 (Row_1のシリンダー名から)
-                var cylinder = cylinders.FirstOrDefault(c =>
-                    (c.CYNum + c.CYNameSub) == cylinderName ||
-                    c.CYNum == cylinderName);
-
-                // 条件シリンダーを取得
-                cylinderDict.TryGetValue(conditionCylinderId, out var conditionCylinder);
-
-                // GoOrBackを数値に変換
-                var goOrBack = ParseGoOrBack(goOrBackDisplay);
-
-                var input = new InterlockErrorInput
-                {
-                    CylinderId = cylinder?.Id ?? 0,
-                    CylinderName = cylinderName,
-                    InterlockSortId = 0, // メモリからは特定困難
-                    GoOrBack = goOrBack,
-                    GoOrBackDisplayName = goOrBackDisplay,
-                    ConditionCylinderId = conditionCylinderId,
-                    ConditionCylinderName = conditionCylinder != null
-                        ? $"{conditionCylinder.CYNum}{conditionCylinder.CYNameSub}"
-                        : memory.Row_3,
-                    ConditionNumber = 0,
-                    ConditionTypeId = null,
-                    ConditionTypeName = memory.Row_2,
-                    ConditionComment1 = memory.Row_3,
-                    ConditionComment2 = memory.Row_4,
-                    Device = memory.Device,
-                    DeviceNumber = memory.DeviceNumber ?? 0,
-                    InterlockNumber = memory.OutcoilNumber ?? 0,
-                    PlcId = memory.PlcId
-                };
-
-                inputs.Add(input);
-            }
-
-            return inputs;
-        }
-
-        /// <summary>
         /// プレースホルダーを置換
+        /// UI表示用の装飾記号（●○）や空白文字を削除してエラーメッセージを整形します
+        /// これらの記号はUIでの選択状態表示に使われるため、エラーメッセージには不要です
         /// </summary>
+        /// <param name="template">テンプレート文字列（例: "{CylinderName}のインターロック異常"）</param>
+        /// <param name="values">プレースホルダー値のディクショナリ</param>
+        /// <returns>置換後の文字列</returns>
         public string ReplacePlaceholders(string? template, Dictionary<string, string?> values)
         {
             if (string.IsNullOrEmpty(template))
@@ -283,7 +234,17 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
             var result = template;
             foreach (var kvp in values)
             {
-                result = result.Replace($"{{{kvp.Key}}}", kvp.Value ?? "");
+                if (kvp.Value == null)
+                {
+                    continue;
+                }
+
+                // UI表示用の装飾記号と空白を削除してエラーメッセージを整形
+                var value = kvp.Value?.Replace(FILLED_CIRCLE, "")
+                                       .Replace(HOLLOW_CIRCLE, "")
+                                       .Replace(HALF_WIDTH_SPACE, "")
+                                       .Replace(FULL_WIDTH_SPACE, "");
+                result = result.Replace($"{{{kvp.Key}}}", value ?? "");
             }
             return result;
         }
@@ -515,15 +476,23 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
         /// </summary>
         private static string? BuildPrecondition1Info(InterlockPrecondition1? precondition1)
         {
-            if (precondition1 == null) return null;
+            if (precondition1 == null)
+            {
+                return null;
+            }
 
             // Precondition1の情報を組み合わせ
             var parts = new List<string>();
 
             if (!string.IsNullOrEmpty(precondition1.ConditionName))
+            {
                 parts.Add(precondition1.ConditionName);
+            }
+
             if (!string.IsNullOrEmpty(precondition1.Description))
+            {
                 parts.Add(precondition1.Description);
+            }
 
             return parts.Count > 0 ? string.Join(" ", parts) : null;
         }
@@ -533,19 +502,29 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
         /// </summary>
         private static string? BuildPrecondition2Info(InterlockPrecondition2? precondition2)
         {
-            if (precondition2 == null) return null;
+            if (precondition2 == null)
+            {
+                return null;
+            }
 
             var parts = new List<string>();
 
             // InterlockModeがある場合
             if (!string.IsNullOrEmpty(precondition2.InterlockMode))
+            {
                 parts.Add($"Mode:{precondition2.InterlockMode}");
+            }
 
             // 工程範囲がある場合
             if (precondition2.StartDetailId.HasValue && precondition2.StartDetailId > 0)
+            {
                 parts.Add($"開始工程:{precondition2.StartDetailId}");
+            }
+
             if (precondition2.EndDetailId.HasValue && precondition2.EndDetailId > 0)
+            {
                 parts.Add($"終了工程:{precondition2.EndDetailId}");
+            }
 
             return parts.Count > 0 ? string.Join(" ", parts) : null;
         }

@@ -50,14 +50,19 @@
         <!-- 生成対象選択 -->
         <GroupBox Grid.Row="1" Header="生成対象" Margin="0,0,0,10">
             <StackPanel Orientation="Horizontal" Margin="5">
-                <CheckBox Content="Interlock" IsChecked="{Binding GenerateInterlock}" Margin="0,0,20,0" />
-                <CheckBox Content="Operation" IsChecked="{Binding GenerateOperation}" Margin="0,0,20,0" />
-                <Button Content="プレビュー生成" Command="{Binding GeneratePreviewCommand}" Width="120" Margin="20,0,0,0" />
+                <CheckBox Content="Interlock" IsChecked="{Binding GenerateInterlock}" Margin="0,0,20,0" IsEnabled="{Binding IsInitialized}" />
+                <CheckBox Content="Operation" IsChecked="{Binding GenerateOperation}" Margin="0,0,20,0" IsEnabled="{Binding IsInitialized}" />
+                <Button Content="プレビュー生成" Command="{Binding GeneratePreviewCommand}" Width="120" Margin="20,0,0,0"
+                        IsEnabled="{Binding IsInitialized}" />
                 <TextBlock VerticalAlignment="Center" Margin="20,0,0,0">
                     <Run Text="Interlock入力数: " />
                     <Run Text="{Binding InterlockInputCount, Mode=OneWay}" FontWeight="Bold" />
                     <Run Text="  生成エラー数: " />
                     <Run Text="{Binding GeneratedErrorCount, Mode=OneWay}" FontWeight="Bold" />
+                </TextBlock>
+                <TextBlock VerticalAlignment="Center" Margin="20,0,0,0" Foreground="Orange" FontWeight="Bold"
+                           Visibility="{Binding IsNotInitialized, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Run Text="初期化中..." />
                 </TextBlock>
             </StackPanel>
         </GroupBox>

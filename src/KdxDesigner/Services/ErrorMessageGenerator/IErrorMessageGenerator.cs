@@ -38,22 +38,6 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
             int deviceStartT);
 
         /// <summary>
-        /// メモリストアからInterlock入力データを生成
-        /// </summary>
-        /// <param name="memories">メモリストアのInterlock関連メモリ</param>
-        /// <param name="cylinders">シリンダー情報</param>
-        /// <param name="interlocks">インターロック情報</param>
-        /// <param name="interlockConditions">インターロック条件情報</param>
-        /// <param name="conditionTypes">条件タイプ情報</param>
-        /// <returns>InterlockErrorInputリスト</returns>
-        List<InterlockErrorInput> BuildInterlockErrorInputs(
-            List<Memory> memories,
-            List<Cylinder> cylinders,
-            List<Interlock> interlocks,
-            List<InterlockCondition> interlockConditions,
-            List<InterlockConditionType> conditionTypes);
-
-        /// <summary>
         /// プレースホルダーを置換
         /// </summary>
         /// <param name="template">テンプレート文字列</param>

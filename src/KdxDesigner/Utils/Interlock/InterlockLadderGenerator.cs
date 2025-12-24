@@ -83,41 +83,9 @@ namespace KdxDesigner.Utils.Interlock
             var Label = cylinder.Mnemonic.DeviceLabel; // ラベルの取得
             var StartNum = cylinder.Mnemonic.StartNum; // ラベルの取得
 
-            // 行き手動
-            result.Add(LadderRow.AddLD($"{Label}{StartNum + 10}"));
-            foreach (var outcoil in _outcoilDevices)
-            {
-                if (outcoil == null) continue;
-                result.Add(LadderRow.AddANI(outcoil));
-            }
-            result.Add(LadderRow.AddOUT($"{Label}{StartNum + 17}"));
-
-            // 行き自動
-            result.Add(LadderRow.AddLD($"{Label}{StartNum + 12}"));
-            foreach (var outcoil in _outcoilDevices)
-            {
-                if (outcoil == null) continue;
-                result.Add(LadderRow.AddANI(outcoil));
-            }
-            result.Add(LadderRow.AddOUT($"{Label}{StartNum + 15}"));
-
-            // 帰り手動
-            result.Add(LadderRow.AddLD($"{Label}{StartNum + 11}"));
-            foreach (var outcoil in _outcoilDevices)
-            {
-                if (outcoil == null) continue;
-                result.Add(LadderRow.AddANI(outcoil));
-            }
-            result.Add(LadderRow.AddOUT($"{Label}{StartNum + 18}"));
-
-            // 帰り自動
-            result.Add(LadderRow.AddLD($"{Label}{StartNum + 13}"));
-            foreach (var outcoil in _outcoilDevices)
-            {
-                if (outcoil == null) continue;
-                result.Add(LadderRow.AddANI(outcoil));
-            }
-            result.Add(LadderRow.AddOUT($"{Label}{StartNum + 16}"));
+            result.AddRange(GenerateInterlockLadder_Outcoil(
+                Label,
+                StartNum));
 
             result.Add(LadderRow.AddNOP());
 
@@ -208,6 +176,66 @@ namespace KdxDesigner.Utils.Interlock
                         break;
                 }
             }
+            return result;
+        }
+
+        private List<LadderCsvRow> GenerateInterlockLadder_Outcoil(
+            string Label,
+            int StartNum)
+        {
+            var result = new List<LadderCsvRow>();
+
+            // 行き手動
+            result.Add(LadderRow.AddLD($"{Label}{StartNum + 10}"));
+            foreach (var outcoil in _outcoilDevices)
+            {
+                if (outcoil == null)
+                {
+                    continue;
+                }
+
+                result.Add(LadderRow.AddANI(outcoil));
+            }
+            result.Add(LadderRow.AddOUT($"{Label}{StartNum + 17}"));
+
+            // 行き自動
+            result.Add(LadderRow.AddLD($"{Label}{StartNum + 12}"));
+            foreach (var outcoil in _outcoilDevices)
+            {
+                if (outcoil == null)
+                {
+                    continue;
+                }
+
+                result.Add(LadderRow.AddANI(outcoil));
+            }
+            result.Add(LadderRow.AddOUT($"{Label}{StartNum + 15}"));
+
+            // 帰り手動
+            result.Add(LadderRow.AddLD($"{Label}{StartNum + 11}"));
+            foreach (var outcoil in _outcoilDevices)
+            {
+                if (outcoil == null)
+                {
+                    continue;
+                }
+
+                result.Add(LadderRow.AddANI(outcoil));
+            }
+            result.Add(LadderRow.AddOUT($"{Label}{StartNum + 18}"));
+
+            // 帰り自動
+            result.Add(LadderRow.AddLD($"{Label}{StartNum + 13}"));
+            foreach (var outcoil in _outcoilDevices)
+            {
+                if (outcoil == null)
+                {
+                    continue;
+                }
+
+                result.Add(LadderRow.AddANI(outcoil));
+            }
+            result.Add(LadderRow.AddOUT($"{Label}{StartNum + 16}"));
             return result;
         }
     }
