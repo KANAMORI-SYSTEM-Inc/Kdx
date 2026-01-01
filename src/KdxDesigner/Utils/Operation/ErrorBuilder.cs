@@ -24,6 +24,8 @@ namespace KdxDesigner.Utils.Operation
 
             List<ProcessError> errorList = error.Where(e => e.RecordId == operation.Id).ToList();
 
+            result.Add(LadderRow.AddStatement(operation.OperationName + "工程ｴﾗｰ"));
+
             int countSpeed = 0;
 
             foreach (var each in errorList)

@@ -22,6 +22,11 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
         private const string HALF_WIDTH_SPACE = " ";
         private const string FULL_WIDTH_SPACE = "　";
 
+        // InterlockエラーInputのID計算用定数
+        private const int INTERLOCK_ID_MULTIPLIER = 1000;
+        private const int INTERLOCK_CONDITION_ID_BASE_MULTIPLIER = 100000;
+        private const int INTERLOCK_CONDITION_ID_SORT_MULTIPLIER = 100;
+
         public ErrorMessageGenerator(ISupabaseRepository repository)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
@@ -48,77 +53,8 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
 
             foreach (var input in inputs)
             {
-                // プレースホルダー置換用辞書を構築（拡張版）
-                var replacements = new Dictionary<string, string?>
-                {
-                    { "CylinderName", input.CylinderName },
-                    { "GoBack", input.GoOrBackDisplayName },
-                    { "ConditionCylinderName", input.ConditionCylinderName },
-                    { "ConditionType", input.ConditionTypeName },
-                    { "Comment1", input.ConditionComment1 },
-                    { "Comment2", input.ConditionComment2 },
-                    { "ConditionNumber", input.ConditionNumber.ToString() },
-                    // 拡張フィールド
-                    { "Precondition1", input.Precondition1Info ?? "" },
-                    { "Precondition2", input.Precondition2Info ?? "" },
-                    { "IOConditions", input.IOConditions.Count > 0 ? string.Join(", ", input.IOConditions) : "" },
-                    { "DetailedIOConditions", input.DetailedIOConditions.Count > 0 ? string.Join(", ", input.DetailedIOConditions) : "" },
-                    { "Device", input.Device ?? "" },
-                    { "DeviceNumber", input.DeviceNumber.ToString() },
-                    { "InterlockNumber", input.InterlockNumber.ToString() }
-                };
-
-                // IO情報用プレースホルダーを追加（最初のIOの情報を使用 - 後方互換性）
-                var firstIo = input.IoInfoList.FirstOrDefault();
-                if (firstIo != null)
-                {
-                    replacements.Add("IO.Address", firstIo.Address);
-                    replacements.Add("IO.IOName", firstIo.IOName ?? "");
-                    replacements.Add("IO.IOExplanation", firstIo.IOExplanation ?? "");
-                    replacements.Add("IO.XComment", firstIo.XComment ?? "");
-                    replacements.Add("IO.YComment", firstIo.YComment ?? "");
-                    replacements.Add("IO.FComment", firstIo.FComment ?? "");
-                    replacements.Add("IO.IOSpot", firstIo.IOSpot ?? "");
-                    replacements.Add("IO.UnitName", firstIo.UnitName ?? "");
-                    replacements.Add("IO.System", firstIo.System ?? "");
-                    replacements.Add("IO.StationNumber", firstIo.StationNumber ?? "");
-                    replacements.Add("IO.LinkDevice", firstIo.LinkDevice ?? "");
-                    replacements.Add("IO.IsOnCondition", firstIo.IsOnCondition ? "ON" : "OFF");
-                }
-                else
-                {
-                    // IOがない場合は空文字で置換
-                    replacements.Add("IO.Address", "");
-                    replacements.Add("IO.IOName", "");
-                    replacements.Add("IO.IOExplanation", "");
-                    replacements.Add("IO.XComment", "");
-                    replacements.Add("IO.YComment", "");
-                    replacements.Add("IO.FComment", "");
-                    replacements.Add("IO.IOSpot", "");
-                    replacements.Add("IO.UnitName", "");
-                    replacements.Add("IO.System", "");
-                    replacements.Add("IO.StationNumber", "");
-                    replacements.Add("IO.LinkDevice", "");
-                    replacements.Add("IO.IsOnCondition", "");
-                }
-
-                // インデックス付きIO情報プレースホルダーを追加 (例: {IO[0].Address}, {IO[1].IOName})
-                for (int i = 0; i < input.IoInfoList.Count; i++)
-                {
-                    var io = input.IoInfoList[i];
-                    replacements.Add($"IO[{i}].Address", io.Address);
-                    replacements.Add($"IO[{i}].IOName", io.IOName ?? "");
-                    replacements.Add($"IO[{i}].IOExplanation", io.IOExplanation ?? "");
-                    replacements.Add($"IO[{i}].XComment", io.XComment ?? "");
-                    replacements.Add($"IO[{i}].YComment", io.YComment ?? "");
-                    replacements.Add($"IO[{i}].FComment", io.FComment ?? "");
-                    replacements.Add($"IO[{i}].IOSpot", io.IOSpot ?? "");
-                    replacements.Add($"IO[{i}].UnitName", io.UnitName ?? "");
-                    replacements.Add($"IO[{i}].System", io.System ?? "");
-                    replacements.Add($"IO[{i}].StationNumber", io.StationNumber ?? "");
-                    replacements.Add($"IO[{i}].LinkDevice", io.LinkDevice ?? "");
-                    replacements.Add($"IO[{i}].IsOnCondition", io.IsOnCondition ? "ON" : "OFF");
-                }
+                // プレースホルダー置換用辞書を構築
+                var replacements = BuildInterlockReplacements(input);
 
                 // ConditionTypeIdに基づいてメッセージを選択
                 var messages = GetMessagesForConditionType(interlockMessages, input.ConditionTypeId);
@@ -172,14 +108,7 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
                 var alarmIds = GetAlarmIdsForCategory(input.CategoryId);
 
                 // プレースホルダー置換用辞書を構築
-                var replacements = new Dictionary<string, string?>
-                {
-                    { "OperationName", input.OperationName },
-                    { "Valve1", input.Valve1 },
-                    { "Valve2", input.Valve2 },
-                    { "GoBack", input.GoBack },
-                    { "CategoryName", input.CategoryName }
-                };
+                var replacements = BuildOperationReplacements(input);
 
                 foreach (var alarmId in alarmIds)
                 {
@@ -214,6 +143,195 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
             }
 
             return errors;
+        }
+
+        /// <summary>
+        /// Interlock用プレースホルダー辞書を構築
+        /// </summary>
+        /// <param name="input">Interlockエラー入力データ</param>
+        /// <returns>プレースホルダー置換用辞書</returns>
+        private Dictionary<string, string?> BuildInterlockReplacements(InterlockErrorInput input)
+        {
+            var replacements = new Dictionary<string, string?>
+            {
+                { "CylinderName", input.CylinderName },
+                { "GoBack", input.GoOrBackDisplayName },
+                { "ConditionCylinderName", input.ConditionCylinderName },
+                { "ConditionType", input.ConditionTypeName },
+                { "ConditionName", input.ConditionName },
+                { "ConditionDevice", input.ConditionDevice },
+                { "Comment1", input.ConditionComment1 },
+                { "Comment2", input.ConditionComment2 },
+                { "ConditionNumber", input.ConditionNumber.ToString() },
+                // 拡張フィールド
+                { "Precondition1", input.Precondition1Info ?? "" },
+                { "Precondition2", input.Precondition2Info ?? "" },
+                { "IOConditions", input.IOConditions.Count > 0 ? string.Join(", ", input.IOConditions) : "" },
+                { "DetailedIOConditions", input.DetailedIOConditions.Count > 0 ? string.Join(", ", input.DetailedIOConditions) : "" },
+                { "Device", input.Device ?? "" },
+                { "DeviceNumber", input.DeviceNumber.ToString() },
+                { "InterlockNumber", input.InterlockNumber.ToString() }
+            };
+
+            // IO情報プレースホルダーを追加
+            AddIoPlaceholders(replacements, input.IoInfoList);
+
+            return replacements;
+        }
+
+        /// <summary>
+        /// IO情報プレースホルダーを辞書に追加
+        /// 最初のIOの情報（IO.xxx形式）とインデックス付きIO情報（IO[n].xxx形式）の両方を追加
+        /// </summary>
+        /// <param name="replacements">プレースホルダー辞書</param>
+        /// <param name="ioInfoList">IO情報リスト</param>
+        private static void AddIoPlaceholders(Dictionary<string, string?> replacements, List<InterlockIoInfo> ioInfoList)
+        {
+            // 最初のIOの情報を追加（後方互換性のため）
+            var firstIo = ioInfoList.FirstOrDefault();
+            if (firstIo != null)
+            {
+                replacements.Add("IO.Address", firstIo.Address);
+                replacements.Add("IO.IOName", firstIo.IOName ?? "");
+                replacements.Add("IO.IOExplanation", firstIo.IOExplanation ?? "");
+                replacements.Add("IO.XComment", firstIo.XComment ?? "");
+                replacements.Add("IO.YComment", firstIo.YComment ?? "");
+                replacements.Add("IO.FComment", firstIo.FComment ?? "");
+                replacements.Add("IO.IOSpot", firstIo.IOSpot ?? "");
+                replacements.Add("IO.UnitName", firstIo.UnitName ?? "");
+                replacements.Add("IO.System", firstIo.System ?? "");
+                replacements.Add("IO.StationNumber", firstIo.StationNumber ?? "");
+                replacements.Add("IO.LinkDevice", firstIo.LinkDevice ?? "");
+                replacements.Add("IO.IsOnCondition", firstIo.IsOnCondition ? "ON" : "OFF");
+            }
+            else
+            {
+                // IOがない場合は空文字で置換
+                AddEmptyIoPlaceholder(replacements, "IO");
+            }
+
+            // インデックス付きIO情報プレースホルダーを追加 (例: {IO[0].Address}, {IO[1].IOName})
+            for (int i = 0; i < ioInfoList.Count; i++)
+            {
+                var io = ioInfoList[i];
+                var prefix = $"IO[{i}]";
+                replacements.Add($"{prefix}.Address", io.Address);
+                replacements.Add($"{prefix}.IOName", io.IOName ?? "");
+                replacements.Add($"{prefix}.IOExplanation", io.IOExplanation ?? "");
+                replacements.Add($"{prefix}.XComment", io.XComment ?? "");
+                replacements.Add($"{prefix}.YComment", io.YComment ?? "");
+                replacements.Add($"{prefix}.FComment", io.FComment ?? "");
+                replacements.Add($"{prefix}.IOSpot", io.IOSpot ?? "");
+                replacements.Add($"{prefix}.UnitName", io.UnitName ?? "");
+                replacements.Add($"{prefix}.System", io.System ?? "");
+                replacements.Add($"{prefix}.StationNumber", io.StationNumber ?? "");
+                replacements.Add($"{prefix}.LinkDevice", io.LinkDevice ?? "");
+                replacements.Add($"{prefix}.IsOnCondition", io.IsOnCondition ? "ON" : "OFF");
+            }
+        }
+
+        /// <summary>
+        /// 空のIO情報プレースホルダーを追加
+        /// </summary>
+        /// <param name="replacements">プレースホルダー辞書</param>
+        /// <param name="prefix">プレースホルダーのプレフィックス（"IO" または "IO[n]"）</param>
+        private static void AddEmptyIoPlaceholder(Dictionary<string, string?> replacements, string prefix)
+        {
+            replacements.Add($"{prefix}.Address", "");
+            replacements.Add($"{prefix}.IOName", "");
+            replacements.Add($"{prefix}.IOExplanation", "");
+            replacements.Add($"{prefix}.XComment", "");
+            replacements.Add($"{prefix}.YComment", "");
+            replacements.Add($"{prefix}.FComment", "");
+            replacements.Add($"{prefix}.IOSpot", "");
+            replacements.Add($"{prefix}.UnitName", "");
+            replacements.Add($"{prefix}.System", "");
+            replacements.Add($"{prefix}.StationNumber", "");
+            replacements.Add($"{prefix}.LinkDevice", "");
+            replacements.Add($"{prefix}.IsOnCondition", "");
+        }
+
+        /// <summary>
+        /// Operation用プレースホルダー辞書を構築
+        /// </summary>
+        /// <param name="input">Operationエラー入力データ</param>
+        /// <returns>プレースホルダー置換用辞書</returns>
+        private static Dictionary<string, string?> BuildOperationReplacements(OperationErrorInput input)
+        {
+            var replacements = new Dictionary<string, string?>
+            {
+                { "OperationName", input.OperationName },
+                { "Valve1", input.Valve1 },
+                { "Valve2", input.Valve2 },
+                { "GoBack", input.GoBack },
+                { "CategoryName", input.CategoryName },
+                // IO条件の表示文字列
+                { "StartCondition", input.StartConditionDisplay },
+                { "FinishCondition", input.FinishConditionDisplay },
+                { "SpeedCondition", input.SpeedConditionDisplay },
+                { "ConIO", input.ConIO?.DisplayCondition ?? "" }
+            };
+
+            // Start IO情報プレースホルダーを追加
+            AddOperationIoPlaceholders(replacements, input.StartIOs, "StartIO");
+
+            // Finish IO情報プレースホルダーを追加
+            AddOperationIoPlaceholders(replacements, input.FinishIOs, "FinishIO");
+
+            // Speed IO情報プレースホルダーを追加
+            AddOperationIoPlaceholders(replacements, input.SpeedIOs, "SpeedIO");
+
+            // Con IO情報プレースホルダーを追加（単一）
+            if (input.ConIO != null)
+            {
+                replacements.Add("ConIO.Address", input.ConIO.Address);
+                replacements.Add("ConIO.IOName", input.ConIO.IOName ?? "");
+                replacements.Add("ConIO.IOExplanation", input.ConIO.IOExplanation ?? "");
+            }
+            else
+            {
+                replacements.Add("ConIO.Address", "");
+                replacements.Add("ConIO.IOName", "");
+                replacements.Add("ConIO.IOExplanation", "");
+            }
+
+            return replacements;
+        }
+
+        /// <summary>
+        /// Operation用のIO情報プレースホルダーを辞書に追加
+        /// </summary>
+        /// <param name="replacements">プレースホルダー辞書</param>
+        /// <param name="ioInfoList">IO情報リスト</param>
+        /// <param name="prefix">プレースホルダーのプレフィックス（"StartIO", "FinishIO", "SpeedIO"）</param>
+        private static void AddOperationIoPlaceholders(Dictionary<string, string?> replacements, List<OperationIoInfo> ioInfoList, string prefix)
+        {
+            // 最初のIOの情報を追加（後方互換性のため）
+            var firstIo = ioInfoList.FirstOrDefault();
+            if (firstIo != null)
+            {
+                replacements.Add($"{prefix}.Address", firstIo.Address);
+                replacements.Add($"{prefix}.IOName", firstIo.IOName ?? "");
+                replacements.Add($"{prefix}.IOExplanation", firstIo.IOExplanation ?? "");
+                replacements.Add($"{prefix}.DisplayCondition", firstIo.DisplayCondition);
+            }
+            else
+            {
+                replacements.Add($"{prefix}.Address", "");
+                replacements.Add($"{prefix}.IOName", "");
+                replacements.Add($"{prefix}.IOExplanation", "");
+                replacements.Add($"{prefix}.DisplayCondition", "");
+            }
+
+            // インデックス付きIO情報プレースホルダーを追加 (例: {StartIO[0].Address})
+            for (int i = 0; i < ioInfoList.Count; i++)
+            {
+                var io = ioInfoList[i];
+                replacements.Add($"{prefix}[{i}].Address", io.Address);
+                replacements.Add($"{prefix}[{i}].IOName", io.IOName ?? "");
+                replacements.Add($"{prefix}[{i}].IOExplanation", io.IOExplanation ?? "");
+                replacements.Add($"{prefix}[{i}].DisplayCondition", io.DisplayCondition);
+            }
         }
 
         /// <summary>
@@ -447,6 +565,8 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
                             ConditionNumber = condition.ConditionNumber,
                             ConditionTypeId = condition.ConditionTypeId,
                             ConditionTypeName = conditionTypeName,
+                            ConditionName = condition.Name,
+                            ConditionDevice = condition.Device,
                             ConditionComment1 = condition.Comment1,
                             ConditionComment2 = condition.Comment2,
                             Device = conditionData.Device,
@@ -458,8 +578,8 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
                             IOConditions = ioConditions,
                             DetailedIOConditions = detailedIOConditions,
                             // 複合キーのため、識別子として組み合わせを使用
-                            InterlockId = interlock.CylinderId * 1000 + interlock.SortId,
-                            InterlockConditionId = condition.CylinderId * 100000 + condition.InterlockSortId * 100 + condition.ConditionNumber,
+                            InterlockId = CalculateInterlockId(interlock.CylinderId, interlock.SortId),
+                            InterlockConditionId = CalculateInterlockConditionId(condition.CylinderId, condition.InterlockSortId, condition.ConditionNumber),
                             IoInfoList = ioInfoList
                         };
 
@@ -527,6 +647,261 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
             }
 
             return parts.Count > 0 ? string.Join(" ", parts) : null;
+        }
+
+        /// <summary>
+        /// OperationリストからOperation入力データを生成
+        /// </summary>
+        /// <param name="operations">Operationリスト</param>
+        /// <param name="ioList">IOリスト</param>
+        /// <param name="plcId">PLC ID</param>
+        /// <param name="cycleId">Cycle ID</param>
+        /// <returns>OperationErrorInputリスト</returns>
+        public List<OperationErrorInput> BuildOperationErrorInputsFromOperations(
+            List<Operation> operations,
+            List<IO> ioList,
+            int plcId,
+            int cycleId)
+        {
+            var inputs = new List<OperationErrorInput>();
+
+            foreach (var operation in operations)
+            {
+                if (operation == null)
+                {
+                    continue;
+                }
+
+                // Start条件のIOを取得
+                var startIOs = FindIOs(ioList, operation.Start);
+
+                // Finish条件のIOを取得
+                var finishIOs = FindIOs(ioList, operation.Finish);
+
+                // 制御センサーのIOを取得
+                var conIO = FindIOs(ioList, operation.Con).FirstOrDefault();
+
+                // 速度センサーのIOを取得（CategoryIdに基づく）
+                var speedIOs = GetSpeedSensorIOs(ioList, operation);
+
+                var input = new OperationErrorInput
+                {
+                    OperationId = operation.Id,
+                    OperationName = operation.OperationName,
+                    CategoryId = operation.CategoryId,
+                    CategoryName = GetCategoryName(operation.CategoryId),
+                    Valve1 = operation.Valve1,
+                    Valve2 = "", // Valve2は現在使用されていない
+                    GoBack = operation.GoBack,
+                    InputDevice = operation.Start,
+                    OutputDevice = operation.Finish,
+                    Device = "", // デバイスは生成時に計算される
+                    DeviceNumber = 0, // デバイス番号は生成時に計算される
+                    PlcId = plcId,
+                    CycleId = cycleId,
+                    StartIOs = startIOs,
+                    FinishIOs = finishIOs,
+                    ConIO = conIO,
+                    SpeedIOs = speedIOs
+                };
+
+                inputs.Add(input);
+            }
+
+            return inputs;
+        }
+
+        /// <summary>
+        /// IOテキストに一致するIOリストを検索してOperationIoInfoに変換
+        /// </summary>
+        /// <param name="ioList">IOリスト</param>
+        /// <param name="ioText">検索するIOテキスト（例: "G", "B"）</param>
+        /// <returns>一致したOperationIoInfoリスト</returns>
+        private static List<OperationIoInfo> FindIOs(List<IO> ioList, string? ioText)
+        {
+            if (string.IsNullOrEmpty(ioText) || ioList == null || ioList.Count == 0)
+            {
+                return new List<OperationIoInfo>();
+            }
+
+            // IOテキストが "_" で始まる場合はON条件、そうでない場合はOFF条件
+            bool isOnCondition = ioText.StartsWith("_");
+            string searchText = isOnCondition ? ioText.Substring(1) : ioText;
+
+            // IONameに一致するIOを検索
+            var matchedIOs = ioList
+                .Where(io => !string.IsNullOrEmpty(io.IOName) && io.IOName.Contains(searchText))
+                .Select((io, index) => new OperationIoInfo
+                {
+                    Index = index,
+                    Address = io.Address ?? "",
+                    IOName = io.IOName,
+                    IOExplanation = io.IOExplanation,
+                    XComment = io.XComment,
+                    YComment = io.YComment,
+                    FComment = io.FComment,
+                    IOSpot = io.IOSpot,
+                    UnitName = io.UnitName,
+                    System = io.System,
+                    StationNumber = io.StationNumber,
+                    LinkDevice = io.LinkDevice,
+                    IsOnCondition = isOnCondition
+                })
+                .ToList();
+
+            return matchedIOs;
+        }
+
+        /// <summary>
+        /// CategoryIdに基づいて速度センサーのIOを取得
+        /// </summary>
+        /// <param name="ioList">IOリスト</param>
+        /// <param name="operation">Operation情報</param>
+        /// <returns>速度センサーのIOリスト</returns>
+        private static List<OperationIoInfo> GetSpeedSensorIOs(List<IO> ioList, Operation operation)
+        {
+            var speedIOs = new List<OperationIoInfo>();
+
+            // CategoryIdに応じて速度センサーを取得
+            switch (operation.CategoryId)
+            {
+                case 3 or 9 or 15 or 27: // 速度変化1回
+                    if (!string.IsNullOrEmpty(operation.SS1))
+                    {
+                        speedIOs.AddRange(FindIOs(ioList, operation.SS1));
+                    }
+
+                    break;
+
+                case 4 or 10 or 16 or 28: // 速度変化2回
+                    if (!string.IsNullOrEmpty(operation.SS1))
+                    {
+                        speedIOs.AddRange(FindIOs(ioList, operation.SS1));
+                    }
+
+                    if (!string.IsNullOrEmpty(operation.SS2))
+                    {
+                        speedIOs.AddRange(FindIOs(ioList, operation.SS2));
+                    }
+
+                    break;
+
+                case 5 or 11 or 17: // 速度変化3回
+                    if (!string.IsNullOrEmpty(operation.SS1))
+                    {
+                        speedIOs.AddRange(FindIOs(ioList, operation.SS1));
+                    }
+
+                    if (!string.IsNullOrEmpty(operation.SS2))
+                    {
+                        speedIOs.AddRange(FindIOs(ioList, operation.SS2));
+                    }
+
+                    if (!string.IsNullOrEmpty(operation.SS3))
+                    {
+                        speedIOs.AddRange(FindIOs(ioList, operation.SS3));
+                    }
+
+                    break;
+
+                case 6 or 12 or 18: // 速度変化4回
+                    if (!string.IsNullOrEmpty(operation.SS1))
+                    {
+                        speedIOs.AddRange(FindIOs(ioList, operation.SS1));
+                    }
+
+                    if (!string.IsNullOrEmpty(operation.SS2))
+                    {
+                        speedIOs.AddRange(FindIOs(ioList, operation.SS2));
+                    }
+
+                    if (!string.IsNullOrEmpty(operation.SS3))
+                    {
+                        speedIOs.AddRange(FindIOs(ioList, operation.SS3));
+                    }
+
+                    if (!string.IsNullOrEmpty(operation.SS4))
+                    {
+                        speedIOs.AddRange(FindIOs(ioList, operation.SS4));
+                    }
+
+                    break;
+
+                case 7 or 13 or 19: // 速度変化5回
+                    if (!string.IsNullOrEmpty(operation.SS1))
+                    {
+                        speedIOs.AddRange(FindIOs(ioList, operation.SS1));
+                    }
+
+                    if (!string.IsNullOrEmpty(operation.SS2))
+                    {
+                        speedIOs.AddRange(FindIOs(ioList, operation.SS2));
+                    }
+
+                    if (!string.IsNullOrEmpty(operation.SS3))
+                    {
+                        speedIOs.AddRange(FindIOs(ioList, operation.SS3));
+                    }
+
+                    if (!string.IsNullOrEmpty(operation.SS4))
+                    {
+                        speedIOs.AddRange(FindIOs(ioList, operation.SS4));
+                    }
+                    // Note: 5回目の速度センサーは未定義のため4つまで
+                    break;
+
+                default:
+                    // その他のカテゴリは速度センサーなし
+                    break;
+            }
+
+            return speedIOs;
+        }
+
+        /// <summary>
+        /// CategoryIdからカテゴリ名を取得
+        /// </summary>
+        private static string? GetCategoryName(int? categoryId)
+        {
+            return categoryId switch
+            {
+                2 or 29 or 30 => "保持",
+                3 or 9 or 15 or 27 => "速度制御INV1",
+                4 or 10 or 16 or 28 => "速度制御INV2",
+                5 or 11 or 17 => "速度制御INV3",
+                6 or 12 or 18 => "速度制御INV4",
+                7 or 13 or 19 => "速度制御INV5",
+                20 => "バネ",
+                31 => "サーボ",
+                _ => $"Category{categoryId}"
+            };
+        }
+
+        /// <summary>
+        /// InterlockIdを計算
+        /// 複合キー（CylinderId, SortId）から一意のIDを生成
+        /// </summary>
+        /// <param name="cylinderId">シリンダーID</param>
+        /// <param name="sortId">ソートID</param>
+        /// <returns>計算されたInterlockId</returns>
+        private static int CalculateInterlockId(int cylinderId, int sortId)
+        {
+            return cylinderId * INTERLOCK_ID_MULTIPLIER + sortId;
+        }
+
+        /// <summary>
+        /// InterlockConditionIdを計算
+        /// 複合キー（CylinderId, InterlockSortId, ConditionNumber）から一意のIDを生成
+        /// </summary>
+        /// <param name="cylinderId">シリンダーID</param>
+        /// <param name="interlockSortId">InterlockソートID</param>
+        /// <param name="conditionNumber">条件番号</param>
+        /// <returns>計算されたInterlockConditionId</returns>
+        private static int CalculateInterlockConditionId(int cylinderId, int interlockSortId, int conditionNumber)
+        {
+            return cylinderId * INTERLOCK_CONDITION_ID_BASE_MULTIPLIER
+                   + interlockSortId * INTERLOCK_CONDITION_ID_SORT_MULTIPLIER
+                   + conditionNumber;
         }
     }
 }
