@@ -59,6 +59,12 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         private ObservableCollection<PlaceholderItem> _ioPlaceholders = new();
 
         /// <summary>
+        /// IO情報用プレースホルダーが存在するか（Interlock選択時のみtrue）
+        /// </summary>
+        [ObservableProperty]
+        private bool _hasIoPlaceholders;
+
+        /// <summary>
         /// 選択されたMnemonicType
         /// </summary>
         [ObservableProperty]
@@ -255,6 +261,7 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         {
             AvailablePlaceholders.Clear();
             IoPlaceholders.Clear();
+            HasIoPlaceholders = false;
 
             if (SelectedMnemonicType?.Type == MnemonicType.Interlock)
             {
@@ -263,6 +270,8 @@ namespace KdxDesigner.ViewModels.ErrorMessage
                 AvailablePlaceholders.Add(new PlaceholderItem("{GoBack}", "動作方向", "Go&Back"));
                 AvailablePlaceholders.Add(new PlaceholderItem("{ConditionCylinderName}", "条件シリンダー名", "CY02B"));
                 AvailablePlaceholders.Add(new PlaceholderItem("{ConditionType}", "条件タイプ名", "インターロック"));
+                AvailablePlaceholders.Add(new PlaceholderItem("{ConditionName}", "条件名", "前進後確認"));
+                AvailablePlaceholders.Add(new PlaceholderItem("{ConditionDevice}", "条件デバイス", "M100"));
                 AvailablePlaceholders.Add(new PlaceholderItem("{Comment1}", "条件コメント1", "前進確認"));
                 AvailablePlaceholders.Add(new PlaceholderItem("{Comment2}", "条件コメント2", "後退確認"));
                 AvailablePlaceholders.Add(new PlaceholderItem("{ConditionNumber}", "条件番号", "1"));
@@ -304,6 +313,8 @@ namespace KdxDesigner.ViewModels.ErrorMessage
                     IoPlaceholders.Add(new PlaceholderItem($"{{IO[{i}].LinkDevice}}", $"IO[{i}]のリンクデバイス", $"B{100 + i}"));
                     IoPlaceholders.Add(new PlaceholderItem($"{{IO[{i}].IsOnCondition}}", $"IO[{i}]のON/OFF条件", i % 2 == 0 ? "ON" : "OFF"));
                 }
+
+                HasIoPlaceholders = true;
             }
             else if (SelectedMnemonicType?.Type == MnemonicType.Operation)
             {
@@ -313,6 +324,61 @@ namespace KdxDesigner.ViewModels.ErrorMessage
                 AvailablePlaceholders.Add(new PlaceholderItem("{Valve2}", "バルブ2", "SOL2"));
                 AvailablePlaceholders.Add(new PlaceholderItem("{GoBack}", "動作方向", "Go"));
                 AvailablePlaceholders.Add(new PlaceholderItem("{CategoryName}", "カテゴリ名", "速度制御INV1"));
+                AvailablePlaceholders.Add(new PlaceholderItem("{StartCondition}", "Start条件の表示文字列", "LS1:ON"));
+                AvailablePlaceholders.Add(new PlaceholderItem("{FinishCondition}", "Finish条件の表示文字列", "LS2:ON"));
+                AvailablePlaceholders.Add(new PlaceholderItem("{SpeedCondition}", "Speed条件の表示文字列", "SS1:ON"));
+
+                // Start IO情報用プレースホルダー（後方互換性: 最初のStartIOを使用）
+                IoPlaceholders.Add(new PlaceholderItem("{StartIO.Address}", "StartIOアドレス(最初)", "X100"));
+                IoPlaceholders.Add(new PlaceholderItem("{StartIO.IOName}", "StartIO名(最初)", "LS1"));
+                IoPlaceholders.Add(new PlaceholderItem("{StartIO.IOExplanation}", "StartIO説明(最初)", "前進開始センサー"));
+                IoPlaceholders.Add(new PlaceholderItem("{StartIO.DisplayCondition}", "StartIO条件(最初)", "LS1:ON"));
+
+                // Finish IO情報用プレースホルダー（後方互換性: 最初のFinishIOを使用）
+                IoPlaceholders.Add(new PlaceholderItem("{FinishIO.Address}", "FinishIOアドレス(最初)", "X101"));
+                IoPlaceholders.Add(new PlaceholderItem("{FinishIO.IOName}", "FinishIO名(最初)", "LS2"));
+                IoPlaceholders.Add(new PlaceholderItem("{FinishIO.IOExplanation}", "FinishIO説明(最初)", "前進完了センサー"));
+                IoPlaceholders.Add(new PlaceholderItem("{FinishIO.DisplayCondition}", "FinishIO条件(最初)", "LS2:ON"));
+
+                // Speed IO情報用プレースホルダー（後方互換性: 最初のSpeedIOを使用）
+                IoPlaceholders.Add(new PlaceholderItem("{SpeedIO.Address}", "SpeedIOアドレス(最初)", "X102"));
+                IoPlaceholders.Add(new PlaceholderItem("{SpeedIO.IOName}", "SpeedIO名(最初)", "SS1"));
+                IoPlaceholders.Add(new PlaceholderItem("{SpeedIO.IOExplanation}", "SpeedIO説明(最初)", "速度センサー1"));
+                IoPlaceholders.Add(new PlaceholderItem("{SpeedIO.DisplayCondition}", "SpeedIO条件(最初)", "SS1:ON"));
+
+                // Con IO情報用プレースホルダー
+                IoPlaceholders.Add(new PlaceholderItem("{ConIO.Address}", "ConIOアドレス", "X103"));
+                IoPlaceholders.Add(new PlaceholderItem("{ConIO.IOName}", "ConIO名", "CON1"));
+                IoPlaceholders.Add(new PlaceholderItem("{ConIO.IOExplanation}", "ConIO説明", "制御センサー"));
+
+                // インデックス付きStartIO情報用プレースホルダー
+                for (int i = 0; i < 5; i++)
+                {
+                    IoPlaceholders.Add(new PlaceholderItem($"{{StartIO[{i}].Address}}", $"StartIO[{i}]のアドレス", $"X{100 + i}"));
+                    IoPlaceholders.Add(new PlaceholderItem($"{{StartIO[{i}].IOName}}", $"StartIO[{i}]のIO名", $"LS{i + 1}"));
+                    IoPlaceholders.Add(new PlaceholderItem($"{{StartIO[{i}].IOExplanation}}", $"StartIO[{i}]の説明", $"開始センサー{i + 1}"));
+                    IoPlaceholders.Add(new PlaceholderItem($"{{StartIO[{i}].DisplayCondition}}", $"StartIO[{i}]の条件", $"LS{i + 1}:ON"));
+                }
+
+                // インデックス付きFinishIO情報用プレースホルダー
+                for (int i = 0; i < 5; i++)
+                {
+                    IoPlaceholders.Add(new PlaceholderItem($"{{FinishIO[{i}].Address}}", $"FinishIO[{i}]のアドレス", $"X{110 + i}"));
+                    IoPlaceholders.Add(new PlaceholderItem($"{{FinishIO[{i}].IOName}}", $"FinishIO[{i}]のIO名", $"LF{i + 1}"));
+                    IoPlaceholders.Add(new PlaceholderItem($"{{FinishIO[{i}].IOExplanation}}", $"FinishIO[{i}]の説明", $"完了センサー{i + 1}"));
+                    IoPlaceholders.Add(new PlaceholderItem($"{{FinishIO[{i}].DisplayCondition}}", $"FinishIO[{i}]の条件", $"LF{i + 1}:ON"));
+                }
+
+                // インデックス付きSpeedIO情報用プレースホルダー
+                for (int i = 0; i < 5; i++)
+                {
+                    IoPlaceholders.Add(new PlaceholderItem($"{{SpeedIO[{i}].Address}}", $"SpeedIO[{i}]のアドレス", $"X{120 + i}"));
+                    IoPlaceholders.Add(new PlaceholderItem($"{{SpeedIO[{i}].IOName}}", $"SpeedIO[{i}]のIO名", $"SS{i + 1}"));
+                    IoPlaceholders.Add(new PlaceholderItem($"{{SpeedIO[{i}].IOExplanation}}", $"SpeedIO[{i}]の説明", $"速度センサー{i + 1}"));
+                    IoPlaceholders.Add(new PlaceholderItem($"{{SpeedIO[{i}].DisplayCondition}}", $"SpeedIO[{i}]の条件", $"SS{i + 1}:ON"));
+                }
+
+                HasIoPlaceholders = true;
             }
         }
 
@@ -437,6 +503,8 @@ namespace KdxDesigner.ViewModels.ErrorMessage
                 preview = preview.Replace("{GoBack}", "Go&Back");
                 preview = preview.Replace("{ConditionCylinderName}", "CY02B");
                 preview = preview.Replace("{ConditionType}", "インターロック");
+                preview = preview.Replace("{ConditionName}", "前進後確認");
+                preview = preview.Replace("{ConditionDevice}", "M100");
                 preview = preview.Replace("{Comment1}", "前進確認");
                 preview = preview.Replace("{Comment2}", "後退確認");
                 preview = preview.Replace("{ConditionNumber}", "1");
@@ -481,11 +549,65 @@ namespace KdxDesigner.ViewModels.ErrorMessage
             }
             else if (SelectedMnemonicType?.Type == MnemonicType.Operation)
             {
+                // 基本プレースホルダー
                 preview = preview.Replace("{OperationName}", "搬送動作");
                 preview = preview.Replace("{Valve1}", "SOL1");
                 preview = preview.Replace("{Valve2}", "SOL2");
                 preview = preview.Replace("{GoBack}", "Go");
                 preview = preview.Replace("{CategoryName}", "速度制御INV1");
+                preview = preview.Replace("{StartCondition}", "LS1:ON");
+                preview = preview.Replace("{FinishCondition}", "LS2:ON");
+                preview = preview.Replace("{SpeedCondition}", "SS1:ON");
+
+                // StartIO情報用プレースホルダー（後方互換性: 最初のStartIO）
+                preview = preview.Replace("{StartIO.Address}", "X100");
+                preview = preview.Replace("{StartIO.IOName}", "LS1");
+                preview = preview.Replace("{StartIO.IOExplanation}", "前進開始センサー");
+                preview = preview.Replace("{StartIO.DisplayCondition}", "LS1:ON");
+
+                // FinishIO情報用プレースホルダー（後方互換性: 最初のFinishIO）
+                preview = preview.Replace("{FinishIO.Address}", "X101");
+                preview = preview.Replace("{FinishIO.IOName}", "LS2");
+                preview = preview.Replace("{FinishIO.IOExplanation}", "前進完了センサー");
+                preview = preview.Replace("{FinishIO.DisplayCondition}", "LS2:ON");
+
+                // SpeedIO情報用プレースホルダー（後方互換性: 最初のSpeedIO）
+                preview = preview.Replace("{SpeedIO.Address}", "X102");
+                preview = preview.Replace("{SpeedIO.IOName}", "SS1");
+                preview = preview.Replace("{SpeedIO.IOExplanation}", "速度センサー1");
+                preview = preview.Replace("{SpeedIO.DisplayCondition}", "SS1:ON");
+
+                // ConIO情報用プレースホルダー
+                preview = preview.Replace("{ConIO.Address}", "X103");
+                preview = preview.Replace("{ConIO.IOName}", "CON1");
+                preview = preview.Replace("{ConIO.IOExplanation}", "制御センサー");
+
+                // インデックス付きStartIO情報用プレースホルダー
+                for (int i = 0; i < 5; i++)
+                {
+                    preview = preview.Replace($"{{StartIO[{i}].Address}}", $"X{100 + i}");
+                    preview = preview.Replace($"{{StartIO[{i}].IOName}}", $"LS{i + 1}");
+                    preview = preview.Replace($"{{StartIO[{i}].IOExplanation}}", $"開始センサー{i + 1}");
+                    preview = preview.Replace($"{{StartIO[{i}].DisplayCondition}}", $"LS{i + 1}:ON");
+                }
+
+                // インデックス付きFinishIO情報用プレースホルダー
+                for (int i = 0; i < 5; i++)
+                {
+                    preview = preview.Replace($"{{FinishIO[{i}].Address}}", $"X{110 + i}");
+                    preview = preview.Replace($"{{FinishIO[{i}].IOName}}", $"LF{i + 1}");
+                    preview = preview.Replace($"{{FinishIO[{i}].IOExplanation}}", $"完了センサー{i + 1}");
+                    preview = preview.Replace($"{{FinishIO[{i}].DisplayCondition}}", $"LF{i + 1}:ON");
+                }
+
+                // インデックス付きSpeedIO情報用プレースホルダー
+                for (int i = 0; i < 5; i++)
+                {
+                    preview = preview.Replace($"{{SpeedIO[{i}].Address}}", $"X{120 + i}");
+                    preview = preview.Replace($"{{SpeedIO[{i}].IOName}}", $"SS{i + 1}");
+                    preview = preview.Replace($"{{SpeedIO[{i}].IOExplanation}}", $"速度センサー{i + 1}");
+                    preview = preview.Replace($"{{SpeedIO[{i}].DisplayCondition}}", $"SS{i + 1}:ON");
+                }
             }
 
             PreviewText = preview;

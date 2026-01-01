@@ -21,6 +21,8 @@ namespace KdxDesigner.Utils.Operation
             List<LadderCsvRow>? result = new();
             var prosTimeList = prosTimes.Where(p => p.RecordId == operation.Id).OrderBy(p => p.SortId).ToList();
 
+            result.Add(LadderRow.AddStatement(operation.OperationName + "工程タイム"));
+
             // ProsTimeデータが存在しない場合は空のリストを返す
             if (prosTimeList.Count == 0)
             {
@@ -64,6 +66,8 @@ namespace KdxDesigner.Utils.Operation
             {
                 return result;
             }
+
+            result.Add(LadderRow.AddStatement(operation.OperationName + "CYタイム"));
 
             result.Add(LadderRow.AddLDP(label + (outNum + 19).ToString()));
             result.AddRange(LadderRow.AddBMOVSet(current, previous, count));

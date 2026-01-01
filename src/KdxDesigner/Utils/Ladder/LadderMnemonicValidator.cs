@@ -43,7 +43,7 @@ namespace KdxDesigner.Utils.Ladder
 
         // 「直前の条件式が必要」な命令
         private static readonly HashSet<string> RequiresExprCommands = new(StringComparer.OrdinalIgnoreCase)
-        { "OUT", "SET", "RST", "MOV", "DMOV", "INC", "DEC", "MOVP", "INC", "PLS", "OUTH", "CJ" };
+        { "OUT", "SET", "RST", "MOV", "DMOV", "INC", "DEC", "MOVP", "INC", "PLS", "OUTH", "CJ", "BMOV", "FMOV", "-P" };
 
         public static List<LadderValidationIssue> Validate(List<LadderCsvRow> rows)
         {

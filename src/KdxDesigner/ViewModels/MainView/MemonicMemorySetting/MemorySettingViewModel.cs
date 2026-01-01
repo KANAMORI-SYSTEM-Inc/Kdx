@@ -426,7 +426,7 @@ namespace KdxDesigner.ViewModels.Settings
                 progressViewModel?.UpdateStatus("エラーテーブルを初期化中...");
                 if (_errorService != null)
                 {
-                    await _errorService.DeleteErrorTable();
+                    await _errorService.DeleteErrorTable(SelectedPlc.Id);
                 }
             }
 
@@ -479,8 +479,26 @@ namespace KdxDesigner.ViewModels.Settings
             {
                 progressViewModel?.UpdateStatus("エラーテーブルを保存中...");
                 var ioList = await _repository.GetIoListAsync();
-                errorCount = await _errorService.SaveMnemonicDeviceOperation(operations, ioList, ErrorDeviceStartM, ErrorDeviceStartT, SelectedPlc.Id, targetCycle.Id, errorCount);
-                progressViewModel?.AddLog($"エラーテーブル保存完了 (このCycle: {errorCount - currentErrorCount}件, 累計: {errorCount}件)");
+
+                // M/Tデバイス番号の調整
+                // ErrorService内部で以下のように計算される:
+                //   M = (startNum + alarmCount)
+                //   T = (startNumTimer + alarmCount)
+                // alarmCountはcurrentErrorCount（ErrorStartNumから開始）なので、
+                // プロファイル入力値からErrorStartNumを引くことで、
+                // 純粋なエラー生成数（0から始まるカウンタ）だけが加算される
+                int adjustedErrorDeviceStartM = ErrorDeviceStartM - ErrorStartNum;
+                int adjustedErrorDeviceStartT = ErrorDeviceStartT - ErrorStartNum;
+
+                errorCount = await _errorService.SaveMnemonicDeviceOperation(operations, ioList, adjustedErrorDeviceStartM, adjustedErrorDeviceStartT, SelectedPlc.Id, targetCycle.Id, errorCount);
+
+                // ログ: 純粋なエラー生成数と、実際のデバイス範囲を表示
+                int generatedCount = errorCount - currentErrorCount;
+                int startMDevice = ErrorDeviceStartM + (currentErrorCount - ErrorStartNum);
+                int endMDevice = ErrorDeviceStartM + (errorCount - ErrorStartNum) - 1;
+                int startTDevice = ErrorDeviceStartT + (currentErrorCount - ErrorStartNum);
+                int endTDevice = ErrorDeviceStartT + (errorCount - ErrorStartNum) - 1;
+                progressViewModel?.AddLog($"エラーテーブル保存完了 (このCycle: {generatedCount}件, 累計: {errorCount - ErrorStartNum}件, Mデバイス: M{startMDevice}～M{endMDevice}, Tデバイス: T{startTDevice}～T{endTDevice})");
             }
 
             // ProsTimeテーブルの保存

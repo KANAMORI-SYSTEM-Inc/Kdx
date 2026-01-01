@@ -54,5 +54,19 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
         List<InterlockErrorInput> BuildInterlockErrorInputsFromCylinderData(
             List<CylinderInterlockData> cylinderInterlockDataList,
             int plcId);
+
+        /// <summary>
+        /// OperationリストからOperation入力データを生成
+        /// </summary>
+        /// <param name="operations">Operationリスト</param>
+        /// <param name="ioList">IOリスト</param>
+        /// <param name="plcId">PLC ID</param>
+        /// <param name="cycleId">Cycle ID</param>
+        /// <returns>OperationErrorInputリスト</returns>
+        List<OperationErrorInput> BuildOperationErrorInputsFromOperations(
+            List<Operation> operations,
+            List<IO> ioList,
+            int plcId,
+            int cycleId);
     }
 }

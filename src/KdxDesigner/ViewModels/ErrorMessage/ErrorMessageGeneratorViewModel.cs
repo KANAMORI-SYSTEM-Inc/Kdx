@@ -19,11 +19,21 @@ namespace KdxDesigner.ViewModels.ErrorMessage
     {
         private readonly ISupabaseRepository _repository;
         private readonly IMnemonicDeviceMemoryStore? _memoryStore;
-        private readonly IErrorMessageGenerator _errorMessageGenerator;
+        private readonly IInterlockErrorMessageGenerator _interlockGenerator;
+        private readonly IOperationErrorMessageGenerator _operationGenerator;
         private List<CylinderInterlockData> _cylinderInterlockDataList = new();
 
         [ObservableProperty]
         private int _plcId;
+
+        [ObservableProperty]
+        private int _cycleId;
+
+        [ObservableProperty]
+        private ObservableCollection<Cycle> _availableCycles = new();
+
+        [ObservableProperty]
+        private Cycle? _selectedCycle;
 
         [ObservableProperty]
         private int _startErrorNum = 1;
@@ -44,6 +54,9 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         private int _interlockInputCount;
 
         [ObservableProperty]
+        private int _operationInputCount;
+
+        [ObservableProperty]
         private int _generatedErrorCount;
 
         [ObservableProperty]
@@ -62,6 +75,25 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         private string _dataSourceInfo = "";
 
         private List<InterlockErrorInput> _interlockInputs = new();
+        private List<Operation> _operations = new();
+        private List<IO> _ioList = new();
+
+        /// <summary>
+        /// SelectedCycle変更時にCycleIdを更新し、Operationデータをロード
+        /// </summary>
+        partial void OnSelectedCycleChanged(Cycle? value)
+        {
+            if (value != null)
+            {
+                CycleId = value.Id;
+
+                // Operationデータを非同期でロード
+                _ = Task.Run(async () =>
+                {
+                    await LoadOperationDataAsync();
+                });
+            }
+        }
 
         /// <summary>
         /// メモリストアからデータを取得するコンストラクタ
@@ -73,7 +105,8 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _memoryStore = memoryStore ?? throw new ArgumentNullException(nameof(memoryStore));
-            _errorMessageGenerator = new ErrorMessageGenerator(repository);
+            _interlockGenerator = new InterlockErrorMessageGenerator(repository);
+            _operationGenerator = new OperationErrorMessageGenerator(repository);
             PlcId = plcId;
             DataSourceInfo = "メモリストアからデータを取得";
 
@@ -111,7 +144,8 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _memoryStore = null;
-            _errorMessageGenerator = new ErrorMessageGenerator(repository);
+            _interlockGenerator = new InterlockErrorMessageGenerator(repository);
+            _operationGenerator = new OperationErrorMessageGenerator(repository);
             _cylinderInterlockDataList = cylinderInterlockDataList ?? new List<CylinderInterlockData>();
             PlcId = plcId;
             DataSourceInfo = $"CylinderInterlockDataから直接取得（{_cylinderInterlockDataList.Count}件）";
@@ -144,6 +178,7 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         /// </summary>
         private async Task InitializeAsync()
         {
+            await LoadCyclesAsync();
             await LoadMemoryDataAsync();
             await LoadNextErrorNumAsync();
             IsInitialized = true;
@@ -154,6 +189,7 @@ namespace KdxDesigner.ViewModels.ErrorMessage
         /// </summary>
         private async Task InitializeFromCylinderDataAsync()
         {
+            await LoadCyclesAsync();
             LoadFromCylinderData();
             await LoadNextErrorNumAsync();
             IsInitialized = true;
@@ -170,7 +206,7 @@ namespace KdxDesigner.ViewModels.ErrorMessage
                 return;
             }
 
-            _interlockInputs = _errorMessageGenerator.BuildInterlockErrorInputsFromCylinderData(
+            _interlockInputs = _interlockGenerator.BuildInterlockErrorInputsFromCylinderData(
                 _cylinderInterlockDataList,
                 PlcId);
 
@@ -190,6 +226,71 @@ namespace KdxDesigner.ViewModels.ErrorMessage
             {
                 System.Diagnostics.Debug.WriteLine($"LoadNextErrorNumAsync error: {ex.Message}");
                 StartErrorNum = 1;
+            }
+        }
+
+        /// <summary>
+        /// Cycleリストをロード
+        /// </summary>
+        private async Task LoadCyclesAsync()
+        {
+            try
+            {
+                var cycles = await _repository.GetCyclesByPlcIdAsync(PlcId);
+                AvailableCycles = new ObservableCollection<Cycle>(cycles);
+
+                // デフォルトで最初のCycleを選択
+                if (AvailableCycles.Count > 0)
+                {
+                    SelectedCycle = AvailableCycles[0];
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"LoadCyclesAsync error: {ex.Message}");
+                AvailableCycles = new ObservableCollection<Cycle>();
+            }
+        }
+
+        /// <summary>
+        /// Operationデータをロード（選択されたCycleIdに基づく）
+        /// </summary>
+        private async Task LoadOperationDataAsync()
+        {
+            if (CycleId == 0)
+            {
+                OperationInputCount = 0;
+                return;
+            }
+
+            try
+            {
+                // SupabaseからOperationリストを取得
+                _operations = await _repository.GetOperationsByCycleIdAsync(CycleId);
+
+                if (_operations == null || _operations.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"CycleId {CycleId} に対応するOperationが見つかりません。");
+                    OperationInputCount = 0;
+                    _operations = new List<Operation>();
+                    _ioList = new List<IO>();
+                    return;
+                }
+
+                // SupabaseからIOリストを取得
+                _ioList = await _repository.GetIoListAsync();
+
+                // Operationカウントを設定
+                OperationInputCount = _operations.Count;
+
+                System.Diagnostics.Debug.WriteLine($"CycleId {CycleId} に対して {_operations.Count} 件のOperationをロードしました。");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"LoadOperationDataAsync error: {ex.Message}");
+                OperationInputCount = 0;
+                _operations = new List<Operation>();
+                _ioList = new List<IO>();
             }
         }
 
@@ -217,7 +318,7 @@ namespace KdxDesigner.ViewModels.ErrorMessage
                 }
 
                 // CylinderInterlockDataからInterlockErrorInputを構築
-                _interlockInputs = _errorMessageGenerator.BuildInterlockErrorInputsFromCylinderData(
+                _interlockInputs = _interlockGenerator.BuildInterlockErrorInputsFromCylinderData(
                     _cylinderInterlockDataList,
                     PlcId);
 
@@ -261,7 +362,7 @@ namespace KdxDesigner.ViewModels.ErrorMessage
 
                 if (GenerateInterlock && _interlockInputs.Count > 0)
                 {
-                    var interlockErrors = await _errorMessageGenerator.GenerateInterlockErrorsAsync(
+                    var interlockErrors = await _interlockGenerator.GenerateInterlockErrorsAsync(
                         _interlockInputs,
                         StartErrorNum,
                         DeviceStartM,
@@ -285,6 +386,122 @@ namespace KdxDesigner.ViewModels.ErrorMessage
             {
                 System.Diagnostics.Debug.WriteLine($"GeneratePreviewAsync error: {ex.Message}");
                 MessageBox.Show($"プレビュー生成に失敗しました: {ex.Message}\n\nスタックトレース:\n{ex.StackTrace}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Interlockプレビュー生成
+        /// </summary>
+        [RelayCommand]
+        private async Task GenerateInterlockPreviewAsync()
+        {
+            try
+            {
+                // 初期化チェック
+                if (!IsInitialized)
+                {
+                    MessageBox.Show("データの初期化中です。しばらくお待ちください。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // データ存在チェック
+                if (_interlockInputs.Count == 0)
+                {
+                    MessageBox.Show(
+                        "Interlockデータが見つかりません。\n" +
+                        "メモリ設定を実行してInterlockデバイスを生成してください。",
+                        "情報",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                    return;
+                }
+
+                var interlockErrors = await _interlockGenerator.GenerateInterlockErrorsAsync(
+                    _interlockInputs,
+                    StartErrorNum,
+                    DeviceStartM,
+                    DeviceStartT);
+
+                PreviewErrors = new ObservableCollection<GeneratedError>(interlockErrors);
+                GeneratedErrorCount = interlockErrors.Count;
+                CanSave = interlockErrors.Count > 0;
+
+                MessageBox.Show(
+                    $"Interlockエラーメッセージを{interlockErrors.Count}件生成しました！",
+                    "完了",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GenerateInterlockPreviewAsync error: {ex.Message}");
+                MessageBox.Show($"Interlockプレビュー生成に失敗しました: {ex.Message}\n\nスタックトレース:\n{ex.StackTrace}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Operationプレビュー生成
+        /// </summary>
+        [RelayCommand]
+        private async Task GenerateOperationPreviewAsync()
+        {
+            try
+            {
+                // 初期化チェック
+                if (!IsInitialized)
+                {
+                    MessageBox.Show("データの初期化中です。しばらくお待ちください。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Cycle選択チェック
+                if (SelectedCycle == null)
+                {
+                    MessageBox.Show(
+                        "Cycleが選択されていません。\nCycle選択パネルからCycleを選択してください。",
+                        "情報",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                    return;
+                }
+
+                // データ存在チェック
+                if (_operations.Count == 0)
+                {
+                    MessageBox.Show(
+                        $"CycleId {CycleId} ({SelectedCycle.CycleName}) に対応するOperationデータが見つかりません。\n" +
+                        "Operationデータが登録されているCycleを選択してください。",
+                        "情報",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                    return;
+                }
+
+                // Operationエラーメッセージを生成
+                var operationErrors = await _operationGenerator.GenerateOperationErrorsAsync(
+                    _operations,
+                    _ioList,
+                    PlcId,
+                    CycleId,
+                    StartErrorNum,
+                    DeviceStartM,
+                    DeviceStartT);
+
+                PreviewErrors = new ObservableCollection<GeneratedError>(operationErrors);
+                GeneratedErrorCount = operationErrors.Count;
+                CanSave = operationErrors.Count > 0;
+
+                MessageBox.Show(
+                    $"Operationエラーメッセージを{operationErrors.Count}件生成しました！\n" +
+                    $"Cycle: {SelectedCycle.CycleName} (ID: {CycleId})",
+                    "完了",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GenerateOperationPreviewAsync error: {ex.Message}");
+                MessageBox.Show($"Operationプレビュー生成に失敗しました: {ex.Message}\n\nスタックトレース:\n{ex.StackTrace}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

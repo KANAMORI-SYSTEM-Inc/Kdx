@@ -8,13 +8,13 @@ namespace Kdx.Infrastructure.Supabase.Entities
     internal class ProsTimeDefinitionsEntity : BaseModel
     {
         [Column("OperationCategoryId")]
-        public int OperationCategoryId { get; set; }
+        public long OperationCategoryId { get; set; }  // bigint → long
 
         [Column("SortOrder")]
-        public int SortOrder { get; set; }
+        public long SortOrder { get; set; }  // bigint → long
 
         [Column("OperationDefinitionsId")]
-        public int OperationDefinitionsId { get; set; }
+        public long? OperationDefinitionsId { get; set; }  // bigint null → long? (nullable)
 
         [Column("Comment1")]
         public string? Comment1 { get; set; }

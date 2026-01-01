@@ -26,6 +26,12 @@ namespace Kdx.Infrastructure.Supabase.Entities
         [Column("AlarmId")]
         public int? AlarmId { get; set; }
 
+        [Column("AlarmCount")]
+        public int? AlarmCount { get; set; }
+
+        [Column("SpeedNumber")]
+        public int? SpeedNumber { get; set; }
+
         [PrimaryKey("ErrorNum", false)]
         [Column("ErrorNum")]
         public int? ErrorNum { get; set; }
@@ -54,6 +60,15 @@ namespace Kdx.Infrastructure.Supabase.Entities
         [Column("ErrorTimeDevice")]
         public string? ErrorTimeDevice { get; set; }
 
+        [Column("io_addresses")]
+        public string? IoAddresses { get; set; }
+
+        [Column("io_names")]
+        public string? IoNames { get; set; }
+
+        [Column("io_conditions")]
+        public string? IoConditions { get; set; }
+
         public static ProcessErrorEntity FromDto(ProcessError dto) => new()
         {
             PlcId = dto.PlcId,
@@ -62,6 +77,8 @@ namespace Kdx.Infrastructure.Supabase.Entities
             MnemonicId = dto.MnemonicId,
             RecordId = dto.RecordId,
             AlarmId = dto.AlarmId,
+            AlarmCount = dto.AlarmCount,
+            SpeedNumber = dto.SpeedNumber,
             ErrorNum = dto.ErrorNum,
             Comment1 = dto.Comment1,
             Comment2 = dto.Comment2,
@@ -70,7 +87,10 @@ namespace Kdx.Infrastructure.Supabase.Entities
             AlarmComment = dto.AlarmComment,
             MessageComment = dto.MessageComment,
             ErrorTime = dto.ErrorTime,
-            ErrorTimeDevice = dto.ErrorTimeDevice
+            ErrorTimeDevice = dto.ErrorTimeDevice,
+            IoAddresses = dto.IoAddresses,
+            IoNames = dto.IoNames,
+            IoConditions = dto.IoConditions
         };
 
         public ProcessError ToDto() => new()
@@ -81,6 +101,8 @@ namespace Kdx.Infrastructure.Supabase.Entities
             MnemonicId = this.MnemonicId,
             RecordId = this.RecordId,
             AlarmId = this.AlarmId,
+            AlarmCount = this.AlarmCount,
+            SpeedNumber = this.SpeedNumber,
             ErrorNum = this.ErrorNum,
             Comment1 = this.Comment1,
             Comment2 = this.Comment2,
@@ -89,7 +111,10 @@ namespace Kdx.Infrastructure.Supabase.Entities
             AlarmComment = this.AlarmComment,
             MessageComment = this.MessageComment,
             ErrorTime = this.ErrorTime,
-            ErrorTimeDevice = this.ErrorTimeDevice
+            ErrorTimeDevice = this.ErrorTimeDevice,
+            IoAddresses = this.IoAddresses,
+            IoNames = this.IoNames,
+            IoConditions = this.IoConditions
         };
     }
 }

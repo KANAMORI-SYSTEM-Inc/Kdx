@@ -12,9 +12,10 @@ namespace KdxDesigner.Services.ErrorService
     public interface IErrorService
     {
         /// <summary>
-        /// Errorテーブルのすべてのレコードを削除する
+        /// 指定されたPLC IDのErrorテーブルレコードを削除する
         /// </summary>
-        Task DeleteErrorTable();
+        /// <param name="plcId">PLC ID</param>
+        Task DeleteErrorTable(int plcId);
 
         /// <summary>
         /// 指定された条件のエラー情報を取得する

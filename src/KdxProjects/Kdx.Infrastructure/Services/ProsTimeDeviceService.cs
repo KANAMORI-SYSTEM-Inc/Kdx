@@ -71,13 +71,13 @@ namespace Kdx.Infrastructure.Services
 
                 foreach (var group in groupedData)
                 {
-                    var operationCategoryKey = group.Key;
+                    var operationCategoryKey = (int)group.Key;  // long → int に明示的変換
                     var totalCount = group.Count();
 
                     var map = new Dictionary<int, int>();
                     foreach (var item in group)
                     {
-                        map[item.SortOrder] = item.OperationDefinitionsId;
+                        map[(int)item.SortOrder] = (int)(item.OperationDefinitionsId ?? 0);  // long → int に明示的変換
                     }
 
                     configs[operationCategoryKey] = new OperationProsTimeConfig
@@ -173,7 +173,7 @@ namespace Kdx.Infrastructure.Services
                         PlcId = plcId,
                         MnemonicId = (int)MnemonicType.Operation,
                         RecordId = operation.Id,
-                        SortId = definition.SortOrder,
+                        SortId = (int)definition.SortOrder,  // long → int に明示的変換
                         CurrentDevice = currentDevice,
                         PreviousDevice = previousDevice,
                         CylinderDevice = cylinderDevice,

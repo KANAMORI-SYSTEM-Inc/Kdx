@@ -16,9 +16,9 @@ namespace KdxDesigner.Services.ErrorService
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public async Task DeleteErrorTable()
+        public async Task DeleteErrorTable(int plcId)
         {
-            await _repository.DeleteErrorTableAsync();
+            await _repository.DeleteErrorTableAsync(plcId);
         }
 
         public async Task<List<Kdx.Contracts.DTOs.ProcessError>> GetErrors(int plcId, int cycleId, int mnemonicId)
@@ -55,53 +55,39 @@ namespace KdxDesigner.Services.ErrorService
                 var existing = allExisting.FirstOrDefault(m => m.RecordId == operation.Id);
                 var category = operation.CategoryId;
 
-                List<int> AlarmIds = new();
-                switch (category)
+                // AlarmIdとSpeedNumber（速度センサー番号）のリスト
+                List<(int AlarmId, int? SpeedNumber)> alarmInfos = category switch
                 {
-                    case 2 or 29 or 30: // 保持
-                        AlarmIds.AddRange([1, 2, 5]);
-                        break;
-                    case 3 or 9 or 15 or 27: // 速度制御INV1
-                        AlarmIds.AddRange([1, 2, 3, 4, 5]);
-                        break;
-                    case 4 or 10 or 16 or 28: // 速度制御INV2
-                        AlarmIds.AddRange([1, 2, 3, 4, 3, 4, 5]);
-                        break;
-                    case 5 or 11 or 17:     // 速度制御INV3
-                        AlarmIds.AddRange([1, 2, 3, 4, 3, 4, 3, 4, 5]);
-                        break;
-                    case 6 or 12 or 18: // 速度制御INV4
-                        AlarmIds.AddRange([1, 2, 3, 4, 3, 4, 3, 4, 3, 4, 5]);
-                        break;
-                    case 7 or 13 or 19: // 速度制御INV5
-                        AlarmIds.AddRange([1, 2, 3, 4, 3, 4, 3, 4, 3, 4, 3, 4, 5]);
-                        break;
-                    case 20:            // バネ
-                        AlarmIds.AddRange([5]);
-                        break;
-                    case 31:            // サーボ
-                        break;
-                    default:
-                        break;
-                }
+                    2 or 29 or 30 => [(1, null), (2, null), (5, null)], // 保持
+                    3 or 9 or 15 or 27 => [(1, null), (2, null), (3, 1), (4, 1), (5, null)], // 速度制御INV1
+                    4 or 10 or 16 or 28 => [(1, null), (2, null), (3, 1), (4, 1), (3, 2), (4, 2), (5, null)], // 速度制御INV2
+                    5 or 11 or 17 => [(1, null), (2, null), (3, 1), (4, 1), (3, 2), (4, 2), (3, 3), (4, 3), (5, null)], // 速度制御INV3
+                    6 or 12 or 18 => [(1, null), (2, null), (3, 1), (4, 1), (3, 2), (4, 2), (3, 3), (4, 3), (3, 4), (4, 4), (5, null)], // 速度制御INV4
+                    7 or 13 or 19 => [(1, null), (2, null), (3, 1), (4, 1), (3, 2), (4, 2), (3, 3), (4, 3), (3, 4), (4, 4), (3, 5), (4, 5), (5, null)], // 速度制御INV5
+                    20 => [(5, null)], // バネ
+                    31 => [], // サーボ
+                    _ => []
+                };
 
                 List<ProcessError> insertErrors = new();
                 List<ProcessError> updateErrors = new();
                 List<Memory> insertMemoriesM = new();
                 List<Memory> insertMemoriesT = new();
 
-                foreach (int id in AlarmIds)
+                int currentAlarmCount = 0;
+
+                foreach (var (alarmId, speedNumber) in alarmInfos)
                 {
                     string device = "M" + (startNum + alarmCount).ToString();
                     string timerDevice = "T" + (startNumTimer + alarmCount).ToString();
 
-                    string comment = messages.FirstOrDefault(m => m.AlarmId == id)?.BaseMessage ?? string.Empty;
-                    string alarm = messages.FirstOrDefault(m => m.AlarmId == id)?.BaseAlarm ?? string.Empty;
-                    int count = messages.FirstOrDefault(m => m.AlarmId == id)?.DefaultCountTime ?? 1000;
+                    string comment = messages.FirstOrDefault(m => m.AlarmId == alarmId)?.BaseMessage ?? string.Empty;
+                    string alarm = messages.FirstOrDefault(m => m.AlarmId == alarmId)?.BaseAlarm ?? string.Empty;
+                    int count = messages.FirstOrDefault(m => m.AlarmId == alarmId)?.DefaultCountTime ?? 1000;
 
                     var comment2 = operation.Valve1 + operation.GoBack;
-                    var comment3 = messages.FirstOrDefault(m => m.AlarmId == id)?.Category2 ?? string.Empty;
-                    var comment4 = messages.FirstOrDefault(m => m.AlarmId == id)?.Category3 ?? string.Empty;
+                    var comment3 = messages.FirstOrDefault(m => m.AlarmId == alarmId)?.Category2 ?? string.Empty;
+                    var comment4 = messages.FirstOrDefault(m => m.AlarmId == alarmId)?.Category3 ?? string.Empty;
 
                     ProcessError saveError = new()
                     {
@@ -110,7 +96,9 @@ namespace KdxDesigner.Services.ErrorService
                         Device = device,
                         MnemonicId = (int)MnemonicType.Operation,
                         RecordId = operation.Id,
-                        AlarmId = id,
+                        AlarmId = alarmId,
+                        AlarmCount = currentAlarmCount++,
+                        SpeedNumber = speedNumber,
                         ErrorNum = alarmCount,
                         Comment1 = "操作ｴﾗｰ",
                         Comment2 = comment2,

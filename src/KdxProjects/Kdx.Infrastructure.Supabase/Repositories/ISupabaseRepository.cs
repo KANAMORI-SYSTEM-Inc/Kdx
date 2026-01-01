@@ -1160,6 +1160,14 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         Task<List<ProcessError>> GetErrorsAsync(int plcId, int cycleId, int mnemonicId);
 
         /// <summary>
+        /// 指定されたPLC IDとニーモニックIDに紐づくエラー情報を取得します（CycleIDに関係なく全て取得）。
+        /// </summary>
+        /// <param name="plcId">PLC ID。</param>
+        /// <param name="mnemonicId">ニーモニックID。</param>
+        /// <returns>エラー情報のリスト。</returns>
+        Task<List<ProcessError>> GetProcessErrorsByPlcIdAndMnemonicIdAsync(int plcId, int mnemonicId);
+
+        /// <summary>
         /// エラー情報を保存します。
         /// </summary>
         /// <param name="errors">保存するエラー情報のリスト。</param>
@@ -1172,9 +1180,10 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         Task UpdateErrorsAsync(List<ProcessError> errors);
 
         /// <summary>
-        /// エラーテーブルを削除します。
+        /// 指定されたPLC IDのエラーテーブルレコードを削除します。
         /// </summary>
-        Task DeleteErrorTableAsync();
+        /// <param name="plcId">PLC ID。</param>
+        Task DeleteErrorTableAsync(int plcId);
 
         #endregion
 

@@ -14,6 +14,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -48,17 +49,25 @@
         </GroupBox>
 
         <!-- 生成対象選択 -->
-        <GroupBox Grid.Row="1" Header="生成対象" Margin="0,0,0,10">
+        <GroupBox Grid.Row="1" Header="プレビュー生成" Margin="0,0,0,10">
             <StackPanel Orientation="Horizontal" Margin="5">
-                <CheckBox Content="Interlock" IsChecked="{Binding GenerateInterlock}" Margin="0,0,20,0" IsEnabled="{Binding IsInitialized}" />
-                <CheckBox Content="Operation" IsChecked="{Binding GenerateOperation}" Margin="0,0,20,0" IsEnabled="{Binding IsInitialized}" />
-                <Button Content="プレビュー生成" Command="{Binding GeneratePreviewCommand}" Width="120" Margin="20,0,0,0"
-                        IsEnabled="{Binding IsInitialized}" />
-                <TextBlock VerticalAlignment="Center" Margin="20,0,0,0">
+                <Button Content="🔧 Interlockプレビュー" Command="{Binding GenerateInterlockPreviewCommand}"
+                        Width="160" Padding="8" Margin="0,0,10,0"
+                        Background="#4CAF50" Foreground="White" FontSize="12" FontWeight="Bold"
+                        IsEnabled="{Binding IsInitialized}"
+                        ToolTip="Interlock用エラーメッセージをプレビュー生成します" />
+                <Button Content="⚙️ Operationプレビュー" Command="{Binding GenerateOperationPreviewCommand}"
+                        Width="160" Padding="8" Margin="0,0,20,0"
+                        Background="#2196F3" Foreground="White" FontSize="12" FontWeight="Bold"
+                        IsEnabled="{Binding IsInitialized}"
+                        ToolTip="Operation用エラーメッセージをプレビュー生成します" />
+                <TextBlock VerticalAlignment="Center" Margin="0,0,0,0">
                     <Run Text="Interlock入力数: " />
-                    <Run Text="{Binding InterlockInputCount, Mode=OneWay}" FontWeight="Bold" />
+                    <Run Text="{Binding InterlockInputCount, Mode=OneWay}" FontWeight="Bold" Foreground="#4CAF50" />
+                    <Run Text="  Operation入力数: " />
+                    <Run Text="{Binding OperationInputCount, Mode=OneWay}" FontWeight="Bold" Foreground="#2196F3" />
                     <Run Text="  生成エラー数: " />
-                    <Run Text="{Binding GeneratedErrorCount, Mode=OneWay}" FontWeight="Bold" />
+                    <Run Text="{Binding GeneratedErrorCount, Mode=OneWay}" FontWeight="Bold" Foreground="#FF9800" />
                 </TextBlock>
                 <TextBlock VerticalAlignment="Center" Margin="20,0,0,0" Foreground="Orange" FontWeight="Bold"
                            Visibility="{Binding IsNotInitialized, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -67,8 +76,26 @@
             </StackPanel>
         </GroupBox>
 
+        <!-- Cycle選択パネル (Operation用) -->
+        <GroupBox Grid.Row="2" Header="Cycle選択 (Operation用)" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal" Margin="5">
+                <TextBlock VerticalAlignment="Center" Text="Cycle:" Margin="0,0,5,0" />
+                <ComboBox
+                    ItemsSource="{Binding AvailableCycles}"
+                    SelectedItem="{Binding SelectedCycle, Mode=TwoWay}"
+                    DisplayMemberPath="CycleName"
+                    Width="200"
+                    IsEnabled="{Binding IsInitialized}"
+                    ToolTip="Operation用エラーメッセージを生成するCycleを選択してください" />
+                <TextBlock VerticalAlignment="Center" Margin="20,0,0,0" Foreground="Gray">
+                    <Run Text="選択中のCycle ID: " />
+                    <Run Text="{Binding CycleId, Mode=OneWay}" FontWeight="Bold" Foreground="#2196F3" />
+                </TextBlock>
+            </StackPanel>
+        </GroupBox>
+
         <!-- プレビューグリッド -->
-        <GroupBox Grid.Row="2" Header="生成プレビュー (GeneratedError)">
+        <GroupBox Grid.Row="3" Header="生成プレビュー (GeneratedError)">
             <DataGrid
                 ItemsSource="{Binding PreviewErrors}"
                 AutoGenerateColumns="False"
@@ -95,7 +122,7 @@
         </GroupBox>
 
         <!-- ボタンパネル -->
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
             <TextBlock VerticalAlignment="Center" Margin="0,0,20,0" Foreground="Gray">
                 <Run Text="※ プレビュー後、「保存」でSupabaseに保存されます" />
             </TextBlock>

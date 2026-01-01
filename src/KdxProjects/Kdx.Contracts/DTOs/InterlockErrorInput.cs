@@ -57,6 +57,16 @@ namespace Kdx.Contracts.DTOs
         public string? ConditionTypeName { get; set; }
 
         /// <summary>
+        /// 条件名 (InterlockCondition.Name)
+        /// </summary>
+        public string? ConditionName { get; set; }
+
+        /// <summary>
+        /// 条件デバイス (InterlockCondition.Device)
+        /// </summary>
+        public string? ConditionDevice { get; set; }
+
+        /// <summary>
         /// 条件コメント1
         /// </summary>
         public string? ConditionComment1 { get; set; }

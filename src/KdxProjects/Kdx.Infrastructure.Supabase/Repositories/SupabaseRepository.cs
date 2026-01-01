@@ -1461,11 +1461,11 @@ namespace Kdx.Infrastructure.Supabase.Repositories
 
         #region Error Methods
 
-        public async Task DeleteErrorTableAsync()
+        public async Task DeleteErrorTableAsync(int plcId)
         {
             await _supabaseClient
                 .From<ProcessErrorEntity>()
-                .Filter("PlcId", Operator.GreaterThanOrEqual, "0") // 蜈ｨ蜑企勁縺ｮ縺溘ａ縺ｮ譚｡莉ｶ
+                .Where(e => e.PlcId == plcId)
                 .Delete();
         }
 
@@ -1516,6 +1516,16 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 .From<ProcessErrorEntity>()
                 .Where(e => e.PlcId == plcId)
                 .Where(e => e.CycleId == cycleId)
+                .Where(e => e.MnemonicId == mnemonicId)
+                .Get();
+            return response.Models.Select(e => e.ToDto()).ToList();
+        }
+
+        public async Task<List<ProcessError>> GetProcessErrorsByPlcIdAndMnemonicIdAsync(int plcId, int mnemonicId)
+        {
+            var response = await _supabaseClient
+                .From<ProcessErrorEntity>()
+                .Where(e => e.PlcId == plcId)
                 .Where(e => e.MnemonicId == mnemonicId)
                 .Get();
             return response.Models.Select(e => e.ToDto()).ToList();
@@ -1716,16 +1726,33 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         {
             try
             {
+                Debug.WriteLine("[GetProsTimeDefinitionsAsync] 開始");
+
                 var response = await _supabaseClient
                     .From<ProsTimeDefinitionsEntity>()
                     .Get();
 
-                return response?.Models?.Select(e => e.ToDto()).ToList() ?? new List<ProsTimeDefinitions>();
+                Debug.WriteLine($"[GetProsTimeDefinitionsAsync] response is null: {response == null}");
+                Debug.WriteLine($"[GetProsTimeDefinitionsAsync] Models count: {response?.Models?.Count() ?? 0}");
+
+                var result = response?.Models?.Select(e => e.ToDto()).ToList() ?? new List<ProsTimeDefinitions>();
+                Debug.WriteLine($"[GetProsTimeDefinitionsAsync] 結果: {result.Count}件");
+
+                if (result.Any())
+                {
+                    Debug.WriteLine($"[GetProsTimeDefinitionsAsync] 最初のレコード: OperationCategoryId={result.First().OperationCategoryId}, OperationDefinitionsId={result.First().OperationDefinitionsId}");
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
-                // 繧ｨ繝ｩ繝ｼ: {ex.Message}
-                Debug.WriteLine($"[GetProsTimeDefinitionsAsync] 繧ｨ繝ｩ繝ｼ: {ex.Message}");
+                Debug.WriteLine($"[GetProsTimeDefinitionsAsync] エラー: {ex.Message}");
+                Debug.WriteLine($"[GetProsTimeDefinitionsAsync] スタックトレース: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Debug.WriteLine($"[GetProsTimeDefinitionsAsync] 内部エラー: {ex.InnerException.Message}");
+                }
                 return new List<ProsTimeDefinitions>();
             }
         }

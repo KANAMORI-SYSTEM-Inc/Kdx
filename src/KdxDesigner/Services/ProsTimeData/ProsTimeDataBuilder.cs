@@ -68,13 +68,13 @@ namespace KdxDesigner.Services.ProsTimeData
 
                 foreach (var group in groupedData)
                 {
-                    var operationCategoryKey = group.Key;
+                    var operationCategoryKey = (int)group.Key;  // long → int に明示的変換
                     var totalCount = group.Count();
 
                     var map = new Dictionary<int, int>();
                     foreach (var item in group)
                     {
-                        map[item.SortOrder] = item.OperationDefinitionsId;
+                        map[(int)item.SortOrder] = (int)(item.OperationDefinitionsId ?? 0);  // long → int に明示的変換
                     }
 
                     configs[operationCategoryKey] = new OperationProsTimeConfig
@@ -139,6 +139,9 @@ namespace KdxDesigner.Services.ProsTimeData
         {
             var result = new ProsTimeDataResult();
 
+            // デバッグ: 入力されたOperationの数を確認
+            System.Diagnostics.Debug.WriteLine($"[ProsTimeDataBuilder] Operations count: {operations.Count}");
+
             // Operationをソート
             operations.Sort((o1, o2) => o1.Id.CompareTo(o2.Id));
 
@@ -148,16 +151,21 @@ namespace KdxDesigner.Services.ProsTimeData
                 .Where(c => c.PlcId == plcId)
                 .ToList();
 
+            // デバッグ: ProsTimeDefinitionsの数を確認
+            System.Diagnostics.Debug.WriteLine($"[ProsTimeDataBuilder] ProsTimeDefinitions count: {prosTimeDefinitions?.Count() ?? 0}");
+
             int count = 0;
 
             foreach (var operation in operations)
             {
                 if (operation == null || operation.CategoryId == null)
                 {
+                    System.Diagnostics.Debug.WriteLine($"[ProsTimeDataBuilder] Operation Id={operation?.Id ?? 0} スキップ: CategoryId is null");
                     continue;
                 }
 
                 var operationCategoryValue = operation.CategoryId.Value;
+                System.Diagnostics.Debug.WriteLine($"[ProsTimeDataBuilder] Operation Id={operation.Id}, CategoryId={operationCategoryValue}");
 
                 // 現在のOperationのカテゴリに対応するコンフィグを取得
                 OperationProsTimeConfig currentConfig = _loadedOperationConfigs.TryGetValue(operationCategoryValue, out var specificConfig)
@@ -165,10 +173,13 @@ namespace KdxDesigner.Services.ProsTimeData
                                                         : _defaultOperationConfig;
 
                 // 指定されたOperationのCategoryIdに対応するProsTimeDefinitionsを取得
-                var prosTimeDefinitionByCategory = prosTimeDefinitions
+                var prosTimeDefinitionByCategory = (prosTimeDefinitions ?? Enumerable.Empty<ProsTimeDefinitions>())
                     .Where(d => d.OperationCategoryId == operationCategoryValue)
                     .OrderBy(d => d.SortOrder)
                     .ToList();
+
+                // デバッグ: マッチしたProsTimeDefinitionsの数を確認
+                System.Diagnostics.Debug.WriteLine($"[ProsTimeDataBuilder] Operation Id={operation.Id}: ProsTimeDefinitions matched count: {prosTimeDefinitionByCategory.Count}");
 
                 foreach (var definition in prosTimeDefinitionByCategory)
                 {
@@ -182,8 +193,8 @@ namespace KdxDesigner.Services.ProsTimeData
                         PlcId = plcId,
                         MnemonicId = (int)MnemonicType.Operation,
                         RecordId = operation.Id,
-                        SortId = definition.SortOrder,
-                        OutcoilNumber = definition.OperationDefinitionsId,
+                        SortId = (int)definition.SortOrder,  // long → int に明示的変換
+                        OutcoilNumber = (int)(definition.OperationDefinitionsId ?? 0),  // long? → int に明示的変換
                         CurrentDevice = currentDevice,
                         PreviousDevice = previousDevice,
                         CylinderDevice = cylinderDevice,
