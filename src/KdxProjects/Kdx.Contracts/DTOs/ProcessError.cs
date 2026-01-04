@@ -50,5 +50,7 @@ namespace Kdx.Contracts.DTOs
 
         // Note: ErrorCountTime doesn't exist in the database table
         // This was likely a duplicate of ErrorTime in the original Access database
+
+
     }
 }

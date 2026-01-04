@@ -327,6 +327,10 @@ namespace KdxDesigner.ViewModels.ErrorMessage
                 AvailablePlaceholders.Add(new PlaceholderItem("{StartCondition}", "Start条件の表示文字列", "LS1:ON"));
                 AvailablePlaceholders.Add(new PlaceholderItem("{FinishCondition}", "Finish条件の表示文字列", "LS2:ON"));
                 AvailablePlaceholders.Add(new PlaceholderItem("{SpeedCondition}", "Speed条件の表示文字列", "SS1:ON"));
+                AvailablePlaceholders.Add(new PlaceholderItem("{SpeedNumber}", "速度センサー番号（1-4）", "1"));
+                AvailablePlaceholders.Add(new PlaceholderItem("{SpeedSensorName}", "速度センサー名", "SS1"));
+                AvailablePlaceholders.Add(new PlaceholderItem("{SpeedSensorAddress}", "速度センサーIOアドレス", "X120"));
+                AvailablePlaceholders.Add(new PlaceholderItem("{SpeedSensorExplain}", "速度センサー説明", "速度センサー1"));
 
                 // Start IO情報用プレースホルダー（後方互換性: 最初のStartIOを使用）
                 IoPlaceholders.Add(new PlaceholderItem("{StartIO.Address}", "StartIOアドレス(最初)", "X100"));
@@ -558,6 +562,10 @@ namespace KdxDesigner.ViewModels.ErrorMessage
                 preview = preview.Replace("{StartCondition}", "LS1:ON");
                 preview = preview.Replace("{FinishCondition}", "LS2:ON");
                 preview = preview.Replace("{SpeedCondition}", "SS1:ON");
+                preview = preview.Replace("{SpeedNumber}", "1");
+                preview = preview.Replace("{SpeedSensorName}", "SS1");
+                preview = preview.Replace("{SpeedSensorAddress}", "X120");
+                preview = preview.Replace("{SpeedSensorExplain}", "速度センサー1");
 
                 // StartIO情報用プレースホルダー（後方互換性: 最初のStartIO）
                 preview = preview.Replace("{StartIO.Address}", "X100");

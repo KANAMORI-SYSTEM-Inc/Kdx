@@ -236,7 +236,12 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
                 { "StartCondition", input.StartConditionDisplay },
                 { "FinishCondition", input.FinishConditionDisplay },
                 { "SpeedCondition", input.SpeedConditionDisplay },
-                { "ConIO", input.ConIO?.DisplayCondition ?? "" }
+                { "ConIO", input.ConIO?.DisplayCondition ?? "" },
+                // SpeedNumber関連のプレースホルダー
+                { "SpeedNumber", input.SpeedNumber?.ToString() ?? "" },
+                { "SpeedSensorName", input.SpeedSensorName ?? "" },
+                { "SpeedSensorAddress", input.SpeedSensorAddress ?? "" },
+                { "SpeedSensorExplain", input.SpeedSensorExplain ?? "" }
             };
 
             // Start IO情報プレースホルダーを追加
@@ -311,11 +316,11 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
             return categoryId switch
             {
                 2 or 29 or 30 => [(1, null), (2, null), (5, null)], // 保持
-                3 or 9 or 15 or 27 => [(1, null), (2, null), (3, 1), (4, 1), (5, null)], // 速度制御INV1
-                4 or 10 or 16 or 28 => [(1, null), (2, null), (3, 1), (4, 1), (3, 2), (4, 2), (5, null)], // 速度制御INV2
-                5 or 11 or 17 => [(1, null), (2, null), (3, 1), (4, 1), (3, 2), (4, 2), (3, 3), (4, 3), (5, null)], // 速度制御INV3
-                6 or 12 or 18 => [(1, null), (2, null), (3, 1), (4, 1), (3, 2), (4, 2), (3, 3), (4, 3), (3, 4), (4, 4), (5, null)], // 速度制御INV4
-                7 or 13 or 19 => [(1, null), (2, null), (3, 1), (4, 1), (3, 2), (4, 2), (3, 3), (4, 3), (3, 4), (4, 4), (3, 5), (4, 5), (5, null)], // 速度制御INV5
+                3 or 9 or 15 or 27 => [(1, null), (2, null), (5, null)], // 速度制御INV1
+                4 or 10 or 16 or 28 => [(1, null), (2, null), (3, 1), (4, 1), (5, null)], // 速度制御INV2
+                5 or 11 or 17 => [(1, null), (2, null), (3, 1), (4, 1), (3, 2), (4, 2), (5, null)], // 速度制御INV3
+                6 or 12 or 18 => [(1, null), (2, null), (3, 1), (4, 1), (3, 2), (4, 2), (3, 3), (4, 3), (5, null)], // 速度制御INV4
+                7 or 13 or 19 => [(1, null), (2, null), (3, 1), (4, 1), (3, 2), (4, 2), (3, 3), (4, 3), (3, 4), (4, 4), (5, null)], // 速度制御INV5
                 20 => [(5, null)], // バネ
                 31 => [], // サーボ
                 _ => []
@@ -365,12 +370,21 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
                 // 速度センサーのIOを取得（ProcessErrorのSpeedNumberに基づいて単一のセンサーを取得）
                 var speedIOs = GetSpeedSensorIOs(ioList, operation, error.SpeedNumber);
 
+                // SpeedNumber関連の情報を取得
+                var speedNumber = error.SpeedNumber;
+                var speedSensorName = speedNumber.HasValue ? $"SS{speedNumber}" : null;
+                var firstSpeedIO = speedIOs.FirstOrDefault();
+
                 var input = new OperationErrorInput
                 {
                     OperationId = operation.Id,
                     OperationName = operation.OperationName,
                     AlarmId = error.AlarmId ?? 0,
                     AlarmCount = error.AlarmCount ?? 0,
+                    SpeedNumber = speedNumber,
+                    SpeedSensorName = speedSensorName,
+                    SpeedSensorAddress = firstSpeedIO?.Address,
+                    SpeedSensorExplain = firstSpeedIO?.IOExplanation,
                     CategoryId = operation.CategoryId,
                     CategoryName = GetCategoryName(operation.CategoryId),
                     Valve1 = operation.Valve1,
@@ -387,6 +401,14 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
                     ConIO = conIO,
                     SpeedIOs = speedIOs
                 };
+
+                if (input.SpeedNumber != null || input.SpeedSensorAddress != null)
+                {
+                    Console.WriteLine($"Operation ID {input.OperationId} uses SpeedNumber {input.SpeedNumber}.");
+                    Console.WriteLine($"Speed Sensor IO Address: {input.SpeedSensorAddress}:{input.SpeedSensorName}:{input.SpeedSensorExplain}");
+                }
+
+
 
                 inputs.Add(input);
             }

@@ -52,6 +52,7 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
                                        .Replace(HOLLOW_CIRCLE, "")
                                        .Replace(HALF_WIDTH_SPACE, "")
                                        .Replace(FULL_WIDTH_SPACE, "");
+                Console.WriteLine($"Replacing {{{kvp.Key}}} with '{value}'");
                 result = result.Replace($"{{{kvp.Key}}}", value ?? "");
             }
             return result;

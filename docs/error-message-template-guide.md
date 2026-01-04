@@ -159,6 +159,22 @@ M16/M19の条件（`operation.Finish`から取得）
 ...
 ```
 
+### 速度センサー情報
+エラーごとに対応する速度センサーの情報（AlarmId=3,4の場合にSpeedNumberで特定）
+
+| プレースホルダー | 説明 | 出力例 |
+|-----------------|------|--------|
+| `{SpeedNumber}` | 速度センサー番号（1-4） | `1`, `2`, `3`, `4` |
+| `{SpeedSensorName}` | 速度センサー名 | `SS1`, `SS2`, `SS3`, `SS4` |
+| `{SpeedSensorAddress}` | 速度センサーのIOアドレス | `X120` |
+| `{SpeedSensorExplain}` | 速度センサーの説明 | `速度センサー1` |
+
+**注意:** AlarmId=3（途中TO）やAlarmId=4（取込TO）の場合、`SpeedNumber`によって対象の速度センサーが特定されます。例えば、CategoryId=4（速度制御INV2）では以下のエラーが生成されます：
+- AlarmId=3, SpeedNumber=1 → SS1の途中TO
+- AlarmId=4, SpeedNumber=1 → SS1の取込TO
+- AlarmId=3, SpeedNumber=2 → SS2の途中TO
+- AlarmId=4, SpeedNumber=2 → SS2の取込TO
+
 ### 速度センサーIO（Speed）
 M10+nの条件（CategoryIdに応じて`SS1`, `SS2`, `SS3`, `SS4`から取得）
 
@@ -393,50 +409,68 @@ Category2: Y010前進
 Category3: START: X000
 ```
 
-#### 例3: 途中タイムアウト (AlarmId=3)
+#### 例3: 途中タイムアウト (AlarmId=3) - SpeedNumber使用
 ```json
 {
   "MnemonicId": 3,
   "AlarmId": 3,
-  "BaseMessage": "{OperationName}途中TO: 速度{SpeedCondition}未検出",
-  "BaseAlarm": "途中TO",
+  "BaseMessage": "{OperationName}途中TO: {SpeedSensorName}({SpeedSensorAddress})未検出",
+  "BaseAlarm": "途中TO({SpeedSensorName})",
   "Category1": "{CategoryName}",
   "Category2": "{Valve1}{GoBack}",
-  "Category3": "{SpeedIO[0].IOName}({SpeedIO[0].Address})",
+  "Category3": "{SpeedSensorExplain}",
   "DefaultCountTime": 10000
 }
 ```
 
-**出力例 (CategoryId=4, 速度変化2回):**
+**出力例 (CategoryId=4, AlarmId=3, SpeedNumber=1):**
 ```
-BaseMessage: CY01前進途中TO: 速度X010(速度LS1), X011(速度LS2)未検出
-BaseAlarm: 途中TO
+BaseMessage: CY01前進途中TO: SS1(X120)未検出
+BaseAlarm: 途中TO(SS1)
 Category1: 速度制御INV2
 Category2: Y010前進
-Category3: 速度LS1(X010)
+Category3: 速度センサー1
 ```
 
-#### 例4: 取り込みタイムアウト (AlarmId=4)
+**出力例 (CategoryId=4, AlarmId=3, SpeedNumber=2):**
+```
+BaseMessage: CY01前進途中TO: SS2(X121)未検出
+BaseAlarm: 途中TO(SS2)
+Category1: 速度制御INV2
+Category2: Y010前進
+Category3: 速度センサー2
+```
+
+#### 例4: 取り込みタイムアウト (AlarmId=4) - SpeedNumber使用
 ```json
 {
   "MnemonicId": 3,
   "AlarmId": 4,
-  "BaseMessage": "{OperationName}取込TO: {SpeedIO[1].DisplayCondition}+完了{FinishCondition}",
-  "BaseAlarm": "取込TO",
+  "BaseMessage": "{OperationName}取込TO: {SpeedSensorName}({SpeedSensorAddress})+完了{FinishCondition}",
+  "BaseAlarm": "取込TO({SpeedSensorName})",
   "Category1": "{CategoryName}",
   "Category2": "{Valve1}{GoBack}",
-  "Category3": "2段目速度",
+  "Category3": "{SpeedSensorExplain}",
   "DefaultCountTime": 8000
 }
 ```
 
-**出力例 (CategoryId=4, 速度変化2回):**
+**出力例 (CategoryId=4, AlarmId=4, SpeedNumber=1):**
 ```
-BaseMessage: CY01前進取込TO: X011(速度LS2)+完了X002(完了LS)
-BaseAlarm: 取込TO
+BaseMessage: CY01前進取込TO: SS1(X120)+完了X002(完了LS)
+BaseAlarm: 取込TO(SS1)
 Category1: 速度制御INV2
 Category2: Y010前進
-Category3: 2段目速度
+Category3: 速度センサー1
+```
+
+**出力例 (CategoryId=4, AlarmId=4, SpeedNumber=2):**
+```
+BaseMessage: CY01前進取込TO: SS2(X121)+完了X002(完了LS)
+BaseAlarm: 取込TO(SS2)
+Category1: 速度制御INV2
+Category2: Y010前進
+Category3: 速度センサー2
 ```
 
 #### 例5: 完了タイムアウト (AlarmId=5)
@@ -626,8 +660,9 @@ CategoryId=3（速度変化1回）で {SpeedIO[1].Address} を使用
 | 日付 | バージョン | 変更内容 |
 |------|----------|---------|
 | 2025-12-24 | 1.0 | 初版作成（Operation用IO情報統合対応） |
+| 2026-01-01 | 1.1 | SpeedNumber関連プレースホルダー追加（SpeedNumber, SpeedSensorName, SpeedSensorAddress, SpeedSensorExplain） |
 
 ---
 
 **作成者:** Claude Code
-**最終更新:** 2025-12-24
+**最終更新:** 2026-01-01

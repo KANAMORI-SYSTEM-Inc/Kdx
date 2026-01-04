@@ -1543,6 +1543,8 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 MnemonicId = e.MnemonicId,
                 RecordId = e.RecordId,
                 AlarmId = e.AlarmId,
+                AlarmCount = e.AlarmCount,
+                SpeedNumber = e.SpeedNumber,
                 ErrorNum = e.ErrorNum,
                 Comment1 = e.Comment1,
                 Comment2 = e.Comment2,
@@ -1551,12 +1553,15 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                 AlarmComment = e.AlarmComment,
                 MessageComment = e.MessageComment,
                 ErrorTime = e.ErrorTime,
-                ErrorTimeDevice = e.ErrorTimeDevice
+                ErrorTimeDevice = e.ErrorTimeDevice,
+                IoAddresses = e.IoAddresses,
+                IoNames = e.IoNames,
+                IoConditions = e.IoConditions
             }).ToList();
 
             await _supabaseClient
                 .From<ProcessErrorEntity>()
-                .Insert(errorsToInsert.Select(e => ProcessErrorEntity.FromDto(e)).ToList());  // 荳諡ｬ謖ｿ蜈･
+                .Upsert(errorsToInsert.Select(e => ProcessErrorEntity.FromDto(e)).ToList());  // 荳諡ｬ謖ｿ蜈･
         }
 
 

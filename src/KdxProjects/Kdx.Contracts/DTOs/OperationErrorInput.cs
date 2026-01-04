@@ -29,6 +29,28 @@ namespace Kdx.Contracts.DTOs
         public int AlarmCount { get; set; }
 
         /// <summary>
+        /// 速度センサー番号（1=SS1, 2=SS2, 3=SS3, 4=SS4）
+        /// AlarmId=3,4の場合に、どの速度センサーに対応するかを識別
+        /// </summary>
+        public int? SpeedNumber { get; set; }
+
+        /// <summary>
+        /// 速度センサー名（SS1, SS2, SS3, SS4）
+        /// SpeedNumberから生成
+        /// </summary>
+        public string? SpeedSensorName { get; set; }
+
+        /// <summary>
+        /// 速度センサーのIOアドレス
+        /// </summary>
+        public string? SpeedSensorAddress { get; set; }
+
+        /// <summary>
+        /// 速度センサーの説明
+        /// </summary>
+        public string? SpeedSensorExplain { get; set; }
+
+        /// <summary>
         /// カテゴリID
         /// </summary>
         public int? CategoryId { get; set; }
@@ -203,7 +225,7 @@ namespace Kdx.Contracts.DTOs
         /// <summary>
         /// 表示用の条件文字列（例: "X000(前進LS)", "NOT X001(後退LS)"）
         /// </summary>
-        public string DisplayCondition => $"{(IsOnCondition ? "" : "NOT ")}{Address}{(string.IsNullOrEmpty(IOName) ? "" : $"({IOName})")}";
+        public string DisplayCondition => $"{Address}:{(string.IsNullOrEmpty(IOName) ? "" : $"({IOName})")}";
 
         /// <summary>
         /// 詳細表示用の条件文字列（説明付き）
