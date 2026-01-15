@@ -31,4 +31,23 @@ namespace Kdx.Infrastructure.Supabase.Entities
             ConditionName = this.ConditionName
         };
     }
+
+    /// <summary>
+    /// Insert専用エンティティ（Idを含まない）
+    /// </summary>
+    [Table("InterlockPrecondition1")]
+    internal class InterlockPrecondition1InsertEntity : BaseModel
+    {
+        [Column("Description")]
+        public string? Description { get; set; }
+
+        [Column("ConditionName")]
+        public string? ConditionName { get; set; }
+
+        public static InterlockPrecondition1InsertEntity FromDto(InterlockPrecondition1 dto) => new()
+        {
+            Description = dto.Description,
+            ConditionName = dto.ConditionName
+        };
+    }
 }

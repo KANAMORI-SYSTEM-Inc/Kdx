@@ -50,4 +50,35 @@ namespace Kdx.Infrastructure.Supabase.Entities
             Description = this.Description
         };
     }
+
+    /// <summary>
+    /// Insert専用エンティティ（Idを含まない）
+    /// </summary>
+    [Table("InterlockPrecondition3")]
+    internal class InterlockPrecondition3InsertEntity : BaseModel
+    {
+        [Column("ConditionType")]
+        public string? ConditionType { get; set; }
+
+        [Column("IOAddress")]
+        public string? IOAddress { get; set; }
+
+        [Column("DeviceAddress")]
+        public string? DeviceAddress { get; set; }
+
+        [Column("IsOnCondition")]
+        public bool IsOnCondition { get; set; }
+
+        [Column("Description")]
+        public string? Description { get; set; }
+
+        public static InterlockPrecondition3InsertEntity FromDto(InterlockPrecondition3 dto) => new()
+        {
+            ConditionType = dto.ConditionType,
+            IOAddress = dto.IOAddress,
+            DeviceAddress = dto.DeviceAddress,
+            IsOnCondition = dto.IsOnCondition,
+            Description = dto.Description
+        };
+    }
 }

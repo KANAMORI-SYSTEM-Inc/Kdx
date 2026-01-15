@@ -1,7 +1,6 @@
 using Kdx.Contracts.DTOs;
 using Kdx.Contracts.Enums;
 using Kdx.Infrastructure.Supabase.Repositories;
-using KdxDesigner.Models;
 
 namespace KdxDesigner.Services.ErrorMessageGenerator
 {
@@ -407,8 +406,6 @@ namespace KdxDesigner.Services.ErrorMessageGenerator
                     Console.WriteLine($"Operation ID {input.OperationId} uses SpeedNumber {input.SpeedNumber}.");
                     Console.WriteLine($"Speed Sensor IO Address: {input.SpeedSensorAddress}:{input.SpeedSensorName}:{input.SpeedSensorExplain}");
                 }
-
-
 
                 inputs.Add(input);
             }

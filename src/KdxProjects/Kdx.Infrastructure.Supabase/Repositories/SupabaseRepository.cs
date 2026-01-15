@@ -1768,11 +1768,31 @@ namespace Kdx.Infrastructure.Supabase.Repositories
 
         public async Task<List<Memory>> GetMemoriesAsync(int plcId)
         {
-            var response = await _supabaseClient
-                .From<MemoryEntity>()
-                .Where(m => m.PlcId == plcId)
-                .Get();
-            return response.Models.Select(e => e.ToDto()).ToList();
+            const int pageSize = 1000;
+            var allMemories = new List<Memory>();
+            int offset = 0;
+
+            while (true)
+            {
+                var response = await _supabaseClient
+                    .From<MemoryEntity>()
+                    .Where(m => m.PlcId == plcId)
+                    .Order("Device", Ordering.Ascending)
+                    .Range(offset, offset + pageSize - 1)
+                    .Get();
+
+                if (response.Models == null || response.Models.Count == 0)
+                    break;
+
+                allMemories.AddRange(response.Models.Select(e => e.ToDto()));
+
+                if (response.Models.Count < pageSize)
+                    break;
+
+                offset += pageSize;
+            }
+
+            return allMemories;
         }
 
         public async Task<List<MemoryCategory>> GetMemoryCategoriesAsync()
@@ -1807,11 +1827,31 @@ namespace Kdx.Infrastructure.Supabase.Repositories
 
         public async Task DeleteMemoriesByPlcIdAsync(int plcId)
         {
-            // 指定されたPLC IDに紐づくMemoryテーブルの全レコードを削除
-            await _supabaseClient
-                .From<MemoryEntity>()
-                .Where(m => m.PlcId == plcId)
-                .Delete();
+            // 大量データ対応：RPC関数を使ったバッチ削除でタイムアウトを回避
+            const int batchSize = 1000;
+            int deletedCount;
+            int totalDeleted = 0;
+
+            do
+            {
+                // RPC関数を呼び出してバッチ削除
+                var result = await _supabaseClient.Rpc(
+                    "delete_memories_batch",
+                    new { p_plc_id = plcId, p_batch_size = batchSize });
+
+                // 結果をパース
+                deletedCount = 0;
+                if (result.Content != null)
+                {
+                    int.TryParse(result.Content, out deletedCount);
+                }
+
+                totalDeleted += deletedCount;
+                System.Diagnostics.Debug.WriteLine($"[DeleteMemoriesByPlcIdAsync] Deleted {deletedCount} records (Total: {totalDeleted})");
+
+            } while (deletedCount >= batchSize);
+
+            System.Diagnostics.Debug.WriteLine($"[DeleteMemoriesByPlcIdAsync] Completed. Total deleted: {totalDeleted}");
         }
 
         #endregion

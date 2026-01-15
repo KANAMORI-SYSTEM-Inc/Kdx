@@ -297,6 +297,16 @@ namespace KdxDesigner.ViewModels
             }
         }
 
+        public int IoIndex
+        {
+            get => _interlockIO.IoIndex;
+            set
+            {
+                _interlockIO.IoIndex = value;
+                OnPropertyChanged();
+            }
+        }
+
         // 表示用のIONameプロパティ
         public string? IOName
         {
@@ -551,22 +561,21 @@ namespace KdxDesigner.ViewModels
 
             try
             {
-                var interlockKey = (SelectedInterlock.CylinderId, SelectedInterlock.SortId);
+                var cylinderId = SelectedInterlock.CylinderId;
 
-                // キャッシュから取得するか、データベースから読み込む
-                List<InterlockConditionDTO> conditions;
-                if (_allConditionsByInterlockKey.TryGetValue(interlockKey, out var cachedConditions))
+                // CylinderIdで全ての条件を取得（SortIdに依らず）
+                var allConditions = await _supabaseRepository.GetInterlockConditionsByCylinderIdAsync(cylinderId);
+
+                // 各SortIdごとにキャッシュに保存（他のメソッドで使用するため）
+                var conditionsBySortId = allConditions.GroupBy(c => c.InterlockSortId);
+                foreach (var group in conditionsBySortId)
                 {
-                    conditions = cachedConditions;
-                }
-                else
-                {
-                    conditions = await _supabaseRepository.GetInterlockConditionsByCylinderIdAsync(SelectedInterlock.CylinderId);
-                    _allConditionsByInterlockKey[interlockKey] = conditions;
+                    var interlockKey = (cylinderId, group.Key);
+                    _allConditionsByInterlockKey[interlockKey] = group.ToList();
                 }
 
-                // Populate the ConditionType navigation property for each condition
-                foreach (var condition in conditions)
+                // 表示: CylinderIdが一致する全ての条件を表示
+                foreach (var condition in allConditions)
                 {
                     var conditionType = ConditionTypes.FirstOrDefault(ct => ct.Id == condition.ConditionTypeId);
                     condition.ConditionType = conditionType;

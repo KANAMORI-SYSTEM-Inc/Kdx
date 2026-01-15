@@ -312,6 +312,13 @@ namespace KdxDesigner.ViewModels
                     plcId = selectedIO.PlcId;
                 }
 
+                // 現在設定されているIO項目から老番（最大値+1）を計算
+                int nextIoIndex = 0;
+                if (InterlockIOs.Any())
+                {
+                    nextIoIndex = InterlockIOs.Max(io => io.IoIndex) + 1;
+                }
+
                 var newIO = new InterlockIO
                 {
                     CylinderId = SelectedCondition.CylinderId,
@@ -319,7 +326,8 @@ namespace KdxDesigner.ViewModels
                     ConditionNumber = SelectedCondition.ConditionNumber,
                     PlcId = plcId,
                     IOAddress = ioAddress,
-                    IsOnCondition = false
+                    IsOnCondition = false,
+                    IoIndex = nextIoIndex
                 };
 
                 try
@@ -447,19 +455,26 @@ namespace KdxDesigner.ViewModels
                     await _supabaseRepository.UpsertInterlockConditionsAsync(allConditionsToSave);
                 }
 
-                // キャッシュから全てのInterlockIOsを収集して保存 (新規作成されたもののみ)
+                // キャッシュから全てのInterlockIOsを収集して保存
                 foreach (var kvp in _allIOsByConditionKey)
                 {
-                    var iosToSave = kvp.Value.Where(io => io.IsNew).ToList();
-
-                    foreach (var ioVm in iosToSave)
+                    foreach (var ioVm in kvp.Value)
                     {
                         if (!string.IsNullOrEmpty(ioVm.IOAddress)) // Only save if IOAddress is set
                         {
                             try
                             {
-                                await _supabaseRepository.AddInterlockIOAssociationAsync(ioVm.GetInterlockIO());
-                                ioVm.IsNew = false; // 保存成功後は既存データとして扱う
+                                if (ioVm.IsNew)
+                                {
+                                    // 新規IOを追加
+                                    await _supabaseRepository.AddInterlockIOAssociationAsync(ioVm.GetInterlockIO());
+                                    ioVm.IsNew = false; // 保存成功後は既存データとして扱う
+                                }
+                                else
+                                {
+                                    // 既存IOを更新（IoIndexなどの変更を反映）
+                                    await _supabaseRepository.UpdateInterlockIOAsync(ioVm.GetInterlockIO());
+                                }
                             }
                             catch (Exception ex)
                             {

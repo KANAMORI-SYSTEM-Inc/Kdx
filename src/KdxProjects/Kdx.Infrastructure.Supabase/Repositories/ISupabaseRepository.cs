@@ -1499,6 +1499,19 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         Task UpsertInterlockPrecondition1ListAsync(List<InterlockPrecondition1> preconditions);
 
         /// <summary>
+        /// インターロック事前条件1を追加します。
+        /// </summary>
+        /// <param name="precondition">追加するインターロック事前条件1。</param>
+        /// <returns>追加されたインターロック事前条件1（IDが設定されたもの）。</returns>
+        Task<InterlockPrecondition1> AddInterlockPrecondition1Async(InterlockPrecondition1 precondition);
+
+        /// <summary>
+        /// インターロック事前条件1を更新します。
+        /// </summary>
+        /// <param name="precondition">更新するインターロック事前条件1。</param>
+        Task UpdateInterlockPrecondition1Async(InterlockPrecondition1 precondition);
+
+        /// <summary>
         /// 全てのインターロック事前条件2を取得します。
         /// </summary>
         /// <returns>インターロック事前条件2のリスト。</returns>
@@ -1509,6 +1522,19 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         /// </summary>
         /// <param name="preconditions">挿入または更新するインターロック事前条件2のリスト。</param>
         Task UpsertInterlockPrecondition2ListAsync(List<InterlockPrecondition2> preconditions);
+
+        /// <summary>
+        /// インターロック事前条件2を追加します。
+        /// </summary>
+        /// <param name="precondition">追加するインターロック事前条件2。</param>
+        /// <returns>追加されたインターロック事前条件2（IDが設定されたもの）。</returns>
+        Task<InterlockPrecondition2> AddInterlockPrecondition2Async(InterlockPrecondition2 precondition);
+
+        /// <summary>
+        /// インターロック事前条件2を更新します。
+        /// </summary>
+        /// <param name="precondition">更新するインターロック事前条件2。</param>
+        Task UpdateInterlockPrecondition2Async(InterlockPrecondition2 precondition);
 
         /// <summary>
         /// 全てのインターロック事前条件3を取得します。

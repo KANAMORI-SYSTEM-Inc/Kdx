@@ -194,6 +194,7 @@
                             <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding ShowIOPropertiesCommand}"/>
                         </DataGrid.InputBindings>
                         <DataGrid.Columns>
+                            <DataGridTextColumn Header="IOIndex" Binding="{Binding IoIndex, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
                             <DataGridTextColumn Header="CylinderId" Binding="{Binding CylinderId}" Width="70" IsReadOnly="True"/>
                             <DataGridTextColumn Header="SortId" Binding="{Binding InterlockSortId}" Width="50" IsReadOnly="True"/>
                             <DataGridTextColumn Header="条件番号" Binding="{Binding ConditionNumber}" Width="60" IsReadOnly="True"/>

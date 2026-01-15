@@ -62,14 +62,14 @@
                     <TextBox Grid.Column="1" Text="{Binding InterlockSortId}" IsReadOnly="True" Background="#F0F0F0"/>
                 </Grid>
 
-                <!-- 条件番号 (読み取り専用) -->
+                <!-- 条件番号 -->
                 <Grid Margin="0,5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="150"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Label Grid.Column="0" Content="条件番号:"/>
-                    <TextBox Grid.Column="1" Text="{Binding ConditionNumber}" IsReadOnly="True" Background="#F0F0F0"/>
+                    <TextBox Grid.Column="1" Text="{Binding ConditionNumber, UpdateSourceTrigger=PropertyChanged}"/>
                 </Grid>
 
                 <!-- 条件タイプ -->

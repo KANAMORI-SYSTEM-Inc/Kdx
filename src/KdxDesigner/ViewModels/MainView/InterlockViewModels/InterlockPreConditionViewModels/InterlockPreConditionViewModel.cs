@@ -23,9 +23,9 @@ namespace KdxDesigner.ViewModels
             PreCondition3List = new ObservableCollection<InterlockPrecondition3>();
             ProcessDetails = new ObservableCollection<ProcessDetail>();
 
-            AddPreCondition1Command = new RelayCommand(() => AddPreCondition1(null));
-            AddPreCondition2Command = new RelayCommand(OpenAddPreCondition2Window);
-            AddPreCondition3Command = new RelayCommand(OpenAddPreCondition3Window);
+            AddPreCondition1Command = new RelayCommand(async () => await AddPreCondition1Async());
+            AddPreCondition2Command = new RelayCommand(async () => await OpenAddPreCondition2WindowAsync());
+            AddPreCondition3Command = new RelayCommand(async () => await OpenAddPreCondition3WindowAsync());
             SaveCommand = new RelayCommand(async () => await SaveAsync());
             CancelCommand = new RelayCommand(() => Cancel(null));
 

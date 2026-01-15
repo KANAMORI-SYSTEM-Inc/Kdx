@@ -617,6 +617,42 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         }
 
         /// <summary>
+        /// インターロック前提条件1を追加
+        /// </summary>
+        /// <param name="precondition">追加する前提条件1</param>
+        /// <returns>追加された前提条件1（IDが設定されたもの）</returns>
+        public async Task<InterlockPrecondition1> AddInterlockPrecondition1Async(InterlockPrecondition1 precondition)
+        {
+            // Insert用エンティティ（Idを含まない）を使用してDBで自動採番させる
+            var insertEntity = InterlockPrecondition1InsertEntity.FromDto(precondition);
+            await _supabaseClient
+                .From<InterlockPrecondition1InsertEntity>()
+                .Insert(insertEntity);
+
+            // 最新のレコードを取得（自動採番されたIdを含む）
+            var response = await _supabaseClient
+                .From<InterlockPrecondition1Entity>()
+                .Order("Id", Ordering.Descending)
+                .Limit(1)
+                .Get();
+
+            return response.Models.First().ToDto();
+        }
+
+        /// <summary>
+        /// インターロック前提条件1を更新
+        /// </summary>
+        /// <param name="precondition">更新する前提条件1</param>
+        public async Task UpdateInterlockPrecondition1Async(InterlockPrecondition1 precondition)
+        {
+            var entity = InterlockPrecondition1Entity.FromDto(precondition);
+            await _supabaseClient
+                .From<InterlockPrecondition1Entity>()
+                .Where(e => e.Id == precondition.Id)
+                .Update(entity);
+        }
+
+        /// <summary>
         /// インターロック前提条件2一覧を取得
         /// </summary>
         /// <returns>インターロック前提条件2リスト</returns>
@@ -641,6 +677,42 @@ namespace Kdx.Infrastructure.Supabase.Repositories
                     .From<InterlockPrecondition2Entity>()
                     .Upsert(entity);
             }
+        }
+
+        /// <summary>
+        /// インターロック前提条件2を追加
+        /// </summary>
+        /// <param name="precondition">追加する前提条件2</param>
+        /// <returns>追加された前提条件2（IDが設定されたもの）</returns>
+        public async Task<InterlockPrecondition2> AddInterlockPrecondition2Async(InterlockPrecondition2 precondition)
+        {
+            // Insert用エンティティ（Idを含まない）を使用してDBで自動採番させる
+            var insertEntity = InterlockPrecondition2InsertEntity.FromDto(precondition);
+            await _supabaseClient
+                .From<InterlockPrecondition2InsertEntity>()
+                .Insert(insertEntity);
+
+            // 最新のレコードを取得（自動採番されたIdを含む）
+            var response = await _supabaseClient
+                .From<InterlockPrecondition2Entity>()
+                .Order("Id", Ordering.Descending)
+                .Limit(1)
+                .Get();
+
+            return response.Models.First().ToDto();
+        }
+
+        /// <summary>
+        /// インターロック前提条件2を更新
+        /// </summary>
+        /// <param name="precondition">更新する前提条件2</param>
+        public async Task UpdateInterlockPrecondition2Async(InterlockPrecondition2 precondition)
+        {
+            var entity = InterlockPrecondition2Entity.FromDto(precondition);
+            await _supabaseClient
+                .From<InterlockPrecondition2Entity>()
+                .Where(e => e.Id == precondition.Id)
+                .Update(entity);
         }
 
         /// <summary>
@@ -678,10 +750,19 @@ namespace Kdx.Infrastructure.Supabase.Repositories
         /// <returns>追加された前提条件3（IDが設定されたもの）</returns>
         public async Task<InterlockPrecondition3> AddInterlockPrecondition3Async(InterlockPrecondition3 precondition)
         {
-            var entity = InterlockPrecondition3Entity.FromDto(precondition);
+            // Insert用エンティティ（Idを含まない）を使用してDBで自動採番させる
+            var insertEntity = InterlockPrecondition3InsertEntity.FromDto(precondition);
+            await _supabaseClient
+                .From<InterlockPrecondition3InsertEntity>()
+                .Insert(insertEntity);
+
+            // 最新のレコードを取得（自動採番されたIdを含む）
             var response = await _supabaseClient
                 .From<InterlockPrecondition3Entity>()
-                .Insert(entity);
+                .Order("Id", Ordering.Descending)
+                .Limit(1)
+                .Get();
+
             return response.Models.First().ToDto();
         }
 
